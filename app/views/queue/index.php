@@ -17,9 +17,6 @@ if (isset($_SESSION['success_message'])):
                     <p class="display-4 fw-bold text-success"><?= $queueNumber; ?></p>
                     <p>Please wait for your turn. Thank you!</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
             </div>
         </div>
     </div>
@@ -30,7 +27,6 @@ if (isset($_SESSION['success_message'])):
                 keyboard: false     // Prevent closing with the escape key
             });
             successModal.show();
-        });
     </script>
 <?php endif; ?>
 
@@ -59,8 +55,6 @@ if (isset($_SESSION['success_message'])):
 
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">Welcome to Rajah Queue Kiosk</h1>
-        <hr>
 
         <!-- User Form -->
         <div class="container mt-5">
@@ -69,14 +63,14 @@ if (isset($_SESSION['success_message'])):
                     <!-- Card Interface -->
                     <div class="card shadow-lg">
                         <div class="card-header bg-primary text-white text-center">
-                            <h3 class="mb-0">Queue</h3>
+                            <h3 class="mb-0">RajahQueue</h3>
                         </div>
                         <div class="card-body">
                             <form action="/RajahQueue/public/QueueController/add" method="POST" id="queueForm">
                                 <!-- Name Input -->
                                 <div class="mb-3">
                                     <label for="customer_name" class="form-label">Your Name</label>
-                                    <input type="text" name="customer_name" id="customer_name" class="form-control"
+                                    <input type="text" autocomplete="off" name="customer_name" id="customer_name" class="form-control"
                                         placeholder="Enter your name" required>
                                 </div>
 
@@ -139,7 +133,7 @@ if (isset($_SESSION['success_message'])):
         </div>
 
 
-       <!-- Queue Table
+        <!-- Queue Table
         <div class="mt-4 bg-white shadow rounded p-4">
             <table class="table table-bordered">
                 <thead>
@@ -182,47 +176,47 @@ if (isset($_SESSION['success_message'])):
     </div>
                     -->
 
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery CDN -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Bootstrap Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- jQuery CDN -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- jQuery Validation Script -->
-    <script>
+        <!-- jQuery Validation Script -->
+        <script>
 
 
-        $(document).ready(function () {
-            // Toggle region dropdown when "Tour Packages" is selected
-            $('#service_type').on('change', function () {
-                if ($(this).val() === 'Tour Packages') {
-                    $('#region_field').show();
-                    $('#region').attr('required', 'required');
-                } else {
-                    $('#region_field').hide();
-                    $('#region').removeAttr('required').val('');
-                }
+            $(document).ready(function () {
+                // Toggle region dropdown when "Tour Packages" is selected
+                $('#service_type').on('change', function () {
+                    if ($(this).val() === 'Tour Packages') {
+                        $('#region_field').show();
+                        $('#region').attr('required', 'required');
+                    } else {
+                        $('#region_field').hide();
+                        $('#region').removeAttr('required').val('');
+                    }
+                });
+
+                // Toggle priority type dropdown when "Yes" is selected
+                $('#priority').on('change', function () {
+                    if ($(this).val() === 'Yes') {
+                        $('#priority_type_field').show();
+                        $('#priority_type').attr('required', 'required');
+                    } else {
+                        $('#priority_type_field').hide();
+                        $('#priority_type').removeAttr('required').val('');
+                    }
+                });
+
+                // Form submission validation
+                $('#queueForm').on('submit', function (e) {
+                    let isValid = true;
+
+                });
             });
+        </script>
 
-            // Toggle priority type dropdown when "Yes" is selected
-            $('#priority').on('change', function () {
-                if ($(this).val() === 'Yes') {
-                    $('#priority_type_field').show();
-                    $('#priority_type').attr('required', 'required');
-                } else {
-                    $('#priority_type_field').hide();
-                    $('#priority_type').removeAttr('required').val('');
-                }
-            });
-
-            // Form submission validation
-            $('#queueForm').on('submit', function (e) {
-                let isValid = true;
-
-            });
-        });
-    </script>
-
-    </script>
+        </script>
 </body>
 
 </html>
