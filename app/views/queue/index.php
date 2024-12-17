@@ -1,3 +1,40 @@
+<?php
+session_start();
+if (isset($_SESSION['success_message'])):
+    $queueNumber = $_SESSION['success_message']['queue_number'];
+    unset($_SESSION['success_message']); // Clear session after showing the message
+    ?>
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="successModalLabel">Queue Added Successfully!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <h3 class="fw-bold text-primary">Your Queue Number</h3>
+                    <p class="display-4 fw-bold text-success"><?= $queueNumber; ?></p>
+                    <p>Please wait for your turn. Thank you!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'), {
+                backdrop: 'static', // Prevent closing by clicking outside
+                keyboard: false     // Prevent closing with the escape key
+            });
+            successModal.show();
+        });
+    </script>
+<?php endif; ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,7 +54,6 @@
         h1 {
             margin-bottom: 1rem;
         }
-
     </style>
 </head>
 
@@ -28,80 +64,82 @@
 
         <!-- User Form -->
         <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <!-- Card Interface -->
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white text-center">
-                    <h3 class="mb-0">Queue</h3>
-                </div>
-                <div class="card-body">
-                    <form action="/RajahQueue/public/QueueController/add" method="POST" id="queueForm">
-                        <!-- Name Input -->
-                        <div class="mb-3">
-                            <label for="customer_name" class="form-label">Your Name</label>
-                            <input type="text" name="customer_name" id="customer_name" class="form-control" placeholder="Enter your name" required>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <!-- Card Interface -->
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h3 class="mb-0">Queue</h3>
                         </div>
+                        <div class="card-body">
+                            <form action="/RajahQueue/public/QueueController/add" method="POST" id="queueForm">
+                                <!-- Name Input -->
+                                <div class="mb-3">
+                                    <label for="customer_name" class="form-label">Your Name</label>
+                                    <input type="text" name="customer_name" id="customer_name" class="form-control"
+                                        placeholder="Enter your name" required>
+                                </div>
 
-                        <!-- Service Type Dropdown -->
-                        <div class="mb-3">
-                            <label for="service_type" class="form-label">Select Service</label>
-                            <select name="service_type" id="service_type" class="form-select" required>
-                                <option value="" disabled selected>-- Select Service --</option>
-                                <option value="Visa">Visa</option>
-                                <option value="Tour Packages">Tour Packages</option>
-                                <option value="Flights">Flights</option>
-                                <option value="Travel Insurance">Travel Insurance</option>
-                            </select>
-                        </div>
+                                <!-- Service Type Dropdown -->
+                                <div class="mb-3">
+                                    <label for="service_type" class="form-label">Select Service</label>
+                                    <select name="service_type" id="service_type" class="form-select" required>
+                                        <option value="" disabled selected>-- Select Service --</option>
+                                        <option value="Visa">Visa</option>
+                                        <option value="Tour Packages">Tour Packages</option>
+                                        <option value="Flights">Flights</option>
+                                        <option value="Travel Insurance">Travel Insurance</option>
+                                    </select>
+                                </div>
 
-                        <!-- Region Dropdown -->
-                        <div class="mb-3" id="region_field" style="display: none;">
-                            <label for="region" class="form-label">Select Region</label>
-                            <select name="region" id="region" class="form-select">
-                                <option value="" disabled selected>-- Select Region --</option>
-                                <option value="Philippines">Philippines</option>
-                                <option value="America">America</option>
-                                <option value="Europe">Europe</option>
-                                <option value="Africa">Africa</option>
-                                <option value="Asia">Asia</option>
-                                <option value="Australia">Australia</option>
-                                <option value="Others">Others</option>
-                            </select>
-                        </div>
+                                <!-- Region Dropdown -->
+                                <div class="mb-3" id="region_field" style="display: none;">
+                                    <label for="region" class="form-label">Select Region</label>
+                                    <select name="region" id="region" class="form-select">
+                                        <option value="" disabled selected>-- Select Region --</option>
+                                        <option value="Philippines">Philippines</option>
+                                        <option value="America">America</option>
+                                        <option value="Europe">Europe</option>
+                                        <option value="Africa">Africa</option>
+                                        <option value="Asia">Asia</option>
+                                        <option value="Australia">Australia</option>
+                                        <option value="Others">Others</option>
+                                    </select>
+                                </div>
 
-                        <!-- Priority Lane Dropdown -->
-                        <div class="mb-3">
-                            <label for="priority" class="form-label">Priority Lane</label>
-                            <select name="priority" id="priority" class="form-select" required>
-                                <option value="No" selected>No</option>
-                                <option value="Yes">Yes</option>
-                            </select>
-                        </div>
+                                <!-- Priority Lane Dropdown -->
+                                <div class="mb-3">
+                                    <label for="priority" class="form-label">Priority Lane</label>
+                                    <select name="priority" id="priority" class="form-select" required>
+                                        <option value="No" selected>No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
 
-                        <!-- Priority Type Dropdown -->
-                        <div class="mb-3" id="priority_type_field" style="display: none;">
-                            <label for="priority_type" class="form-label">Select Priority Type</label>
-                            <select name="priority_type" id="priority_type" class="form-select">
-                                <option value="" disabled selected>-- Select Type --</option>
-                                <option value="PWD">PWD</option>
-                                <option value="Pregnant">Pregnant</option>
-                                <option value="Senior Citizen">Senior Citizen</option>
-                            </select>
-                        </div>
+                                <!-- Priority Type Dropdown -->
+                                <div class="mb-3" id="priority_type_field" style="display: none;">
+                                    <label for="priority_type" class="form-label">Select Priority Type</label>
+                                    <select name="priority_type" id="priority_type" class="form-select">
+                                        <option value="" disabled selected>-- Select Type --</option>
+                                        <option value="PWD">PWD</option>
+                                        <option value="Pregnant">Pregnant</option>
+                                        <option value="Senior Citizen">Senior Citizen</option>
+                                    </select>
+                                </div>
 
-                        <!-- Submit Button -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Add to Queue</button>
+                                <!-- Submit Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Add to Queue</button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-        <!-- Queue Table -->
+
+       <!-- Queue Table
         <div class="mt-4 bg-white shadow rounded p-4">
             <table class="table table-bordered">
                 <thead>
@@ -116,7 +154,7 @@
                         <th>Created At</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody> 
                     <?php if (isset($data['queue']) && count($data['queue']) > 0): ?>
                         <?php foreach ($data['queue'] as $item): ?>
                             <tr>
@@ -142,6 +180,7 @@
 
         </div>
     </div>
+                    -->
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -150,6 +189,8 @@
 
     <!-- jQuery Validation Script -->
     <script>
+
+
         $(document).ready(function () {
             // Toggle region dropdown when "Tour Packages" is selected
             $('#service_type').on('change', function () {
