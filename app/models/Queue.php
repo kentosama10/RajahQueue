@@ -53,5 +53,145 @@ class Queue extends Model
         return $result['count'] + 1; // Increment count for the next queue number
     }
     
+    public function getCountByStatus($status)
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM queue WHERE status = ?");
+        $stmt->execute([$status]);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    public function getCompletedToday()
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) as count 
+            FROM queue 
+            WHERE status = 'Done' 
+            AND DATE(created_at) = CURDATE()
+        ");
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    public function getActiveQueue($page = 1, $limit = 10)
+    {
+        $offset = ($page - 1) * $limit; // Calculate the offset for pagination
+
+        $stmt = $this->db->prepare("
+            SELECT * FROM queue 
+            WHERE status IN ('Waiting', 'Serving', 'No Show')
+            ORDER BY 
+                CASE status
+                    WHEN 'Serving' THEN 1
+                    WHEN 'Waiting' THEN 2
+                    ELSE 3
+                END,
+                CASE priority
+                    WHEN 'Yes' THEN 1
+                    ELSE 2
+                END,
+                created_at ASC
+            LIMIT :limit OFFSET :offset
+        ");
+        
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getTotalQueueCount()
+    {
+        $stmt = $this->db->query("SELECT COUNT(*) as count FROM queue WHERE status IN ('Waiting', 'Serving')");
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    public function updateStatus($queueNumber, $status)
+    {
+        $allowedStatuses = ['Waiting', 'Serving', 'Done', 'Skipped', 'No Show', 'Recalled'];
+        
+        if (!in_array($status, $allowedStatuses)) {
+            return false;
+        }
+
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE queue 
+                SET 
+                    status = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE queue_number = ?
+            ");
+            
+            $result = $stmt->execute([$status, $queueNumber]);
+            return $result && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error updating queue status: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getRecallHistory()
+    {
+        $stmt = $this->db->query("
+            SELECT 
+                queue_number,
+                status as action,
+                updated_at
+            FROM queue 
+            WHERE status IN ('No Show', 'Recalled', 'Serving')
+            AND DATE(updated_at) = CURDATE()
+            ORDER BY updated_at DESC
+            LIMIT 10
+        ");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function searchQueue($searchTerm, $page = 1, $limit = 10)
+    {
+        $offset = ($page - 1) * $limit; // Calculate the offset for pagination
+
+        $stmt = $this->db->prepare("
+            SELECT * FROM queue 
+            WHERE (customer_name LIKE :searchTerm OR queue_number LIKE :searchTerm)
+            AND status IN ('Waiting', 'Serving', 'No Show', 'Recalled')
+            ORDER BY 
+                CASE status
+                    WHEN 'Serving' THEN 1
+                    WHEN 'No Show' THEN 2
+                    WHEN 'Waiting' THEN 3
+                    ELSE 4
+                END,
+                CASE priority
+                    WHEN 'Yes' THEN 1
+                    ELSE 2
+                END,
+                created_at ASC
+            LIMIT :limit OFFSET :offset
+        ");
+        
+        $searchTerm = "%$searchTerm%"; // Prepare the search term for LIKE
+        $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getSearchCount($searchTerm)
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) as count FROM queue 
+            WHERE (customer_name LIKE :searchTerm OR queue_number LIKE :searchTerm)
+            AND status IN ('Waiting', 'Serving', 'No Show', 'Recalled')
+        ");
+        
+        $searchTerm = "%$searchTerm%"; // Prepare the search term for LIKE
+        $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
 
 }

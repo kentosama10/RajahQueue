@@ -33,7 +33,6 @@ class App {
     private function parseUrl() {
         if (isset($_GET['url'])) {
             $url = explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
-            print_r($url); // Debugging output
             return $url;
         }
         return ['QueueController'];

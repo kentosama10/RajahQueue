@@ -27,6 +27,7 @@ if (isset($_SESSION['success_message'])):
                 keyboard: false     // Prevent closing with the escape key
             });
             successModal.show();
+        })
     </script>
 <?php endif; ?>
 
