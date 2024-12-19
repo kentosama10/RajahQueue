@@ -54,27 +54,23 @@ class QueueController extends Controller
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
             $searchTerm = isset($_GET['search']) ? $_GET['search'] : ''; // Get search term
 
+            // Always fetch the overall stats and recent activity
+            $data = [
+                'stats' => [
+                    'waiting' => (int)$queueModel->getCountByStatus('Waiting'),
+                    'serving' => (int)$queueModel->getCountByStatus('Serving'),
+                    'completed' => (int)$queueModel->getCompletedToday()
+                ],
+                'recallHistory' => $queueModel->getRecallHistory(), // Always fetch recent activity
+            ];
+
+            // If a search term is provided, fetch the filtered queue
             if ($searchTerm) {
-                $data = [
-                    'stats' => [
-                        'waiting' => 0,
-                        'serving' => 0,
-                        'completed' => 0
-                    ],
-                    'queue' => $queueModel->searchQueue($searchTerm, $page),
-                    'totalCount' => $queueModel->getSearchCount($searchTerm), // Get total count for pagination
-                ];
+                $data['queue'] = $queueModel->searchQueue($searchTerm, $page);
+                $data['totalCount'] = $queueModel->getSearchCount($searchTerm); // Get total count for pagination
             } else {
-                $data = [
-                    'stats' => [
-                        'waiting' => (int)$queueModel->getCountByStatus('Waiting'),
-                        'serving' => (int)$queueModel->getCountByStatus('Serving'),
-                        'completed' => (int)$queueModel->getCompletedToday()
-                    ],
-                    'queue' => $queueModel->getActiveQueue($page),
-                    'recallHistory' => $queueModel->getRecallHistory(),
-                    'totalCount' => $queueModel->getTotalQueueCount(), // Get total count for pagination
-                ];
+                $data['queue'] = $queueModel->getActiveQueue($page);
+                $data['totalCount'] = $queueModel->getTotalQueueCount(); // Get total count for pagination
             }
 
             header('Content-Type: application/json');

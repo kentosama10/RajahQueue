@@ -11,26 +11,55 @@ class Queue extends Model
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function add($customerName, $serviceType, $region = null, $priority = 'No', $priorityType = null) {
+    public function add($customerName, $serviceType, $region = null, $priority = 'No', $priorityType = null)
+    {
+        // Ensure reset logic runs
+        $this->resetQueueNumbersIfNeeded();
+
         // Determine the service initial letter
         $serviceInitial = $this->getServiceInitial($serviceType);
-    
+
         // Generate queue number
         $nextNumber = $this->getNextQueueNumberByService($serviceInitial);
         $queueNumber = $serviceInitial . '-' . $nextNumber;
-    
+
         // Insert into database
         $stmt = $this->db->prepare("INSERT INTO queue 
             (customer_name, service_type, region, priority, priority_type, queue_number) 
             VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute([$customerName, $serviceType, $region, $priority, $priorityType, $queueNumber]);
-    
+
         // Return the queue number for confirmation
         return $queueNumber;
     }
-    
-    // Determine the first letter for the queue based on service type
-    private function getServiceInitial($serviceType) {
+
+    private function resetQueueNumbersIfNeeded()
+    {
+        // Check the last reset date in the queue_reset table
+        $stmt = $this->db->query("SELECT reset_date FROM queue_reset ORDER BY reset_date DESC LIMIT 1");
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $lastResetDate = $result ? $result['reset_date'] : null;
+
+        // If the reset hasn't occurred today, perform the reset
+        if ($lastResetDate !== date('Y-m-d')) {
+            $this->resetQueueNumbers();
+        }
+    }
+
+    private function resetQueueNumbers()
+    {
+        // Clear the queue for a fresh start
+        $stmt = $this->db->prepare("DELETE FROM queue WHERE DATE(created_at) < CURDATE()");
+        $stmt->execute();
+
+        // Insert the new reset date into the queue_reset table
+        $stmt = $this->db->prepare("INSERT INTO queue_reset (reset_date) VALUES (CURDATE())");
+        $stmt->execute();
+    }
+
+    private function getServiceInitial($serviceType)
+    {
         switch ($serviceType) {
             case 'Tour Packages':
                 return 'T';
@@ -44,15 +73,15 @@ class Queue extends Model
                 return 'U'; // Default to 'U' for Unknown
         }
     }
-    
-    // Get the next queue number based on the service initial
-    private function getNextQueueNumberByService($serviceInitial) {
+
+    private function getNextQueueNumberByService($serviceInitial)
+    {
         $stmt = $this->db->prepare("SELECT COUNT(*) AS count FROM queue WHERE queue_number LIKE ?");
         $stmt->execute([$serviceInitial . '-%']);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['count'] + 1; // Increment count for the next queue number
     }
-    
+
     public function getCountByStatus($status)
     {
         $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM queue WHERE status = ?");
@@ -117,7 +146,7 @@ class Queue extends Model
         try {
             // If the status is 'Recalled', set it to 'Waiting'
             if ($status === 'Recalled') {
-                $status = 'Waiting';
+                $status = 'Serving';
             }
 
             $stmt = $this->db->prepare("
@@ -144,7 +173,7 @@ class Queue extends Model
                 status as action,
                 updated_at
             FROM queue 
-            WHERE status IN ('No Show', 'Recalled', 'Serving', 'Done')
+            WHERE status IN ('No Show', 'Recalled', 'Serving', 'Done', 'Skipped')
             AND DATE(updated_at) = CURDATE()
             ORDER BY updated_at DESC
             LIMIT 10
@@ -189,7 +218,7 @@ class Queue extends Model
         $stmt = $this->db->prepare("
             SELECT COUNT(*) as count FROM queue 
             WHERE (customer_name LIKE :searchTerm OR queue_number LIKE :searchTerm)
-            AND status IN ('Waiting', 'Serving', 'No Show', 'Recalled')
+            AND status IN ('Waiting', 'Serving', 'No Show')
         ");
         
         $searchTerm = "%$searchTerm%"; // Prepare the search term for LIKE
