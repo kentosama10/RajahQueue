@@ -115,6 +115,11 @@ class Queue extends Model
         }
 
         try {
+            // If the status is 'Recalled', set it to 'Waiting'
+            if ($status === 'Recalled') {
+                $status = 'Waiting';
+            }
+
             $stmt = $this->db->prepare("
                 UPDATE queue 
                 SET 
@@ -139,7 +144,7 @@ class Queue extends Model
                 status as action,
                 updated_at
             FROM queue 
-            WHERE status IN ('No Show', 'Recalled', 'Serving')
+            WHERE status IN ('No Show', 'Recalled', 'Serving', 'Done')
             AND DATE(updated_at) = CURDATE()
             ORDER BY updated_at DESC
             LIMIT 10
