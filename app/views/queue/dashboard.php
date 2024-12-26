@@ -139,6 +139,9 @@
                     <button class="btn btn-primary" onclick="refreshDashboard()">
                         <i class="bi bi-arrow-clockwise"></i> Refresh Now
                     </button>
+                    <button class="btn btn-danger ms-2" onclick="logout()">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
                 </div>
             </div>
         </div>
@@ -185,12 +188,12 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Queue #</th>
-                                    <th>Customer Name</th>
-                                    <th>Service</th>
-                                    <th>Priority</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th class="text-center">Queue #</th>
+                                    <th class="text-center">Customer Name</th>
+                                    <th class="text-center">Service</th>
+                                    <th class="text-center">Priority</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="queueTableBody">
@@ -321,12 +324,12 @@
                 data.queue.forEach(item => {
                     queueTableBody.append(`
                         <tr>
-                            <td>${item.queue_number}</td>
-                            <td>${item.customer_name}</td>
-                            <td>${item.service_type}</td>
-                            <td>${item.priority}</td>
-                            <td><span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></td>
-                            <td>${getActionButtons(item)}</td>
+                            <td class="text-center">${item.queue_number}</td>
+                            <td class="text-center">${item.customer_name}</td>
+                            <td class="text-center">${item.service_type}${item.region ? ` - ${item.region}` : ''}</td>
+                            <td class="text-center">${item.priority}</td>
+                            <td class="text-center"><span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></td>
+                            <td class="text-center">${getActionButtons(item)}</td>
                         </tr>
                     `);
                 });
@@ -581,6 +584,11 @@
                     console.log('Response Text:', xhr.responseText);
                 }
             });
+        }
+
+        function logout() {
+            // Redirect to the logout endpoint
+            window.location.href = "/RajahQueue/public/LoginController/logout";
         }
 
         // Initial load

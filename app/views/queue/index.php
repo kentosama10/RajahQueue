@@ -1,5 +1,4 @@
 <?php
-session_start();
 if (isset($_SESSION['success_message'])):
     $queueNumber = $_SESSION['success_message']['queue_number'];
     unset($_SESSION['success_message']); // Clear session after showing the message
