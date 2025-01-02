@@ -327,7 +327,11 @@
                             <td class="text-center">${item.queue_number}</td>
                             <td class="text-center">${item.customer_name}</td>
                             <td class="text-center">${item.service_type}${item.region ? ` - ${item.region}` : ''}</td>
-                            <td class="text-center">${item.priority}</td>
+                            <td class="text-center">
+                                <span class="badge ${item.priority.toLowerCase() === 'yes' ? 'bg-success' : 'bg-secondary'}">
+                                    ${item.priority}
+                                </span>
+                            </td>
                             <td class="text-center"><span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></td>
                             <td class="text-center">${getActionButtons(item)}</td>
                         </tr>
