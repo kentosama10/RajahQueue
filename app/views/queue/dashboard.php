@@ -1,5 +1,8 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +10,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <link href="/RajahQueue/app/assets/css/dashboard.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 </head>
+
 <body>
     <div class="dashboard-header">
         <div class="container">
@@ -34,13 +40,30 @@
         <div class="row">
             <!-- Main Queue Content -->
             <div class="col-lg-9">
-                <!-- Add Search Bar -->
-                <div class="mb-3">
-                    <div class="input-group">
+                <div class="mb-3 d-flex align-items-center">
+                    <!-- Search Bar -->
+                    <div class="input-group me-3" style="flex: 1;">
                         <span class="input-group-text" id="search-addon">
                             <i class="bi bi-search"></i>
                         </span>
                         <input type="text" id="searchInput" class="form-control" placeholder="Search by customer name or queue number" onkeyup="searchQueue()" aria-label="Search" aria-describedby="search-addon" style="border: 1px solid #ced4da; border-radius: 0.25rem;">
+                    </div>
+                    <!-- Counter Dropdown -->
+                    <div>
+                        <label for="counterSelect" class="me-2 mb-0">Counter:</label>
+                        <select id="counterSelect" class="form-select form-select-sm" onchange="updateUserCounter()" style="width: 120px;">
+                            <option value="" disabled selected>Choose...</option>
+                            <option value="1">Counter 1</option>
+                            <option value="2">Counter 2</option>
+                            <option value="3">Counter 3</option>
+                            <option value="4">Counter 4</option>
+                            <option value="5">Counter 5</option>
+                            <option value="6">Counter 6</option>
+                            <option value="7">Counter 7</option>
+                            <option value="8">Counter 8</option>
+                            <option value="9">Counter 9</option>
+                            <option value="10">Counter 10</option>
+                        </select>
                     </div>
                 </div>
                 <!-- Queue Statistics -->
@@ -134,9 +157,8 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
+
     <script>
         let countdownValue = 15;
         let countdownInterval;
@@ -165,14 +187,14 @@
                 url: '/RajahQueue/public/queue/getDashboardData?page=' + currentPage, // Pass the current page
                 method: 'GET',
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     totalCount = data.totalCount; // Set totalCount from the response
                     updateDashboard(data);
                     updateRecallPanel(data);
                     updatePagination(totalCount); // Update pagination
                     startCountdown();
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error fetching dashboard data:', error);
                 }
             });
@@ -222,7 +244,7 @@
         }
 
         function getActionButtons(item) {
-            switch(item.status.toLowerCase()) {
+            switch (item.status.toLowerCase()) {
                 case 'waiting':
                     return `
                         <div class="btn-group" role="group">
@@ -259,7 +281,7 @@
         }
 
         function getStatusBadgeClass(status) {
-            switch(status?.toLowerCase()) {
+            switch (status?.toLowerCase()) {
                 case 'waiting':
                     return 'bg-warning';
                 case 'serving':
@@ -279,7 +301,7 @@
 
         function updateStatus(queueNumber, newStatus) {
             let confirmMessage = '';
-            switch(newStatus.toLowerCase()) {
+            switch (newStatus.toLowerCase()) {
                 case 'no show':
                     confirmMessage = 'Mark this customer as No Show?';
                     break;
@@ -297,7 +319,7 @@
 
             // Add loading state to buttons
             const buttons = $(`button[onclick*="${queueNumber}"]`).prop('disabled', true);
-            
+
             $.ajax({
                 url: '/RajahQueue/public/queue/updateStatus',
                 method: 'POST',
@@ -306,7 +328,7 @@
                     status: newStatus
                 },
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         if (newStatus.toLowerCase() === 'recalled') {
                             // Show alert for recalled number
@@ -317,11 +339,11 @@
                         alert('Failed to update status. Please try again.');
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error updating status:', error);
                     alert('Error updating status. Please try again.');
                 },
-                complete: function() {
+                complete: function () {
                     // Re-enable buttons
                     buttons.prop('disabled', false);
                 }
@@ -331,15 +353,15 @@
         function updateRecallPanel(data) {
             const recallsList = $('#recallsList');
             const recallHistory = $('#recallHistory');
-            
+
             // Filter no-shows and recalls
-            const activeRecalls = data.queue.filter(item => 
+            const activeRecalls = data.queue.filter(item =>
                 ['No Show', 'Recalled'].includes(item.status)
             );
-            
+
             // Update recall count
             $('#recallCount').text(activeRecalls.length);
-            
+
             // Update active recalls list
             if (activeRecalls.length === 0) {
                 recallsList.html(`
@@ -354,7 +376,7 @@
                     recallsList.append(createRecallItem(item));
                 });
             }
-            
+
             // Update recall history (if available)
             if (data.recallHistory && data.recallHistory.length > 0) {
                 recallHistory.empty();
@@ -369,7 +391,7 @@
                 `);
             }
         }
-        
+
         function createRecallItem(item) {
             const timeDiff = getTimeDifference(item.updated_at);
             return `
@@ -389,7 +411,7 @@
                 </div>
             `;
         }
-        
+
         function createHistoryItem(item) {
             return `
                 <div class="list-group-item">
@@ -400,7 +422,7 @@
                 </div>
             `;
         }
-        
+
         function getRecallActionButtons(item) {
             if (item.status === 'No Show') {
                 return `
@@ -415,19 +437,19 @@
                 </button>
             `;
         }
-        
+
         function getTimeDifference(timestamp) {
             const now = new Date();
             const past = new Date(timestamp);
             const diffInMinutes = Math.floor((now - past) / 60000);
-            
+
             if (diffInMinutes < 1) return 'Just now';
             if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
             const hours = Math.floor(diffInMinutes / 60);
             if (hours < 24) return `${hours}h ago`;
             return `${Math.floor(hours / 24)}d ago`;
         }
-        
+
         function formatDateTime(timestamp) {
             const date = new Date(timestamp);
             return date.toLocaleString();
@@ -436,9 +458,9 @@
         function updatePagination(totalCount) {
             const itemsPerPage = 10;
             const totalPages = Math.ceil(totalCount / itemsPerPage);
-            
+
             $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
-            
+
             // Enable/disable pagination buttons
             $('#prevPage').prop('disabled', currentPage === 1);
             $('#nextPage').prop('disabled', currentPage === totalPages);
@@ -457,14 +479,14 @@
                 url: '/RajahQueue/public/queue/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm), // Pass the search term
                 method: 'GET',
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     totalCount = data.totalCount; // Set totalCount from the response
                     updateDashboard(data);
                     updateRecallPanel(data);
                     updatePagination(totalCount); // Update pagination
                     startCountdown();
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error fetching dashboard data:', error);
                     console.log('Response Text:', xhr.responseText);
                 }
@@ -476,10 +498,52 @@
             window.location.href = "/RajahQueue/public/LoginController/logout";
         }
 
+        function updateUserCounter() {
+            const selectedCounter = document.getElementById("counterSelect").value;
+
+            if (selectedCounter) {
+                $.ajax({
+                    url: "/RajahQueue/public/UserController/updateCounter", // Update counter route
+                    method: "POST",
+                    data: {
+                        counter: selectedCounter,
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            alert(`Counter ${selectedCounter} has been saved to your account.`);
+                        } else {
+                            alert("Failed to update counter. Please try again.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error updating counter:", error);
+                        alert("Error updating counter. Please try again.");
+                    },
+                });
+            }
+        }
+
+        // Pre-select the counter based on the stored value (if any)
+        $(document).ready(function () {
+            $.ajax({
+                url: "/RajahQueue/public/UserController/getCounter", // Endpoint to fetch user's counter
+                method: "GET",
+                success: function (response) {
+                    if (response.counter) {
+                        $("#counterSelect").val(response.counter);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching user counter:", error);
+                },
+            });
+        });
+
         // Initial load
-        $(document).ready(function() {
+        $(document).ready(function () {
             refreshDashboard();
         });
     </script>
 </body>
+
 </html>

@@ -38,10 +38,10 @@ if (isset($_SESSION['success_message'])):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rajah Queue - Kiosk</title>
-    <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts - Roboto -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -63,15 +63,15 @@ if (isset($_SESSION['success_message'])):
                     <!-- Card Interface -->
                     <div class="card shadow-lg">
                         <div class="card-header bg-primary text-white text-center">
-                            <h3 class="mb-0">RajahQueue</h3>
+                            <h3 class="mb-0">Get a ticket number here!</h3>
                         </div>
                         <div class="card-body">
                             <form action="/RajahQueue/public/QueueController/add" method="POST" id="queueForm">
                                 <!-- Name Input -->
                                 <div class="mb-3">
-                                    <label for="customer_name" class="form-label">Your Name</label>
-                                    <input type="text" autocomplete="off" name="customer_name" id="customer_name" class="form-control"
-                                        placeholder="Enter your name" required>
+                                    <label for="customer_name" class="form-label">Name</label>
+                                    <input type="text" autocomplete="off" name="customer_name" id="customer_name"
+                                        class="form-control" placeholder="Enter your name" required>
                                 </div>
 
                                 <!-- Service Type Dropdown -->
@@ -133,55 +133,6 @@ if (isset($_SESSION['success_message'])):
         </div>
 
 
-        <!-- Queue Table
-        <div class="mt-4 bg-white shadow rounded p-4">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Customer Name</th>
-                        <th>Service Type</th>
-                        <th>Region</th>
-                        <th>Priority</th>
-                        <th>Priority Type</th>
-                        <th>Status</th>
-                        <th>Created At</th>
-                    </tr>
-                </thead>
-                <tbody> 
-                    <?php if (isset($data['queue']) && count($data['queue']) > 0): ?>
-                        <?php foreach ($data['queue'] as $item): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($item['queue_number']); ?></td>
-                                <td><?= htmlspecialchars($item['customer_name']); ?></td>
-                                <td><?= htmlspecialchars($item['service_type']); ?></td>
-                                <td><?= htmlspecialchars($item['region'] ?: '-'); ?></td>
-                                <td><?= htmlspecialchars($item['priority']); ?></td>
-                                <td><?= htmlspecialchars($item['priority_type'] ?: '-'); ?></td>
-                                <td><?= htmlspecialchars($item['status']); ?></td>
-                                <td><?= htmlspecialchars($item['created_at']); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="8" class="text-center">No records found</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-
-            </table>
-
-
-        </div>
-    </div>
-                    -->
-
-        <!-- Bootstrap Bundle with Popper -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- jQuery CDN -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-        <!-- jQuery Validation Script -->
         <script>
 
 
