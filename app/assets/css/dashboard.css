@@ -1,0 +1,117 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+}
+.dashboard-header {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+.queue-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    margin-bottom: 1rem;
+}
+.queue-stats {
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+.stats-waiting { background-color: #fff3cd; }
+.stats-serving { background-color: #cfe2ff; }
+.stats-completed { background-color: #d1e7dd; }
+.status-badge {
+    padding: 0.5em 1em;
+    border-radius: 20px;
+    font-weight: 500;
+}
+.status-waiting { background-color: #ffc107; color: #000; }
+.status-serving { background-color: #0d6efd; color: #fff; }
+.status-done { background-color: #198754; color: #fff; }
+.status-skipped { background-color: #dc3545; color: #fff; }
+.table th { 
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+.refresh-timer {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+.status-no-show {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.status-recalled {
+    background-color: #0dcaf0;
+    color: #fff;
+}
+
+/* Add hover effects for buttons */
+.btn-group .btn:hover {
+    opacity: 0.9;
+}
+
+.side-panel {
+    position: sticky;
+    top: 1rem;
+}
+
+.recall-item {
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.recall-item:hover {
+    background-color: #f8f9fa;
+}
+
+.recall-item.no-show {
+    border-left-color: #ffc107;
+}
+
+.recall-item.recalled {
+    border-left-color: #0dcaf0;
+}
+
+.recall-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.recall-actions {
+    display: none;
+}
+
+.recall-item:hover .recall-actions {
+    display: block;
+}
+
+.empty-list {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6c757d;
+}
+.input-group {
+    max-width: 400px; /* Limit the width of the search bar */
+    margin: auto; /* Center the search bar */
+}
+
+.input-group-text {
+    background-color: #f8f9fa; /* Subtle background color */
+    border: 1px solid #ced4da; /* Match the input border */
+    border-right: none; /* Remove right border for seamless look */
+}
+
+.form-control {
+    border: 1px solid #ced4da; /* Match the input border */
+    border-left: none; /* Remove left border for seamless look */
+    border-radius: 0 0.25rem 0.25rem 0; /* Adjust border radius */
+}
+
+.form-control:focus {
+    box-shadow: none; /* Remove focus shadow */
+    border-color: #ced4da; /* Match the input border */
+}
