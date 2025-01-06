@@ -35,4 +35,62 @@ class UserController extends Controller {
 
         echo json_encode(['counter' => $counter]);
     }
+
+    // Show the login form
+    public function showLoginForm() {
+        $this->view('user/login');
+    }
+
+    // Handle the login request
+    public function login() {
+        session_start();
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+
+        $userModel = $this->model('User');
+        $user = $userModel->getUserByUsername($username);
+
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['role'] = $user['role'];
+
+            if ($user['role'] == 'kiosk') {
+                header('Location: /RajahQueue/public/QueueController/index');
+            } else {
+                header('Location: /RajahQueue/public/DashboardController/index');
+            }
+            exit;
+        } else {
+            echo 'Invalid username or password';
+        }
+    }
+
+    // Handle the logout request
+    public function logout() {
+        session_start();
+        session_destroy();
+        header('Location: /RajahQueue/public/UserController/showLoginForm');
+        exit;
+    }
+
+    // Show the registration form
+    public function showRegisterForm() {
+        $this->view('user/register');
+    }
+
+    // Handle the registration request
+    public function register() {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+
+        $userModel = $this->model('User');
+        $success = $userModel->createUser($username, $password);
+
+        if ($success) {
+            header('Location: /RajahQueue/public/UserController/showLoginForm');
+            exit;
+        } else {
+            echo 'Registration failed';
+        }
+    }
 }

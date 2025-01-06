@@ -3,17 +3,14 @@
 
 require_once '../core/Controller.php';
 
-class QueueController extends Controller
-{
-    public function index()
-    {
+class QueueController extends Controller {
+    public function index() {
         $queueModel = $this->model('Queue');
         $data['queue'] = $queueModel->getAll();
         $this->view('queue/index', $data);
     }
 
-    public function add()
-    {
+    public function add() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $queueModel = $this->model('Queue');
 
@@ -33,86 +30,8 @@ class QueueController extends Controller
                 'queue_number' => $queueNumber
             ];
 
-            header('Location: /RajahQueue/public/');
+            header('Location: /RajahQueue/public/QueueController/index');
             exit;
         }
     }
-
-    public function dashboard()
-    {
-        $this->view('queue/dashboard');
-    }
-
-    public function getDashboardData()
-    {
-        ob_clean();
-        
-        try {
-            $queueModel = $this->model('Queue');
-
-            // Get the current page from the request, default to 1
-            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-            $searchTerm = isset($_GET['search']) ? $_GET['search'] : ''; // Get search term
-
-            // Always fetch the overall stats and recent activity
-            $data = [
-                'stats' => [
-                    'waiting' => (int)$queueModel->getCountByStatus('Waiting'),
-                    'serving' => (int)$queueModel->getCountByStatus('Serving'),
-                    'completed' => (int)$queueModel->getCompletedToday()
-                ],
-                'recallHistory' => $queueModel->getRecallHistory(), // Always fetch recent activity
-            ];
-
-            // If a search term is provided, fetch the filtered queue
-            if ($searchTerm) {
-                $data['queue'] = $queueModel->searchQueue($searchTerm, $page);
-                $data['totalCount'] = $queueModel->getSearchCount($searchTerm); // Get total count for pagination
-            } else {
-                $data['queue'] = $queueModel->getActiveQueue($page);
-                $data['totalCount'] = $queueModel->getTotalQueueCount(); // Get total count for pagination
-            }
-
-            header('Content-Type: application/json');
-            echo json_encode($data, JSON_PRETTY_PRINT);
-            exit;
-        } catch (Exception $e) {
-            // Log the error message
-            error_log("Error in getDashboardData: " . $e->getMessage());
-            // Return a JSON error response
-            header('Content-Type: application/json');
-            echo json_encode(['error' => 'An error occurred while fetching data.']);
-            exit;
-        }
-    }
-
-    public function updateStatus()
-    {
-        // Clear any previous output
-        ob_clean();
-        
-        $response = ['success' => false, 'message' => ''];
-        
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!isset($_POST['queue_number']) || !isset($_POST['status'])) {
-                $response['message'] = 'Missing required parameters';
-            } else {
-                $queueNumber = $_POST['queue_number'];
-                $newStatus = $_POST['status'];
-                
-                $queueModel = $this->model('Queue');
-                $success = $queueModel->updateStatus($queueNumber, $newStatus);
-                
-                $response['success'] = $success;
-                $response['message'] = $success ? 'Status updated successfully' : 'Failed to update status';
-            }
-        } else {
-            $response['message'] = 'Invalid request method';
-        }
-        
-        header('Content-Type: application/json');
-        echo json_encode($response);
-        exit;
-    }
-
 }

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,9 +25,6 @@
                     </span>
                     <button class="btn btn-primary" onclick="refreshDashboard()">
                         <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                    </button>
-                    <button class="btn btn-danger ms-2" onclick="logout()">
-                        <i class="bi bi-box-arrow-right"></i> Logout
                     </button>
                 </div>
             </div>
@@ -184,7 +179,7 @@
 
         function refreshDashboard() {
             $.ajax({
-                url: '/RajahQueue/public/queue/getDashboardData?page=' + currentPage, // Pass the current page
+                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage, // Correct URL
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -321,7 +316,7 @@
             const buttons = $(`button[onclick*="${queueNumber}"]`).prop('disabled', true);
 
             $.ajax({
-                url: '/RajahQueue/public/queue/updateStatus',
+                url: '/RajahQueue/public/DashboardController/updateStatus',
                 method: 'POST',
                 data: {
                     queue_number: queueNumber,
@@ -476,7 +471,7 @@
             const searchTerm = document.getElementById('searchInput').value;
             currentPage = 1; // Reset to the first page on new search
             $.ajax({
-                url: '/RajahQueue/public/queue/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm), // Pass the search term
+                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm), // Pass the search term
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -493,11 +488,6 @@
             });
         }
 
-        function logout() {
-            // Redirect to the logout endpoint
-            window.location.href = "/RajahQueue/public/LoginController/logout";
-        }
-
         function updateUserCounter() {
             const selectedCounter = document.getElementById("counterSelect").value;
 
@@ -505,20 +495,14 @@
                 $.ajax({
                     url: "/RajahQueue/public/UserController/updateCounter", // Update counter route
                     method: "POST",
-                    data: {
-                        counter: selectedCounter,
-                    },
+                    data: { counter: selectedCounter },
                     success: function (response) {
-                        if (response.success) {
-                            alert(`Counter ${selectedCounter} has been saved to your account.`);
-                        } else {
-                            alert("Failed to update counter. Please try again.");
-                        }
+                        console.log('Counter updated successfully');
                     },
                     error: function (xhr, status, error) {
-                        console.error("Error updating counter:", error);
-                        alert("Error updating counter. Please try again.");
-                    },
+                        console.error('Error updating counter:', error);
+                        console.log('Response Text:', xhr.responseText);
+                    }
                 });
             }
         }

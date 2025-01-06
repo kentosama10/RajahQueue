@@ -22,4 +22,11 @@ class User extends Model {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ? $row['counter'] : null;
     }
+
+    // Create a new user with hashed password
+    public function createUser($username, $password) {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $this->db->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        return $stmt->execute([$username, $hashedPassword]);
+    }
 }

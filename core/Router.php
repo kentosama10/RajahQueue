@@ -25,12 +25,6 @@ class Router {
 
         $this->params = $url ? array_values($url) : [];
 
-        // Define routes for CounterController
-        $this->addRoute('GET', '/counters', 'CounterController@getActiveCounters');
-        $this->addRoute('POST', '/counters/update', 'CounterController@updateCounterValue');
-        $this->addRoute('GET', '/counters/current', 'CounterController@getCurrentCounterValue');
-        $this->addRoute('GET', '/queue/dashboard', 'QueueController@getDashboardData');
-
         // Call the controller method with parameters
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
@@ -39,7 +33,7 @@ class Router {
         if (isset($_GET['url'])) {
             return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
         }
-        return ['LoginController', 'index']; // Default route
+        return ['UserController', 'showLoginForm']; // Default route
     }
 
     // Method to add routes
@@ -48,4 +42,4 @@ class Router {
         // This could be an array or any other structure to hold routes
         $this->routes[] = ['method' => $method, 'path' => $path, 'handler' => $handler];
     }
-} 
+}
