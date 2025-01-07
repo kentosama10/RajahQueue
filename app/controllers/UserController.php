@@ -43,34 +43,45 @@ class UserController extends Controller {
 
     // Handle the login request
     public function login() {
-        session_start();
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
 
-        $userModel = $this->model('User');
-        $user = $userModel->getUserByUsername($username);
+        if (isset($_POST['username']) && isset($_POST['password'])) {
+            $username = $_POST['username'];
+            $password = $_POST['password'];
 
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
+            $userModel = $this->model('User');
+            $user = $userModel->getUserByUsername($username);
 
-            if ($user['role'] == 'kiosk') {
-                header('Location: /RajahQueue/public/QueueController/index');
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role'] = $user['role'];
+
+                if ($user['role'] == 'kiosk') {
+                    header('Location: /RajahQueue/public/QueueController/index');
+                } else {
+                    header('Location: /RajahQueue/public/DashboardController/index');
+                }
+                exit;
             } else {
-                header('Location: /RajahQueue/public/DashboardController/index');
+                // Handle invalid login
+                $this->view('user/login', ['error' => 'Invalid username or password']);
             }
-            exit;
         } else {
-            echo 'Invalid username or password';
+            // Handle missing username or password
+            $this->view('user/login', ['error' => 'Please enter both username and password']);
         }
     }
 
     // Handle the logout request
     public function logout() {
-        session_start();
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
         session_destroy();
         header('Location: /RajahQueue/public/UserController/showLoginForm');
-        exit;
+        exit();
     }
 
     // Show the registration form

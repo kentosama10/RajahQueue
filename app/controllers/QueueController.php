@@ -4,6 +4,10 @@
 require_once '../core/Controller.php';
 
 class QueueController extends Controller {
+    public function __construct() {
+        $this->requireAuth(); // Ensure user is authenticated for all actions in this controller
+    }
+
     public function index() {
         $queueModel = $this->model('Queue');
         $data['queue'] = $queueModel->getAll();

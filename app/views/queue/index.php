@@ -4,7 +4,7 @@ if (isset($_SESSION['success_message'])):
     unset($_SESSION['success_message']); // Clear session after showing the message
     ?>
     <!-- Success Modal -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal fade" id="successModal" tabindex="""-1" aria-labelledby="successModalLabel" aria-hidden="""true"></div>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
@@ -54,6 +54,18 @@ if (isset($_SESSION['success_message'])):
 </head>
 
 <body>
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Rajah Queue - Kiosk</h2>
+                <div class="d-flex align-items-center">
+                    <a href="/RajahQueue/public/UserController/logout" class="btn btn-outline-secondary">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container mt-5">
 
         <!-- User Form -->

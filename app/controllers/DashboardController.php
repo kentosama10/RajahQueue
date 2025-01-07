@@ -3,6 +3,10 @@
 require_once '../core/Controller.php';
 
 class DashboardController extends Controller {
+    public function __construct() {
+        $this->requireAuth(); // Ensure user is authenticated for all actions in this controller
+    }
+
     public function index() {
         $this->view('dashboard/index');
     }
@@ -48,8 +52,8 @@ class DashboardController extends Controller {
             exit;
         }
     }
-    public function updateStatus()
-    {
+
+    public function updateStatus() {
         // Clear any previous output
         ob_clean();
         

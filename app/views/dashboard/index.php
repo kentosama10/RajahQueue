@@ -23,19 +23,23 @@
                     <span class="refresh-timer me-3">
                         Auto-refresh in: <span id="countdown">15</span>s
                     </span>
-                    <button class="btn btn-primary" onclick="refreshDashboard()">
+                    <button class="btn btn-primary me-3" onclick="refreshDashboard()">
                         <i class="bi bi-arrow-clockwise"></i> Refresh Now
                     </button>
+                    <a href="/RajahQueue/public/UserController/logout" class="btn btn-outline-secondary">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
+
     <div class="container-fluid">
         <div class="row">
             <!-- Main Queue Content -->
             <div class="col-lg-9">
-                <div class="mb-3 d-flex align-items-center">
+                <div class="mb-3 d-flex align-items-center gap-3">
                     <!-- Search Bar -->
                     <div class="input-group me-3" style="flex: 1;">
                         <span class="input-group-text" id="search-addon">
@@ -45,9 +49,8 @@
                     </div>
                     <!-- Counter Dropdown -->
                     <div>
-                        <label for="counterSelect" class="me-2 mb-0">Counter:</label>
                         <select id="counterSelect" class="form-select form-select-sm" onchange="updateUserCounter()" style="width: 120px;">
-                            <option value="" disabled selected>Choose...</option>
+                            <option value="" disabled selected>Counter</option>
                             <option value="1">Counter 1</option>
                             <option value="2">Counter 2</option>
                             <option value="3">Counter 3</option>
