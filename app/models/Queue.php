@@ -49,8 +49,8 @@ class Queue extends Model
 
     private function resetQueueNumbers()
     {
-        // Clear the queue for a fresh start
-        $stmt = $this->db->prepare("DELETE FROM queue WHERE DATE(created_at) < CURDATE()");
+        // Update the status of the queue for a fresh start
+        $stmt = $this->db->prepare("UPDATE queue SET status = 'Archived' WHERE DATE(created_at) < CURDATE()");
         $stmt->execute();
 
         // Insert the new reset date into the queue_reset table
