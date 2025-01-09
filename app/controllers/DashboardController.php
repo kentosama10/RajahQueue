@@ -8,7 +8,7 @@ class DashboardController extends Controller {
     }
 
     public function index() {
-        $this->view('dashboard/index');
+        $this->view('dashboard/dashboard');
     }
 
     public function getDashboardData() {

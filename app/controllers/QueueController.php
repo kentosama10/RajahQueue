@@ -11,7 +11,7 @@ class QueueController extends Controller {
     public function index() {
         $queueModel = $this->model('Queue');
         $data['queue'] = $queueModel->getAll();
-        $this->view('queue/index', $data);
+        $this->view('queue/queue', $data);
     }
 
     public function add() {
