@@ -81,4 +81,8 @@ class DashboardController extends Controller {
         exit;
     }
 
+    public function display() {
+        $this->view('dashboard/display');
+    }
+
 }

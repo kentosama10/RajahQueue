@@ -27,6 +27,9 @@ class Router {
 
         // Call the controller method with parameters
         call_user_func_array([$this->controller, $this->method], $this->params);
+
+        // Add this route in the Router constructor or wherever you define routes
+        $this->addRoute('GET', 'DashboardController/display', 'DashboardController@display');
     }
 
     private function parseUrl() {
@@ -35,6 +38,7 @@ class Router {
         }
         return ['UserController', 'showLoginForm']; // Default route
     }
+    
 
     // Method to add routes
     public function addRoute($method, $path, $handler) {
@@ -42,4 +46,7 @@ class Router {
         // This could be an array or any other structure to hold routes
         $this->routes[] = ['method' => $method, 'path' => $path, 'handler' => $handler];
     }
+
+    
+
 }
