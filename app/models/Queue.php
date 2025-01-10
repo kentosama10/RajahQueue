@@ -166,6 +166,24 @@ class Queue extends Model
         }
     }
 
+    public function updatePaymentStatus($queueNumber, $paymentStatus) {
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE queue 
+                SET 
+                    payment_status = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE queue_number = ?
+            ");
+            
+            $result = $stmt->execute([$paymentStatus, $queueNumber]);
+            return $result && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error updating payment status: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function getRecallHistory()
     {
         $stmt = $this->db->query("

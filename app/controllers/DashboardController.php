@@ -70,8 +70,41 @@ class DashboardController extends Controller {
                 $queueModel = $this->model('Queue');
                 $success = $queueModel->updateStatus($queueNumber, $newStatus);
                 
+                if ($success && $newStatus === 'Done') {
+                    // Prompt the user if they wish to proceed to payment
+                    $response['promptPayment'] = true;
+                    $response['message'] = 'Status updated successfully. Do you wish to proceed to payment?';
+                } else {
+                    $response['success'] = $success;
+                    $response['message'] = $success ? 'Status updated successfully' : 'Failed to update status';
+                }
+            }
+        } else {
+            $response['message'] = 'Invalid request method';
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+    public function updatePaymentStatus() {
+        ob_clean();
+        
+        $response = ['success' => false, 'message' => ''];
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_POST['queue_number']) || !isset($_POST['payment_status'])) {
+                $response['message'] = 'Missing required parameters';
+            } else {
+                $queueNumber = $_POST['queue_number'];
+                $paymentStatus = $_POST['payment_status'];
+                
+                $queueModel = $this->model('Queue');
+                $success = $queueModel->updatePaymentStatus($queueNumber, $paymentStatus);
+                
                 $response['success'] = $success;
-                $response['message'] = $success ? 'Status updated successfully' : 'Failed to update status';
+                $response['message'] = $success ? 'Payment status updated successfully' : 'Failed to update payment status';
             }
         } else {
             $response['message'] = 'Invalid request method';

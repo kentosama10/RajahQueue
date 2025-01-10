@@ -333,6 +333,12 @@
                             alert(`Queue number ${queueNumber} has been recalled!`);
                         }
                         refreshDashboard();
+                    } else if (response.promptPayment) {
+                        if (confirm(response.message)) {
+                            updatePaymentStatus(queueNumber, 'Pending');
+                        } else {
+                            updatePaymentStatus(queueNumber, 'Not Required');
+                        }
                     } else {
                         alert('Failed to update status. Please try again.');
                     }
@@ -344,6 +350,29 @@
                 complete: function () {
                     // Re-enable buttons
                     buttons.prop('disabled', false);
+                }
+            });
+        }
+
+        function updatePaymentStatus(queueNumber, paymentStatus) {
+            $.ajax({
+                url: '/RajahQueue/public/DashboardController/updatePaymentStatus',
+                method: 'POST',
+                data: {
+                    queue_number: queueNumber,
+                    payment_status: paymentStatus
+                },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        refreshDashboard();
+                    } else {
+                        alert('Failed to update payment status. Please try again.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating payment status:', error);
+                    alert('Error updating payment status. Please try again.');
                 }
             });
         }
