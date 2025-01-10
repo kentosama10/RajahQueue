@@ -13,26 +13,28 @@
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
+            padding: 20px;
         }
         .display-header {
             background-color: #343a40;
             color: #fff;
             padding: 1rem 0;
             text-align: center;
+            margin-bottom: 20px;
         }
         .queue-item {
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,.1);
             margin-bottom: 1rem;
-            padding: 1rem;
+            padding: 1.5rem;
         }
         .queue-number {
             font-size: 2rem;
             font-weight: bold;
         }
-        .customer-name {
-            font-size: 1.5rem;
+        .container {
+            padding: 0 15px;
         }
     </style>
 </head>
