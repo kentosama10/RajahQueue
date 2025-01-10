@@ -8,7 +8,9 @@ class DashboardController extends Controller {
     }
 
     public function index() {
-        $this->view('dashboard/dashboard');
+        $queueModel = $this->model('Queue');
+        $queueData = $queueModel->getQueueData();
+        $this->view('dashboard/dashboard', ['queueData' => $queueData]);
     }
 
     public function getDashboardData() {
@@ -54,7 +56,6 @@ class DashboardController extends Controller {
     }
 
     public function updateStatus() {
-        // Clear any previous output
         ob_clean();
         
         $response = ['success' => false, 'message' => ''];

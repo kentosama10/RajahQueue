@@ -153,11 +153,12 @@ class Queue extends Model
                 UPDATE queue 
                 SET 
                     status = ?,
+                    payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE queue_number = ?
             ");
             
-            $result = $stmt->execute([$status, $queueNumber]);
+            $result = $stmt->execute([$status, $status, $queueNumber]);
             return $result && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
             error_log("Error updating queue status: " . $e->getMessage());
@@ -226,6 +227,34 @@ class Queue extends Model
         $stmt->execute();
         
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
+    public function getPaymentQueue() {
+        $stmt = $this->db->query("SELECT * FROM queue WHERE payment_status = 'Pending' ORDER BY updated_at ASC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function completePayment($queueNumber) {
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE queue 
+                SET 
+                    payment_status = 'Completed',
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE queue_number = ?
+            ");
+            
+            $result = $stmt->execute([$queueNumber]);
+            return $result && $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error completing payment: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getQueueData() {
+        $stmt = $this->db->query("SELECT * FROM queue WHERE status = 'Done' AND payment_status = 'Pending' ORDER BY updated_at ASC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 }
