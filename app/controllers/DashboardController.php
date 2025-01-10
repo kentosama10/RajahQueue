@@ -18,6 +18,7 @@ class DashboardController extends Controller {
         
         try {
             $dashboardModel = $this->model('Dashboard');
+            $queueModel = $this->model('Queue');
 
             // Get the current page from the request, default to 1
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -41,6 +42,9 @@ class DashboardController extends Controller {
                 $data['queue'] = $dashboardModel->getActiveQueue($page);
                 $data['totalCount'] = $dashboardModel->getTotalQueueCount(); // Get total count for pagination
             }
+
+            // Fetch the payment queue for completed items
+            $data['paymentQueue'] = $queueModel->getPaymentQueue(); // Fetch payment queue items
 
             header('Content-Type: application/json');
             echo json_encode($data, JSON_PRETTY_PRINT);

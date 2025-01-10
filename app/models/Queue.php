@@ -248,7 +248,8 @@ class Queue extends Model
     }
 
     public function getPaymentQueue() {
-        $stmt = $this->db->query("SELECT * FROM queue WHERE payment_status = 'Pending' ORDER BY updated_at ASC");
+        $stmt = $this->db->prepare("SELECT * FROM queue WHERE payment_status = 'Pending' AND status = 'Done'");
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

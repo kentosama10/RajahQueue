@@ -45,6 +45,12 @@
         <div id="servingQueue" class="row">
             <!-- Serving queue items will be loaded here -->
         </div>
+        <div class="display-header mt-5">
+            <h2>Pending Payments</h2>
+        </div>
+        <div id="paymentQueue" class="row">
+            <!-- Payment queue items will be loaded here -->
+        </div>
     </div>
 
     <script>
@@ -79,12 +85,32 @@
                             <div class="col-md-4">
                                 <div class="queue-item text-center">
                                     <div class="queue-number">${item.queue_number}</div>
-                                    <div class="customer-name">${item.customer_name}</div>
-                                    <div class="service-type">${item.service_type}</div>
                                 </div>
                             </div>
                         `);
                     }
+                });
+            }
+
+            // Update the payment queue section
+            const paymentQueue = $('#paymentQueue');
+            paymentQueue.empty(); // Clear existing items
+
+            if (data.paymentQueue.length === 0) {
+                paymentQueue.append(`
+                    <div class="col-12 text-center text-muted">
+                        No pending payments.
+                    </div>
+                `);
+            } else {
+                data.paymentQueue.forEach(item => {
+                    paymentQueue.append(`
+                        <div class="col-md-4">
+                            <div class="queue-item text-center">
+                                <div class="queue-number">${item.queue_number}</div>
+                            </div>
+                        </div>
+                    `);
                 });
             }
         }
