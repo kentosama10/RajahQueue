@@ -1,3 +1,4 @@
+<?php include '../app/views/header.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,10 +26,8 @@
                     </span>
                     <button class="btn btn-primary me-3" onclick="refreshDashboard()">
                         <i class="bi bi-arrow-clockwise"></i> Refresh Now
+                        <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
-                    <a href="/RajahQueue/public/UserController/logout" class="btn btn-outline-secondary">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </a>
                 </div>
             </div>
         </div>
@@ -181,6 +180,7 @@
         }
 
         function refreshDashboard() {
+            $('#refreshSpinner').removeClass('d-none'); // Show spinner
             $.ajax({
                 url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage, // Correct URL
                 method: 'GET',
@@ -194,6 +194,9 @@
                 },
                 error: function (xhr, status, error) {
                     console.error('Error fetching dashboard data:', error);
+                },
+                complete: function () {
+                    $('#refreshSpinner').addClass('d-none'); // Hide spinner
                 }
             });
         }
@@ -563,3 +566,4 @@
 </body>
 
 </html>
+<?php include '../app/views/footer.php'; ?>

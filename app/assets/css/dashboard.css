@@ -43,75 +43,69 @@ body {
     background-color: #ffc107;
     color: #000;
 }
-
 .status-recalled {
     background-color: #0dcaf0;
     color: #fff;
 }
-
-/* Add hover effects for buttons */
 .btn-group .btn:hover {
     opacity: 0.9;
 }
-
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
 .side-panel {
     position: sticky;
     top: 1rem;
 }
-
 .recall-item {
     border-left: 4px solid transparent;
     transition: all 0.3s ease;
 }
-
 .recall-item:hover {
     background-color: #f8f9fa;
 }
-
 .recall-item.no-show {
     border-left-color: #ffc107;
 }
-
 .recall-item.recalled {
     border-left-color: #0dcaf0;
 }
-
 .recall-time {
     font-size: 0.8rem;
     color: #6c757d;
 }
-
 .recall-actions {
     display: none;
 }
-
 .recall-item:hover .recall-actions {
     display: block;
 }
-
 .empty-list {
     padding: 1.5rem;
     text-align: center;
     color: #6c757d;
 }
 .input-group {
-    max-width: 400px; /* Limit the width of the search bar */
-    margin: auto; /* Center the search bar */
+    max-width: 400px;
+    margin: auto;
 }
-
 .input-group-text {
-    background-color: #f8f9fa; /* Subtle background color */
-    border: 1px solid #ced4da; /* Match the input border */
-    border-right: none; /* Remove right border for seamless look */
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-right: none;
 }
-
 .form-control {
-    border: 1px solid #ced4da; /* Match the input border */
-    border-left: none; /* Remove left border for seamless look */
-    border-radius: 0 0.25rem 0.25rem 0; /* Adjust border radius */
+    border: 1px solid #ced4da;
+    border-left: none;
+    border-radius: 0 0.25rem 0.25rem 0;
 }
-
 .form-control:focus {
-    box-shadow: none; /* Remove focus shadow */
-    border-color: #ced4da; /* Match the input border */
+    box-shadow: none;
+    border-color: #ced4da;
+}
+#prevPage, #nextPage {
+    transition: background-color 0.3s ease;
+}
+#prevPage:hover, #nextPage:hover {
+    background-color: #e2e6ea;
 }

@@ -42,6 +42,7 @@ if (isset($_SESSION['success_message'])):
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -57,7 +58,6 @@ if (isset($_SESSION['success_message'])):
     <div class="dashboard-header">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
-                <h2 class="mb-0">Rajah Queue - Kiosk</h2>
                 <div class="d-flex align-items-center">
                     <a href="/RajahQueue/public/UserController/logout" class="btn btn-outline-secondary">
                         <i class="bi bi-box-arrow-right"></i>
@@ -75,7 +75,7 @@ if (isset($_SESSION['success_message'])):
                     <!-- Card Interface -->
                     <div class="card shadow-lg">
                         <div class="card-header bg-primary text-white text-center">
-                            <h3 class="mb-0">Get a ticket number here!</h3>
+                            <h3 class="mb-0">Get a queue number here!</h3>
                         </div>
                         <div class="card-body">
                             <form action="/RajahQueue/public/QueueController/add" method="POST" id="queueForm">
