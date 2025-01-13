@@ -15,23 +15,24 @@ class Queue extends Model
     {
         // Ensure reset logic runs
         $this->resetQueueNumbersIfNeeded();
-
+    
         // Determine the service initial letter
         $serviceInitial = $this->getServiceInitial($serviceType);
-
+    
         // Generate queue number
         $nextNumber = $this->getNextQueueNumberByService($serviceInitial);
         $queueNumber = $serviceInitial . '-' . $nextNumber;
-
+    
         // Insert into database
         $stmt = $this->db->prepare("INSERT INTO queue 
-            (customer_name, service_type, region, priority, priority_type, queue_number) 
-            VALUES (?, ?, ?, ?, ?, ?)");
+            (customer_name, service_type, region, priority, priority_type, queue_number, reset_flag) 
+            VALUES (?, ?, ?, ?, ?, ?, 0)");
         $stmt->execute([$customerName, $serviceType, $region, $priority, $priorityType, $queueNumber]);
-
+    
         // Return the queue number for confirmation
         return $queueNumber;
     }
+    
 
     private function resetQueueNumbersIfNeeded()
     {
@@ -49,14 +50,16 @@ class Queue extends Model
 
     private function resetQueueNumbers()
     {
-        // Update the status of the queue for a fresh start
-        $stmt = $this->db->prepare("UPDATE queue SET status = 'Archived' WHERE DATE(created_at) < CURDATE()");
+        // Archive old queue numbers by updating the reset_flag column
+        $stmt = $this->db->prepare("UPDATE queue SET reset_flag = 1 WHERE reset_flag = 0");
         $stmt->execute();
-
+    
         // Insert the new reset date into the queue_reset table
         $stmt = $this->db->prepare("INSERT INTO queue_reset (reset_date) VALUES (CURDATE())");
         $stmt->execute();
     }
+    
+
 
     private function getServiceInitial($serviceType)
     {
@@ -76,11 +79,13 @@ class Queue extends Model
 
     private function getNextQueueNumberByService($serviceInitial)
     {
-        $stmt = $this->db->prepare("SELECT COUNT(*) AS count FROM queue WHERE queue_number LIKE ?");
-        $stmt->execute([$serviceInitial . '-%']);
+        // Count rows where reset_flag = 0 for the given service
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM queue WHERE reset_flag = 0 AND LEFT(queue_number, 1) = ?");
+        $stmt->execute([$serviceInitial]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['count'] + 1; // Increment count for the next queue number
+        return $result['count'] + 1; // Next queue number
     }
+
 
     public function getCountByStatus($status)
     {
@@ -121,11 +126,11 @@ class Queue extends Model
                 created_at ASC
             LIMIT :limit OFFSET :offset
         ");
-        
+
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -138,7 +143,7 @@ class Queue extends Model
     public function updateStatus($queueNumber, $status)
     {
         $allowedStatuses = ['Waiting', 'Serving', 'Done', 'Skipped', 'No Show', 'Recalled'];
-        
+
         if (!in_array($status, $allowedStatuses)) {
             return false;
         }
@@ -157,7 +162,7 @@ class Queue extends Model
                     updated_at = CURRENT_TIMESTAMP
                 WHERE queue_number = ?
             ");
-            
+
             $result = $stmt->execute([$status, $status, $queueNumber]);
             return $result && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
@@ -166,7 +171,8 @@ class Queue extends Model
         }
     }
 
-    public function updatePaymentStatus($queueNumber, $paymentStatus) {
+    public function updatePaymentStatus($queueNumber, $paymentStatus)
+    {
         try {
             $stmt = $this->db->prepare("
                 UPDATE queue 
@@ -175,7 +181,7 @@ class Queue extends Model
                     updated_at = CURRENT_TIMESTAMP
                 WHERE queue_number = ?
             ");
-            
+
             $result = $stmt->execute([$paymentStatus, $queueNumber]);
             return $result && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
@@ -222,13 +228,13 @@ class Queue extends Model
                 created_at ASC
             LIMIT :limit OFFSET :offset
         ");
-        
+
         $searchTerm = "%$searchTerm%"; // Prepare the search term for LIKE
         $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -239,21 +245,23 @@ class Queue extends Model
             WHERE (customer_name LIKE :searchTerm OR queue_number LIKE :searchTerm)
             AND status IN ('Waiting', 'Serving', 'No Show')
         ");
-        
+
         $searchTerm = "%$searchTerm%"; // Prepare the search term for LIKE
         $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
         $stmt->execute();
-        
+
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 
-    public function getPaymentQueue() {
+    public function getPaymentQueue()
+    {
         $stmt = $this->db->prepare("SELECT * FROM queue WHERE payment_status = 'Pending' AND status = 'Done'");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function completePayment($queueNumber) {
+    public function completePayment($queueNumber)
+    {
         try {
             $stmt = $this->db->prepare("
                 UPDATE queue 
@@ -262,7 +270,7 @@ class Queue extends Model
                     updated_at = CURRENT_TIMESTAMP
                 WHERE queue_number = ?
             ");
-            
+
             $result = $stmt->execute([$queueNumber]);
             return $result && $stmt->rowCount() > 0;
         } catch (PDOException $e) {
@@ -271,7 +279,8 @@ class Queue extends Model
         }
     }
 
-    public function getQueueData() {
+    public function getQueueData()
+    {
         $stmt = $this->db->query("SELECT * FROM queue WHERE status = 'Done' AND payment_status = 'Pending' ORDER BY updated_at ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

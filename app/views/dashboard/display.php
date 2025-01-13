@@ -48,7 +48,7 @@
             <!-- Serving queue items will be loaded here -->
         </div>
         <div class="display-header mt-5">
-            <h2>Pending Payments</h2>
+            <h2>Contuining Clients</h2>
         </div>
         <div id="paymentQueue" class="row">
             <!-- Payment queue items will be loaded here -->
