@@ -15,6 +15,7 @@
             background-color: #f8f9fa;
             padding: 20px;
         }
+
         .display-header {
             background-color: #343a40;
             color: #fff;
@@ -22,17 +23,20 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
         .queue-item {
             background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
             margin-bottom: 1rem;
             padding: 1.5rem;
         }
+
         .queue-number {
             font-size: 2rem;
             font-weight: bold;
         }
+
         .container {
             padding: 0 15px;
         }
@@ -44,11 +48,12 @@
         <h2>Currently Serving</h2>
     </div>
     <div class="container mt-5">
+
         <div id="servingQueue" class="row">
             <!-- Serving queue items will be loaded here -->
         </div>
         <div class="display-header mt-5">
-            <h2>Contuining Clients</h2>
+            <h2>Continuing Clients</h2>
         </div>
         <div id="paymentQueue" class="row">
             <!-- Payment queue items will be loaded here -->
@@ -86,6 +91,7 @@
                         servingQueue.append(`
                             <div class="col-md-4">
                                 <div class="queue-item text-center">
+                                    <div class="queue-counter">Counter: ${data.counter}</div>
                                     <div class="queue-number">${item.queue_number}</div>
                                 </div>
                             </div>
@@ -114,6 +120,13 @@
                         </div>
                     `);
                 });
+            }
+
+            // Display the counter information
+            if (data.counter) {
+                $('#counterInfo').text(`Counter: ${data.counter}`);
+            } else {
+                $('#counterInfo').text('Counter: Not assigned');
             }
         }
 

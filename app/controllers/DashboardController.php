@@ -46,6 +46,11 @@ class DashboardController extends Controller {
             // Fetch the payment queue for completed items
             $data['paymentQueue'] = $queueModel->getPaymentQueue(); // Fetch payment queue items
 
+            // Fetch the counter for the logged-in user
+            $userId = $_SESSION['user_id'];
+            $userModel = $this->model('User');
+            $data['counter'] = $userModel->getCounter($userId);
+
             header('Content-Type: application/json');
             echo json_encode($data, JSON_PRETTY_PRINT);
             exit;
