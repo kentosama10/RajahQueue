@@ -545,9 +545,12 @@
         function updateUserCounter() {
             const selectedCounter = document.getElementById("counterSelect").value;
 
-            if (!selectedCounter) return; // Exit if no counter is selected
+            if (!selectedCounter) {
+                alert("Please select a counter first.");
+                return;
+            }
 
-            const isReleasingCounter = selectedCounter === "release"; // Check if the user is releasing the counter
+            const isReleasingCounter = selectedCounter === "release";
 
             // Send the AJAX request to update or release the counter
             $.ajax({
@@ -557,48 +560,103 @@
                     counter_number: isReleasingCounter ? null : selectedCounter 
                 },
                 success: function (response) {
-                    const data = JSON.parse(response);
+                    try {
+                        const data = typeof response === 'string' ? JSON.parse(response) : response;
 
-                    if (data.success) {
-                        if (isReleasingCounter) {
-                            alert("Counter successfully released!");
+                        if (data.success) {
+                            if (isReleasingCounter) {
+                                alert("Counter successfully released!");
+                                document.getElementById("counterSelect").value = ""; // Reset to default
+                            } else {
+                                alert(`You are now assigned to Counter ${selectedCounter}.`);
+                            }
+                            refreshDashboard(); // Refresh the dashboard to update counter information
                         } else {
-                            alert(`You are now assigned to Counter ${selectedCounter}.`);
+                            alert(data.message || "Failed to update the counter. Please try again.");
+                            // Reset the dropdown if there was an error
+                            refreshCounterSelect();
                         }
-                    } else {
-                        alert(data.message || "Failed to update the counter. Please try again.");
+                    } catch (e) {
+                        console.error("Error parsing response:", e);
+                        alert("An error occurred while processing the response.");
+                        refreshCounterSelect();
                     }
-
-                    // Optionally reset the dropdown to the default state
-                    document.getElementById("counterSelect").value = selectedCounter; // Keep the selected value
                 },
                 error: function (xhr, status, error) {
                     console.error("Error updating counter:", error);
                     console.log("Response Text:", xhr.responseText);
                     alert("An error occurred while updating the counter. Please try again.");
+                    refreshCounterSelect();
                 }
             });
         }
 
-
-        // Pre-select the counter based on the stored value (if any)
-        $(document).ready(function () {
+        // Function to refresh the counter select dropdown
+        function refreshCounterSelect() {
             $.ajax({
-                url: "/RajahQueue/public/UserController/getCounter", // Endpoint to fetch user's counter
+                url: "/RajahQueue/public/UserController/getCounter",
                 method: "GET",
                 success: function (response) {
-                    if (response.counter) {
-                        $("#counterSelect").val(response.counter);
+                    try {
+                        const data = typeof response === 'string' ? JSON.parse(response) : response;
+                        const select = document.getElementById("counterSelect");
+                        
+                        // If user has an assigned counter, select it
+                        if (data.counter_number) {
+                            select.value = data.counter_number;
+                        } else {
+                            select.value = ""; // Reset to default if no counter is assigned
+                        }
+                    } catch (e) {
+                        console.error("Error refreshing counter select:", e);
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error fetching user counter:", error);
-                },
+                    console.error("Error fetching counter info:", error);
+                }
             });
+        }
+
+        // Add event listener for counter select changes
+        document.getElementById("counterSelect").addEventListener("change", function(e) {
+            const selectedValue = e.target.value;
+            if (selectedValue && selectedValue !== "release") {
+                // Check if counter is already assigned
+                $.ajax({
+                    url: "/RajahQueue/public/UserController/checkCounterAvailability",
+                    method: "POST",
+                    data: { counter_number: selectedValue },
+                    success: function(response) {
+                        try {
+                            const data = typeof response === 'string' ? JSON.parse(response) : response;
+                            if (!data.available) {
+                                alert("This counter is already assigned to another user.");
+                                refreshCounterSelect(); // Reset the dropdown
+                                return;
+                            }
+                            // If available, proceed with updateUserCounter
+                            updateUserCounter();
+                        } catch (e) {
+                            console.error("Error checking counter availability:", e);
+                            alert("An error occurred while checking counter availability.");
+                            refreshCounterSelect();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error checking counter availability:", error);
+                        alert("An error occurred while checking counter availability.");
+                        refreshCounterSelect();
+                    }
+                });
+            } else {
+                // If releasing or no counter selected, proceed normally
+                updateUserCounter();
+            }
         });
 
         // Initial load
         $(document).ready(function () {
+            refreshCounterSelect();
             refreshDashboard();
         });
     </script>

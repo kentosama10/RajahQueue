@@ -91,7 +91,7 @@ if (isset($_SESSION['success_message'])):
                                     <label for="service_type" class="form-label">Select Service</label>
                                     <select name="service_type" id="service_type" class="form-select" required>
                                         <option value="" disabled selected>-- Select Service --</option>
-                                        <option value="Visa">Visa</option>
+                                        <!-- <option value="Visa">Visa</option> -->
                                         <option value="Tour Packages">Tour Packages</option>
                                         <option value="Flights">Flights</option>
                                         <option value="Travel Insurance">Travel Insurance</option>

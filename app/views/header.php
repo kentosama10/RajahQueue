@@ -19,9 +19,11 @@
 
             <img src="/RajahQueue/app/assets/images/01 RTC Logo.png" alt="RajahQueue Logo" height="50">
             <nav>
-
-                <a href="/RajahQueue/public/DashboardController/index" class="text-white me-3">Dashboard</a>
-                <a href="/RajahQueue/public/QueueController/index" class="text-white me-3">Queue</a>
+               
+                <a href="/RajahQueue/public/DashboardController/index" class="text-white me-3">Queue Dashboard</a>
+                <a href="/RajahQueue/public/PaymentController/index" class="text-white me-3">Payment Dashboard</a>
+                <a href="/RajahQueue/public/DashboardController/display" class="text-white me-3">Customer Serving</a>
+                <a href="/RajahQueue/public/QueueController/index" class="text-white me-3">Queue Form</a>
                 <a href="/RajahQueue/public/UserController/logout" class="btn btn-danger">Logout</a>
                 <?php if (isset($_SESSION['first_name'])): ?>
                     <span class="text-white">Welcome, <?php echo htmlspecialchars($_SESSION['first_name']); ?>!</span>

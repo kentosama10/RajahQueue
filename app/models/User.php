@@ -15,58 +15,49 @@ class User extends Model
     public function updateCounter($counterNumber, $userId)
     {
         try {
-            // First, verify the user exists
-            $userCheckStmt = $this->db->prepare("SELECT id FROM users WHERE id = ?");
-            $userCheckStmt->execute([$userId]);
-            if (!$userCheckStmt->fetch()) {
-                error_log("User ID $userId does not exist in users table");
-                return false;
-            }
-
-            // Check if the counter exists
-            $checkStmt = $this->db->prepare("SELECT counter_number FROM counters WHERE counter_number = ?");
-            $checkStmt->execute([$counterNumber]);
-            if (!$checkStmt->fetch()) {
-                error_log("Counter $counterNumber does not exist");
-                return false;
-            }
-
-            // Release any existing counter assignments for this user
-            $releaseStmt = $this->db->prepare("UPDATE counters SET active_user_id = NULL WHERE active_user_id = ?");
-            $releaseStmt->execute([$userId]);
-
-            // Update the new counter assignment with explicit type casting
-            $stmt = $this->db->prepare("
-                UPDATE counters 
-                SET active_user_id = CAST(? AS SIGNED), 
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE counter_number = ?
-            ");
-            $success = $stmt->execute([$userId, $counterNumber]);
-        
-            if (!$success) {
-                error_log("Failed to update counter: " . json_encode($stmt->errorInfo()));
-                return false;
-            }
-        
-            // Verify the update
-            $verifyStmt = $this->db->prepare("
+            // First check if the counter is already assigned to someone else
+            $checkStmt = $this->db->prepare("
                 SELECT active_user_id 
                 FROM counters 
-                WHERE counter_number = ? AND active_user_id = ?
+                WHERE counter_number = ? AND active_user_id IS NOT NULL
             ");
-            $verifyStmt->execute([$counterNumber, $userId]);
-            $result = $verifyStmt->fetch();
-            
-            if (!$result) {
-                error_log("Verification failed: Counter update did not persist. Counter: $counterNumber, User: $userId");
+            $checkStmt->execute([$counterNumber]);
+            $existingAssignment = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existingAssignment && $existingAssignment['active_user_id'] != $userId) {
+                error_log("Counter $counterNumber is already assigned to user {$existingAssignment['active_user_id']}");
                 return false;
             }
 
-            error_log("Successfully updated counter $counterNumber for user $userId");
-            return true;
+            // Begin transaction
+            $this->db->beginTransaction();
+
+            // Release any other counters assigned to this user
+            $releaseStmt = $this->db->prepare("
+                UPDATE counters 
+                SET active_user_id = NULL 
+                WHERE active_user_id = ?
+            ");
+            $releaseStmt->execute([$userId]);
+
+            // Assign the new counter
+            $updateStmt = $this->db->prepare("
+                UPDATE counters 
+                SET active_user_id = ? 
+                WHERE counter_number = ?
+            ");
+            $success = $updateStmt->execute([$userId, $counterNumber]);
+
+            if ($success) {
+                $this->db->commit();
+                return true;
+            } else {
+                $this->db->rollBack();
+                return false;
+            }
         } catch (PDOException $e) {
-            error_log("Database error in updateCounter: " . $e->getMessage());
+            $this->db->rollBack();
+            error_log("Error updating counter: " . $e->getMessage());
             return false;
         }
     }
@@ -90,7 +81,21 @@ class User extends Model
 
     public function getActiveUserForCounter($counterNumber)
     {
-        return $this->getCounter($counterNumber); // Reuse getCounter
+        try {
+            $stmt = $this->db->prepare("
+                SELECT u.id, u.username, u.first_name, u.last_name
+                FROM users u
+                INNER JOIN counters c ON c.active_user_id = u.id
+                WHERE c.counter_number = ?
+                LIMIT 1
+            ");
+            
+            $stmt->execute([$counterNumber]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting active user for counter: " . $e->getMessage());
+            return null;
+        }
     }
 
     
@@ -114,5 +119,20 @@ class User extends Model
         return $stmt->execute([$firstName, $lastName, $username, $hashedPassword]);
     }
 
+    public function getUserCounter($userId) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT counter_number 
+                FROM counters 
+                WHERE active_user_id = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$userId]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting user counter: " . $e->getMessage());
+            return null;
+        }
+    }
 
 }

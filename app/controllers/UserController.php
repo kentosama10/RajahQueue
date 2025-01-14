@@ -48,28 +48,50 @@ class UserController extends Controller {
     
     // Fetch the counter for the logged-in user
     public function getCounter() {
-        session_start();
-        if (!isset($_SESSION['user_id'])) {
-            echo json_encode(['counter_number' => null]);
-            return;
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
         }
-    
-        $counter_number = $_GET['counter_number'] ?? null; // Optionally accept a counter ID in the request
-        if (!$counter_number || !is_numeric($counter_number)) {
-            echo json_encode(['counter_number' => null, 'message' => 'Invalid counter specified.']);
-            return;
+
+        // Set JSON header before any output
+        header('Content-Type: application/json');
+
+        try {
+            // Get the current user's ID from session
+            $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+            if (!$userId) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'User not logged in',
+                    'counter_number' => null
+                ]);
+                exit;
+            }
+
+            $userModel = $this->model('User');
+            $counterInfo = $userModel->getUserCounter($userId);
+
+            if ($counterInfo) {
+                echo json_encode([
+                    'success' => true,
+                    'counter_number' => $counterInfo['counter_number'],
+                    'message' => 'Counter found'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => true,
+                    'counter_number' => null,
+                    'message' => 'No counter assigned'
+                ]);
+            }
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error retrieving counter information',
+                'counter_number' => null
+            ]);
         }
-    
-        $userModel = $this->model('User');
-    
-        // Fetch the active user for the specified counter
-        $activeUser = $userModel->getActiveUserForCounter($counter_number);
-    
-        if ($activeUser) {
-            echo json_encode(['counter_number' => $counter_number, 'active_user' => $activeUser]);
-        } else {
-            echo json_encode(['counter_number' => $counter_number, 'active_user' => null, 'message' => 'No active user for this counter.']);
-        }
+        exit;
     }
     
     
@@ -147,6 +169,74 @@ class UserController extends Controller {
             }
         } else {
             echo 'Please fill in all fields.';
+        }
+    }
+
+    public function checkCounterAvailability() {
+        // Set JSON header before any output
+        header('Content-Type: application/json');
+        
+        try {
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            // Default response
+            $response = [
+                'success' => false,
+                'available' => false,
+                'message' => ''
+            ];
+
+            // Check if user is logged in
+            if (!isset($_SESSION['user_id'])) {
+                $response['message'] = 'User not logged in';
+                echo json_encode($response);
+                exit;
+            }
+
+            // Check if it's a POST request with counter_number
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['counter_number'])) {
+                $response['message'] = 'Invalid request or missing counter number';
+                echo json_encode($response);
+                exit;
+            }
+
+            $counter_number = filter_var($_POST['counter_number'], FILTER_VALIDATE_INT);
+            if ($counter_number === false) {
+                $response['message'] = 'Invalid counter number format';
+                echo json_encode($response);
+                exit;
+            }
+
+            $userModel = $this->model('User');
+            $activeUser = $userModel->getActiveUserForCounter($counter_number);
+
+            // Counter is available if:
+            // 1. No active user is assigned to it, or
+            // 2. It's assigned to the current user
+            $isAvailable = !$activeUser || 
+                (isset($_SESSION['user_id']) && $activeUser['id'] == $_SESSION['user_id']);
+
+            $response = [
+                'success' => true,
+                'available' => $isAvailable,
+                'message' => $isAvailable ? 
+                    'Counter is available' : 
+                    'Counter is already assigned to another user'
+            ];
+
+            echo json_encode($response);
+            exit;
+
+        } catch (Exception $e) {
+            error_log("Error in checkCounterAvailability: " . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'available' => false,
+                'message' => 'An error occurred while checking counter availability'
+            ]);
+            exit;
         }
     }
 }
