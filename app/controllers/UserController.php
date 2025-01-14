@@ -5,37 +5,74 @@ require_once '../core/Controller.php';
 class UserController extends Controller {
     // Update the counter for the logged-in user
     public function updateCounter() {
-        session_start();
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        error_log("Session data: " . print_r($_SESSION, true));
+        error_log("POST data: " . print_r($_POST, true));
+
         if (!isset($_SESSION['user_id'])) {
             echo json_encode(['success' => false, 'message' => 'User not logged in.']);
             return;
         }
-
-        $userId = $_SESSION['user_id'];
-        $counter = $_POST['counter'];
-
+    
+        $userId = (int)$_SESSION['user_id'];
+        $counter_number = isset($_POST['counter_number']) ? (int)$_POST['counter_number'] : null;
+    
+        // Add debug logging
+        error_log("Attempting to update counter: Counter={$counter_number}, UserID={$userId}");
+    
+        if ($counter_number !== null && !is_numeric($counter_number)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid counter number format']);
+            return;
+        }
+    
         $userModel = $this->model('User');
-        $success = $userModel->updateCounter($userId, $counter);
-
-        echo json_encode(['success' => $success]);
+    
+        if (is_null($counter_number)) {
+            // Release counter
+            $success = $userModel->releaseCounter($userId);
+            $message = $success ? 'Counter released successfully.' : 'Failed to release counter.';
+        } else {
+            // Assign counter
+            $success = $userModel->updateCounter($counter_number, $userId);
+            $message = $success ? 'Counter updated successfully.' : 'Failed to update counter.';
+        }
+    
+        // Add debug logging
+        error_log("Update counter result: Success={$success}, Message={$message}");
+    
+        echo json_encode(['success' => $success, 'message' => $message]);
     }
-
+    
     // Fetch the counter for the logged-in user
     public function getCounter() {
         session_start();
         if (!isset($_SESSION['user_id'])) {
-            echo json_encode(['counter' => null]);
+            echo json_encode(['counter_number' => null]);
             return;
         }
-
-        $userId = $_SESSION['user_id'];
-
+    
+        $counter_number = $_GET['counter_number'] ?? null; // Optionally accept a counter ID in the request
+        if (!$counter_number || !is_numeric($counter_number)) {
+            echo json_encode(['counter_number' => null, 'message' => 'Invalid counter specified.']);
+            return;
+        }
+    
         $userModel = $this->model('User');
-        $counter = $userModel->getCounter($userId);
-
-        echo json_encode(['counter' => $counter]);
+    
+        // Fetch the active user for the specified counter
+        $activeUser = $userModel->getActiveUserForCounter($counter_number);
+    
+        if ($activeUser) {
+            echo json_encode(['counter_number' => $counter_number, 'active_user' => $activeUser]);
+        } else {
+            echo json_encode(['counter_number' => $counter_number, 'active_user' => null, 'message' => 'No active user for this counter.']);
+        }
     }
-
+    
+    
     // Show the login form
     public function showLoginForm() {
         $this->view('user/login');

@@ -26,7 +26,8 @@
                     </span>
                     <button class="btn btn-primary me-3" onclick="refreshDashboard()">
                         <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                        <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status"
+                            aria-hidden="true"></span>
                     </button>
                 </div>
             </div>
@@ -44,12 +45,17 @@
                         <span class="input-group-text" id="search-addon">
                             <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Search by customer name or queue number" onkeyup="searchQueue()" aria-label="Search" aria-describedby="search-addon" style="border: 1px solid #ced4da; border-radius: 0.25rem;">
+                        <input type="text" id="searchInput" class="form-control"
+                            placeholder="Search by customer name or queue number" onkeyup="searchQueue()"
+                            aria-label="Search" aria-describedby="search-addon"
+                            style="border: 1px solid #ced4da; border-radius: 0.25rem;">
                     </div>
                     <!-- Counter Dropdown -->
                     <div>
-                        <select id="counterSelect" class="form-select form-select-sm" onchange="updateUserCounter()" style="width: 120px;">
-                            <option value="" disabled selected>Counter</option>
+                        <select id="counterSelect" class="form-select form-select-sm" onchange="updateUserCounter()"
+                            style="width: 160px;">
+                            <option value="" disabled selected>Choose Counter</option>
+                            <option value="release">Release Counter</option>
                             <option value="1">Counter 1</option>
                             <option value="2">Counter 2</option>
                             <option value="3">Counter 3</option>
@@ -62,6 +68,7 @@
                             <option value="10">Counter 10</option>
                         </select>
                     </div>
+
                 </div>
                 <!-- Queue Statistics -->
                 <div class="row mb-4">
@@ -526,21 +533,41 @@
         function updateUserCounter() {
             const selectedCounter = document.getElementById("counterSelect").value;
 
-            if (selectedCounter) {
-                $.ajax({
-                    url: "/RajahQueue/public/UserController/updateCounter", // Update counter route
-                    method: "POST",
-                    data: { counter: selectedCounter },
-                    success: function (response) {
-                        console.log('Counter updated successfully');
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error updating counter:', error);
-                        console.log('Response Text:', xhr.responseText);
+            if (!selectedCounter) return; // Exit if no counter is selected
+
+            const isReleasingCounter = selectedCounter === "release"; // Check if the user is releasing the counter
+
+            // Send the AJAX request to update or release the counter
+            $.ajax({
+                url: "/RajahQueue/public/UserController/updateCounter",
+                method: "POST",
+                data: { 
+                    counter_number: isReleasingCounter ? null : selectedCounter 
+                },
+                success: function (response) {
+                    const data = JSON.parse(response);
+
+                    if (data.success) {
+                        if (isReleasingCounter) {
+                            alert("Counter successfully released!");
+                        } else {
+                            alert(`You are now assigned to Counter ${selectedCounter}.`);
+                        }
+                    } else {
+                        alert(data.message || "Failed to update the counter. Please try again.");
                     }
-                });
-            }
+
+                    // Optionally reset the dropdown to the default state
+                    document.getElementById("counterSelect").value = selectedCounter; // Keep the selected value
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error updating counter:", error);
+                    console.log("Response Text:", xhr.responseText);
+                    alert("An error occurred while updating the counter. Please try again.");
+                }
+            });
         }
+
 
         // Pre-select the counter based on the stored value (if any)
         $(document).ready(function () {
