@@ -19,7 +19,7 @@ body {
     border-radius: 8px;
     margin-bottom: 1rem;
 }
-.stats-waiting { background-color: #fff3cd; }
+.stats-waiting { background-color: #000; }
 .stats-serving { background-color: #cfe2ff; }
 .stats-completed { background-color: #d1e7dd; }
 .status-badge {

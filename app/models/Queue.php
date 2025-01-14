@@ -145,17 +145,18 @@ class Queue extends Model
         $allowedStatuses = ['Waiting', 'Serving', 'Done', 'Skipped', 'No Show', 'Recalled'];
 
         if (!in_array($status, $allowedStatuses)) {
-            return false;
+            return ['success' => false, 'message' => 'Invalid status provided'];
         }
 
         try {
             // First, check if this queue number is valid for serving
             if ($status === 'Serving') {
-                // Check if the queue number exists with reset_flag = 0 and is not already Done
+                // Check if the queue number exists with reset_flag = 0 and current status
                 $checkStmt = $this->db->prepare("
-                    SELECT status, reset_flag 
+                    SELECT status, reset_flag, serving_user_id 
                     FROM queue 
                     WHERE queue_number = ?
+                    AND reset_flag = 0
                     ORDER BY created_at DESC
                     LIMIT 1
                 ");
@@ -163,18 +164,15 @@ class Queue extends Model
                 $queueItem = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
                 if (!$queueItem) {
-                    error_log("Queue number not found: $queueNumber");
-                    return false;
-                }
-
-                if ($queueItem['reset_flag'] == 1) {
-                    error_log("Cannot serve reset queue number: $queueNumber");
-                    return false;
+                    return ['success' => false, 'message' => 'Queue number not found or has been reset'];
                 }
 
                 if ($queueItem['status'] === 'Done') {
-                    error_log("Cannot serve completed queue number: $queueNumber");
-                    return false;
+                    return ['success' => false, 'message' => 'This queue number has already been completed'];
+                }
+
+                if ($queueItem['status'] === 'Serving' && $queueItem['serving_user_id'] !== null) {
+                    return ['success' => false, 'message' => 'This customer is already being served by another user'];
                 }
             }
 
@@ -194,11 +192,11 @@ class Queue extends Model
                         updated_at = CURRENT_TIMESTAMP
                     WHERE queue_number = ? 
                     AND reset_flag = 0 
-                    AND status != 'Done'
+                    AND (status != 'Done' AND (status != 'Serving' OR serving_user_id IS NULL))
                 ";
-                $result = $this->db->prepare($sql)->execute([$status, $userId, $status, $queueNumber]);
+                $stmt = $this->db->prepare($sql);
+                $result = $stmt->execute([$status, $userId, $status, $queueNumber]);
             } else {
-                // For other statuses, keep the serving_user_id unchanged
                 $sql = "
                     UPDATE queue 
                     SET 
@@ -208,18 +206,23 @@ class Queue extends Model
                     WHERE queue_number = ? 
                     AND reset_flag = 0
                 ";
-                $result = $this->db->prepare($sql)->execute([$status, $status, $queueNumber]);
+                $stmt = $this->db->prepare($sql);
+                $result = $stmt->execute([$status, $status, $queueNumber]);
             }
 
-            if (!$result) {
-                error_log("Failed to update status for queue number: $queueNumber");
-                return false;
+            if (!$result || $stmt->rowCount() === 0) {
+                return ['success' => false, 'message' => 'Failed to update status'];
             }
 
-            return true;
+            return [
+                'success' => true, 
+                'message' => 'Status updated successfully',
+                'showPaymentModal' => ($status === 'Done')
+            ];
+
         } catch (PDOException $e) {
             error_log("Error updating queue status: " . $e->getMessage());
-            return false;
+            return ['success' => false, 'message' => 'Database error occurred'];
         }
     }
 
