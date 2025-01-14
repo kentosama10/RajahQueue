@@ -22,19 +22,51 @@
             padding: 1rem 0;
             text-align: center;
             margin-bottom: 20px;
+            border-radius: 8px;
         }
 
         .queue-item {
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
-            margin-bottom: 1rem;
-            padding: 1.5rem;
+            padding: 0;
+            transition: transform 0.2s ease;
+            overflow: hidden;
+        }
+
+        .queue-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .15);
+        }
+
+        .counter-header {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 8px 8px 0 0;
         }
 
         .queue-number {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .customer-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #212529;
+        }
+
+        .service-type {
+            color: #6c757d;
+        }
+
+        .server-name {
+            font-weight: 500;
+            color: #0d6efd;
+            padding: 10px;
+            border-top: 1px solid #dee2e6;
+            margin-top: 10px;
         }
 
         .container {
@@ -82,51 +114,70 @@
             if (data.queue.length === 0) {
                 servingQueue.append(`
                     <div class="col-12 text-center text-muted">
-                        No customers are currently being served.
+                        <h3>No customers are currently being served.</h3>
                     </div>
                 `);
             } else {
+                // Group serving customers by counter
+                const servingByCounter = {};
+                
                 data.queue.forEach(item => {
                     if (item.status.toLowerCase() === 'serving') {
+                        if (item.counter_number) {
+                            if (!servingByCounter[item.counter_number]) {
+                                servingByCounter[item.counter_number] = [];
+                            }
+                            servingByCounter[item.counter_number].push(item);
+                        }
+                    }
+                });
+
+                // Sort counters numerically
+                const sortedCounters = Object.keys(servingByCounter).sort((a, b) => parseInt(a) - parseInt(b));
+
+                sortedCounters.forEach(counterNumber => {
+                    const items = servingByCounter[counterNumber];
+                    items.forEach(item => {
                         servingQueue.append(`
-                            <div class="col-md-4">
+                            <div class="col-md-4 mb-4">
                                 <div class="queue-item text-center">
-                                    <div class="queue-counter">Counter: ${data.counter}</div>
-                                    <div class="queue-number">${item.queue_number}</div>
+                                    <div class="counter-header bg-primary text-white py-2 mb-3">
+                                        <h4 class="mb-0">Counter ${item.counter_number}</h4>
+                                    </div>
+                                    <div class="queue-number mb-2">${item.queue_number}</div>
+                                    <div class="customer-name mb-2">${item.customer_name}</div>
+                                    <div class="service-type small text-muted">${item.service_type}</div>
+                                    <div class="server-name small text-primary mt-2">
+                                        Served by: ${item.first_name} ${item.last_name}
+                                    </div>
                                 </div>
                             </div>
                         `);
-                    }
+                    });
                 });
             }
 
             // Update the payment queue section
             const paymentQueue = $('#paymentQueue');
-            paymentQueue.empty(); // Clear existing items
+            paymentQueue.empty();
 
-            if (data.paymentQueue.length === 0) {
+            if (!data.paymentQueue || data.paymentQueue.length === 0) {
                 paymentQueue.append(`
                     <div class="col-12 text-center text-muted">
-                        No pending payments.
+                        <h3>No pending payments.</h3>
                     </div>
                 `);
             } else {
                 data.paymentQueue.forEach(item => {
                     paymentQueue.append(`
-                        <div class="col-md-4">
+                        <div class="col-md-4 mb-4">
                             <div class="queue-item text-center">
-                                <div class="queue-number">${item.queue_number}</div>
+                                <div class="queue-number mb-2">${item.queue_number}</div>
+                                <div class="customer-name">${item.customer_name}</div>
                             </div>
                         </div>
                     `);
                 });
-            }
-
-            // Display the counter information
-            if (data.counter) {
-                $('#counterInfo').text(`Counter: ${data.counter}`);
-            } else {
-                $('#counterInfo').text('Counter: Not assigned');
             }
         }
 

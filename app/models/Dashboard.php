@@ -85,9 +85,14 @@ class Dashboard extends Model {
         $offset = ($page - 1) * $limit;
 
         $stmt = $this->db->prepare("
-            SELECT q.*, u.first_name, u.last_name 
+            SELECT 
+                q.*, 
+                u.first_name, 
+                u.last_name,
+                c.counter_number
             FROM queue q
             LEFT JOIN users u ON q.serving_user_id = u.id
+            LEFT JOIN counters c ON c.active_user_id = u.id
             WHERE q.status IN ('Waiting', 'Serving', 'No Show')
             ORDER BY 
                 CASE q.status
