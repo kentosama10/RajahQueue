@@ -77,13 +77,21 @@ class DashboardController extends Controller {
                 $queueModel = $this->model('Queue');
                 $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId);
                 
-                if ($success && $newStatus === 'Done') {
-                    // Prompt the user if they wish to proceed to payment
-                    $response['promptPayment'] = true;
-                    $response['message'] = 'Status updated successfully. Do you wish to proceed to payment?';
+                if ($success) {
+                    if ($newStatus === 'Done') {
+                        $response['promptPayment'] = true;
+                        $response['message'] = 'Status updated successfully. Do you wish to proceed to payment?';
+                    } else {
+                        $response['success'] = true;
+                        $response['message'] = 'Status updated successfully';
+                    }
                 } else {
-                    $response['success'] = $success;
-                    $response['message'] = $success ? 'Status updated successfully' : 'Failed to update status';
+                    $response['success'] = false;
+                    if ($newStatus === 'Serving') {
+                        $response['message'] = 'Cannot serve this queue number. It may be completed, reset, or no longer valid.';
+                    } else {
+                        $response['message'] = 'Failed to update status';
+                    }
                 }
             }
         } else {

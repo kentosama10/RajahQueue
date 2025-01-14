@@ -149,6 +149,35 @@ class Queue extends Model
         }
 
         try {
+            // First, check if this queue number is valid for serving
+            if ($status === 'Serving') {
+                // Check if the queue number exists with reset_flag = 0 and is not already Done
+                $checkStmt = $this->db->prepare("
+                    SELECT status, reset_flag 
+                    FROM queue 
+                    WHERE queue_number = ?
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                ");
+                $checkStmt->execute([$queueNumber]);
+                $queueItem = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$queueItem) {
+                    error_log("Queue number not found: $queueNumber");
+                    return false;
+                }
+
+                if ($queueItem['reset_flag'] == 1) {
+                    error_log("Cannot serve reset queue number: $queueNumber");
+                    return false;
+                }
+
+                if ($queueItem['status'] === 'Done') {
+                    error_log("Cannot serve completed queue number: $queueNumber");
+                    return false;
+                }
+            }
+
             // If the status is 'Recalled', set it to 'Serving'
             if ($status === 'Recalled') {
                 $status = 'Serving';
@@ -163,7 +192,9 @@ class Queue extends Model
                         serving_user_id = ?,
                         payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
                         updated_at = CURRENT_TIMESTAMP
-                    WHERE queue_number = ?
+                    WHERE queue_number = ? 
+                    AND reset_flag = 0 
+                    AND status != 'Done'
                 ";
                 $result = $this->db->prepare($sql)->execute([$status, $userId, $status, $queueNumber]);
             } else {
@@ -174,12 +205,18 @@ class Queue extends Model
                         status = ?,
                         payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
                         updated_at = CURRENT_TIMESTAMP
-                    WHERE queue_number = ?
+                    WHERE queue_number = ? 
+                    AND reset_flag = 0
                 ";
                 $result = $this->db->prepare($sql)->execute([$status, $status, $queueNumber]);
             }
 
-            return $result;
+            if (!$result) {
+                error_log("Failed to update status for queue number: $queueNumber");
+                return false;
+            }
+
+            return true;
         } catch (PDOException $e) {
             error_log("Error updating queue status: " . $e->getMessage());
             return false;
