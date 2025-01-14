@@ -140,7 +140,7 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 
-    public function updateStatus($queueNumber, $status)
+    public function updateStatus($queueNumber, $status, $userId = null)
     {
         $allowedStatuses = ['Waiting', 'Serving', 'Done', 'Skipped', 'No Show', 'Recalled'];
 
@@ -149,22 +149,37 @@ class Queue extends Model
         }
 
         try {
-            // If the status is 'Recalled', set it to 'Waiting'
+            // If the status is 'Recalled', set it to 'Serving'
             if ($status === 'Recalled') {
                 $status = 'Serving';
             }
 
-            $stmt = $this->db->prepare("
-                UPDATE queue 
-                SET 
-                    status = ?,
-                    payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE queue_number = ?
-            ");
+            // Prepare the SQL query based on the status
+            if ($status === 'Serving') {
+                $sql = "
+                    UPDATE queue 
+                    SET 
+                        status = ?,
+                        serving_user_id = ?,
+                        payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE queue_number = ?
+                ";
+                $result = $this->db->prepare($sql)->execute([$status, $userId, $status, $queueNumber]);
+            } else {
+                // For other statuses, keep the serving_user_id unchanged
+                $sql = "
+                    UPDATE queue 
+                    SET 
+                        status = ?,
+                        payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE queue_number = ?
+                ";
+                $result = $this->db->prepare($sql)->execute([$status, $status, $queueNumber]);
+            }
 
-            $result = $stmt->execute([$status, $status, $queueNumber]);
-            return $result && $stmt->rowCount() > 0;
+            return $result;
         } catch (PDOException $e) {
             error_log("Error updating queue status: " . $e->getMessage());
             return false;

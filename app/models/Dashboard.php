@@ -82,22 +82,24 @@ class Dashboard extends Model {
     }
 
     public function getActiveQueue($page = 1, $limit = 10) {
-        $offset = ($page - 1) * $limit; // Calculate the offset for pagination
+        $offset = ($page - 1) * $limit;
 
         $stmt = $this->db->prepare("
-            SELECT * FROM queue 
-            WHERE status IN ('Waiting', 'Serving', 'No Show')
+            SELECT q.*, u.first_name, u.last_name 
+            FROM queue q
+            LEFT JOIN users u ON q.serving_user_id = u.id
+            WHERE q.status IN ('Waiting', 'Serving', 'No Show')
             ORDER BY 
-                CASE status
+                CASE q.status
                     WHEN 'Serving' THEN 1
                     WHEN 'Waiting' THEN 2
                     ELSE 3
                 END,
-                CASE priority
+                CASE q.priority
                     WHEN 'Yes' THEN 1
                     ELSE 2
                 END,
-                created_at ASC
+                q.created_at ASC
             LIMIT :limit OFFSET :offset
         ");
         

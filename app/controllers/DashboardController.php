@@ -71,8 +71,11 @@ class DashboardController extends Controller {
                 $queueNumber = $_POST['queue_number'];
                 $newStatus = $_POST['status'];
                 
+                // Get the current user's ID from session
+                $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+                
                 $queueModel = $this->model('Queue');
-                $success = $queueModel->updateStatus($queueNumber, $newStatus);
+                $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId);
                 
                 if ($success && $newStatus === 'Done') {
                     // Prompt the user if they wish to proceed to payment

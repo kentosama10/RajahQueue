@@ -103,6 +103,7 @@
                                     <th class="text-center">Service</th>
                                     <th class="text-center">Priority</th>
                                     <th class="text-center">Status</th>
+                                    <th class="text-center">Served By</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -243,8 +244,19 @@
                                     ${item.priority}
                                 </span>
                             </td>
-                            <td class="text-center"><span class="status-badge status-${item.status.toLowerCase()}">${item.status}</span></td>
-                            <td class="text-center">${getActionButtons(item)}</td>
+                            <td class="text-center">
+                                <span class="badge ${getStatusBadgeClass(item.status)}">
+                                    ${item.status}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                ${item.status === 'Serving' ? 
+                                    (item.first_name ? `${item.first_name} ${item.last_name}` : 'Not assigned') : 
+                                    ''}
+                            </td>
+                            <td class="text-center">
+                                ${getActionButtons(item)}
+                            </td>
                         </tr>
                     `);
                 });
@@ -350,10 +362,10 @@
                             updatePaymentStatus(queueNumber, 'Not Required');
                         }
                     } else {
-                        alert('Failed to update status. Please try again.');
+                        alert(response.message || 'Failed to update status');
                     }
                 },
-                error: function (xhr, status, error) {
+                error: function(xhr, status, error) {
                     console.error('Error updating status:', error);
                     alert('Error updating status. Please try again.');
                 },
