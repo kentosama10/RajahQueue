@@ -94,6 +94,7 @@ class UserController extends Controller {
             if ($user && password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['role'];
+                $_SESSION['first_name'] = $user['first_name'];
 
                 if ($user['role'] == 'kiosk') {
                     header('Location: /RajahQueue/public/QueueController/index');
@@ -128,17 +129,24 @@ class UserController extends Controller {
 
     // Handle the registration request
     public function register() {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+        // Check if the required fields are set
+        if (isset($_POST['first_name'], $_POST['last_name'], $_POST['username'], $_POST['password'])) {
+            $firstName = $_POST['first_name'];
+            $lastName = $_POST['last_name'];
+            $username = $_POST['username'];
+            $password = $_POST['password'];
 
-        $userModel = $this->model('User');
-        $success = $userModel->createUser($username, $password);
+            $userModel = $this->model('User');
+            $success = $userModel->createUser($firstName, $lastName, $username, $password);
 
-        if ($success) {
-            header('Location: /RajahQueue/public/UserController/showLoginForm');
-            exit;
+            if ($success) {
+                header('Location: /RajahQueue/public/UserController/showLoginForm');
+                exit;
+            } else {
+                echo 'Registration failed';
+            }
         } else {
-            echo 'Registration failed';
+            echo 'Please fill in all fields.';
         }
     }
 }

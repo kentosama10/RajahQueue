@@ -15,54 +15,49 @@ class DashboardController extends Controller {
 
     public function getDashboardData() {
         ob_clean();
-        
+    
         try {
             $dashboardModel = $this->model('Dashboard');
             $queueModel = $this->model('Queue');
-
-            // Get the current page from the request, default to 1
+    
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-            $searchTerm = isset($_GET['search']) ? $_GET['search'] : ''; // Get search term
-
-            // Always fetch the overall stats and recent activity
+            $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
+    
             $data = [
                 'stats' => [
                     'waiting' => (int)$dashboardModel->getCountByStatus('Waiting'),
                     'serving' => (int)$dashboardModel->getCountByStatus('Serving'),
                     'completed' => (int)$dashboardModel->getCompletedToday()
                 ],
-                'recallHistory' => $dashboardModel->getRecallHistory(), // Always fetch recent activity
+                'recallHistory' => $dashboardModel->getRecallHistory(),
             ];
-
-            // If a search term is provided, fetch the filtered queue
+    
             if ($searchTerm) {
                 $data['queue'] = $dashboardModel->searchQueue($searchTerm, $page);
-                $data['totalCount'] = $dashboardModel->getSearchCount($searchTerm); // Get total count for pagination
+                $data['totalCount'] = $dashboardModel->getSearchCount($searchTerm);
             } else {
                 $data['queue'] = $dashboardModel->getActiveQueue($page);
-                $data['totalCount'] = $dashboardModel->getTotalQueueCount(); // Get total count for pagination
+                $data['totalCount'] = $dashboardModel->getTotalQueueCount();
             }
-
-            // Fetch the payment queue for completed items
-            $data['paymentQueue'] = $queueModel->getPaymentQueue(); // Fetch payment queue items
-
-            // Fetch the counter for the logged-in user
-            $userId = $_SESSION['user_id'];
+    
+            $data['paymentQueue'] = $queueModel->getPaymentQueue();
+    
+            // Fetch the counter's active user
+            $counterNumber = $_GET['counter_number'] ?? 1; // Default to counter 1 if not provided
             $userModel = $this->model('User');
-            $data['counter'] = $userModel->getCounter($userId);
-
+            $data['counters'] = $userModel->getCounter($counterNumber);
+    
             header('Content-Type: application/json');
             echo json_encode($data, JSON_PRETTY_PRINT);
             exit;
         } catch (Exception $e) {
-            // Log the error message
             error_log("Error in getDashboardData: " . $e->getMessage());
-            // Return a JSON error response
             header('Content-Type: application/json');
             echo json_encode(['error' => 'An error occurred while fetching data.']);
             exit;
         }
     }
+    
 
     public function updateStatus() {
         ob_clean();

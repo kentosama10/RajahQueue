@@ -107,11 +107,11 @@ class User extends Model
     
     
     // Create a new user with hashed password
-    public function createUser($username, $password)
+    public function createUser($firstName, $lastName, $username, $password)
     {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $this->db->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-        return $stmt->execute([$username, $hashedPassword]);
+        $stmt = $this->db->prepare("INSERT INTO users (first_name, last_name, username, password) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([$firstName, $lastName, $username, $hashedPassword]);
     }
 
 
