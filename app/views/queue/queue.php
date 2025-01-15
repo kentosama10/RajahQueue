@@ -72,7 +72,7 @@
         }
 
         .dashboard-header .logout-btn:hover {
-            color: #ffc107;
+            color: #f02127;
         }
 
         .card {
