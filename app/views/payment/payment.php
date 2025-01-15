@@ -323,6 +323,5 @@
         });
     </script>
 </body>
-
+<footer><?php include '../app/views/footer.php'; ?></footer>
 </html>
-<?php include '../app/views/footer.php'; ?>
