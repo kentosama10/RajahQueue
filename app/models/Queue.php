@@ -106,7 +106,7 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 
-    public function getActiveQueue($page = 1, $limit = 10)
+    public function getActiveQueue($page = 1, $limit = 15)
     {
         $offset = ($page - 1) * $limit; // Calculate the offset for pagination
 
