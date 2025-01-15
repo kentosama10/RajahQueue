@@ -310,9 +310,22 @@ class Queue extends Model
 
     public function getPaymentQueue()
     {
-        $stmt = $this->db->prepare("SELECT * FROM queue WHERE payment_status = 'Pending' AND status = 'Done'");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->db->prepare("
+                SELECT * FROM queue 
+                WHERE payment_status = 'Pending' 
+                AND status = 'Done'
+                AND reset_flag = 0
+                ORDER BY updated_at ASC
+            ");
+            
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch (PDOException $e) {
+            error_log("Error getting payment queue: " . $e->getMessage());
+            return [];
+        }
     }
 
     public function completePayment($queueNumber)
@@ -338,6 +351,34 @@ class Queue extends Model
     {
         $stmt = $this->db->query("SELECT * FROM queue WHERE status = 'Done' AND payment_status = 'Pending' ORDER BY updated_at ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Verifies if a queue number is valid for payment processing
+     * @param string $queueNumber The queue number to verify
+     * @return array|false Queue item data if valid, false otherwise
+     */
+    public function verifyQueueForPayment($queueNumber) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT 
+                    queue_number,
+                    status,
+                    payment_status,
+                    reset_flag
+                FROM queue 
+                WHERE queue_number = ?
+                AND status = 'Done'
+                LIMIT 1
+            ");
+            
+            $stmt->execute([$queueNumber]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+            
+        } catch (PDOException $e) {
+            error_log("Error verifying queue for payment: " . $e->getMessage());
+            return false;
+        }
     }
 
 }
