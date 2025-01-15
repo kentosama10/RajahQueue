@@ -308,40 +308,44 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 
-    public function getPaymentQueue()
-    {
+    /**
+     * Complete a payment and track the user who processed it
+     * @param string $queueNumber Queue number to complete
+     * @param int|null $userId ID of user completing the payment
+     * @return bool Success status
+     */
+    public function completePayment($queueNumber, $userId) {
         try {
-            $stmt = $this->db->prepare("
-                SELECT * FROM queue 
-                WHERE payment_status = 'Pending' 
-                AND status = 'Done'
-                AND reset_flag = 0
-                ORDER BY updated_at ASC
-            ");
-            
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-        } catch (PDOException $e) {
-            error_log("Error getting payment queue: " . $e->getMessage());
-            return [];
-        }
-    }
+            $this->db->beginTransaction();
 
-    public function completePayment($queueNumber)
-    {
-        try {
             $stmt = $this->db->prepare("
                 UPDATE queue 
                 SET 
                     payment_status = 'Completed',
+                    completed_by_user_id = :userId,
+                    payment_completed_at = CURRENT_TIMESTAMP,
                     updated_at = CURRENT_TIMESTAMP
-                WHERE queue_number = ?
+                WHERE queue_number = :queueNumber
+                AND payment_status = 'Pending'
+                AND status = 'Done'
+                AND reset_flag = 0
             ");
 
-            $result = $stmt->execute([$queueNumber]);
-            return $result && $stmt->rowCount() > 0;
+            $stmt->bindParam(':queueNumber', $queueNumber, PDO::PARAM_STR);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            
+            $success = $stmt->execute();
+            
+            if ($success && $stmt->rowCount() > 0) {
+                $this->db->commit();
+                return true;
+            }
+            
+            $this->db->rollBack();
+            return false;
+
         } catch (PDOException $e) {
+            $this->db->rollBack();
             error_log("Error completing payment: " . $e->getMessage());
             return false;
         }
@@ -378,6 +382,197 @@ class Queue extends Model
         } catch (PDOException $e) {
             error_log("Error verifying queue for payment: " . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Get count of payments by status
+     * @param string $status Payment status to count
+     * @return int Count of payments with given status
+     */
+    public function getPaymentCountByStatus($status) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as count 
+                FROM queue 
+                WHERE payment_status = ?
+                AND reset_flag = 0
+            ");
+            $stmt->execute([$status]);
+            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        } catch (PDOException $e) {
+            error_log("Error getting payment count: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get count of payments completed today
+     * @return int Count of payments completed today
+     */
+    public function getPaymentsCompletedToday() {
+        try {
+            $stmt = $this->db->query("
+                SELECT COUNT(*) as count 
+                FROM queue 
+                WHERE payment_status = 'Completed'
+                AND DATE(updated_at) = CURDATE()
+                AND reset_flag = 0
+            ");
+            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        } catch (PDOException $e) {
+            error_log("Error getting completed payments: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get paginated payment queue
+     * @param int $page Page number
+     * @param int $limit Items per page
+     * @return array Array of payment queue items
+     */
+    public function getPaymentQueue($page = 1, $limit = 10) {
+        try {
+            $offset = ($page - 1) * $limit;
+            
+            $stmt = $this->db->prepare("
+                SELECT 
+                    q.*,
+                    u.first_name,
+                    u.last_name
+                FROM queue q
+                LEFT JOIN users u ON q.serving_user_id = u.id
+                WHERE q.payment_status = 'Pending' 
+                AND q.status = 'Done'
+                AND q.reset_flag = 0
+                ORDER BY q.updated_at ASC
+                LIMIT :limit OFFSET :offset
+            ");
+            
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting payment queue: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Search payment queue
+     * @param string $searchTerm Search term
+     * @param int $page Page number
+     * @param int $limit Items per page
+     * @return array Array of matching payment queue items
+     */
+    public function searchPaymentQueue($searchTerm, $page = 1, $limit = 10) {
+        try {
+            $offset = ($page - 1) * $limit;
+            
+            $stmt = $this->db->prepare("
+                SELECT 
+                    q.*,
+                    u.first_name,
+                    u.last_name
+                FROM queue q
+                LEFT JOIN users u ON q.serving_user_id = u.id
+                WHERE (q.customer_name LIKE :searchTerm 
+                    OR q.queue_number LIKE :searchTerm)
+                AND q.payment_status = 'Pending'
+                AND q.status = 'Done'
+                AND q.reset_flag = 0
+                ORDER BY q.updated_at ASC
+                LIMIT :limit OFFSET :offset
+            ");
+            
+            $searchTerm = "%$searchTerm%";
+            $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error searching payment queue: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get total count of pending payments
+     * @return int Total count of pending payments
+     */
+    public function getTotalPendingPayments() {
+        try {
+            $stmt = $this->db->query("
+                SELECT COUNT(*) as count 
+                FROM queue 
+                WHERE payment_status = 'Pending'
+                AND status = 'Done'
+                AND reset_flag = 0
+            ");
+            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        } catch (PDOException $e) {
+            error_log("Error getting total pending payments: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get count of payment search results
+     * @param string $searchTerm Search term
+     * @return int Count of matching payment items
+     */
+    public function getPaymentSearchCount($searchTerm) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as count 
+                FROM queue 
+                WHERE (customer_name LIKE :searchTerm 
+                    OR queue_number LIKE :searchTerm)
+                AND payment_status = 'Pending'
+                AND status = 'Done'
+                AND reset_flag = 0
+            ");
+            
+            $searchTerm = "%$searchTerm%";
+            $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+            $stmt->execute();
+            
+            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        } catch (PDOException $e) {
+            error_log("Error getting payment search count: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get payment history for the current day
+     * @return array Array of payment history items
+     */
+    public function getPaymentHistory() {
+        try {
+            $stmt = $this->db->query("
+                SELECT 
+                    q.*,
+                    u.first_name,
+                    u.last_name
+                FROM queue q
+                LEFT JOIN users u ON q.completed_by_user_id = u.id
+                WHERE q.payment_status = 'Completed'
+                AND DATE(q.updated_at) = CURDATE()
+                AND q.reset_flag = 0
+                ORDER BY q.updated_at DESC
+                LIMIT 50
+            ");
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting payment history: " . $e->getMessage());
+            return [];
         }
     }
 

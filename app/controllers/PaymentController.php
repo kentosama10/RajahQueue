@@ -3,32 +3,62 @@
 require_once '../core/Controller.php';
 
 class PaymentController extends Controller {
-    /**
-     * Retrieves the current payment queue with validation
-     * @return void
-     */
-    public function getPaymentQueue() {
-        try {
-            $queueModel = $this->model('Queue');
-            // Only get active (non-reset) payment queue items
-            $data = $queueModel->getPaymentQueue();
-            
-            header('Content-Type: application/json');
-            echo json_encode($data);
-            exit;
-        } catch (Exception $e) {
-            error_log("Error fetching payment queue: " . $e->getMessage());
-            header('Content-Type: application/json');
-            echo json_encode([
-                "error" => "Failed to fetch payment queue",
-                "success" => false
-            ]);
-            exit;
-        }
+    public function __construct() {
+        $this->requireAuth(); // Ensure user is authenticated
     }
 
     public function index() {
         $this->view('payment/payment');
+    }
+
+    /**
+     * Retrieves the current payment queue with pagination and search
+     * @return void
+     */
+    public function getPaymentQueue() {
+        ob_clean();
+        
+        try {
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
+            
+            $queueModel = $this->model('Queue');
+            
+            // Get payment statistics
+            $stats = [
+                'pending' => $queueModel->getPaymentCountByStatus('Pending'),
+                'completed' => $queueModel->getPaymentsCompletedToday()
+            ];
+            
+            // Get paginated payment queue
+            if ($searchTerm) {
+                $payments = $queueModel->searchPaymentQueue($searchTerm, $page);
+                $totalCount = $queueModel->getPaymentSearchCount($searchTerm);
+            } else {
+                $payments = $queueModel->getPaymentQueue($page);
+                $totalCount = $queueModel->getTotalPendingPayments();
+            }
+            
+            $response = [
+                "success" => true,
+                "stats" => $stats,
+                "payments" => $payments,
+                "totalCount" => $totalCount,
+                "currentPage" => $page
+            ];
+            
+        } catch (Exception $e) {
+            error_log("Error fetching payment queue: " . $e->getMessage());
+            $response = [
+                "success" => false,
+                "error" => "Failed to fetch payment queue",
+                "message" => "An error occurred while fetching the payment queue"
+            ];
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
     }
 
     /**
@@ -37,6 +67,10 @@ class PaymentController extends Controller {
      */
     public function completePayment() {
         ob_clean();
+        
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
         
         $response = [
             "success" => false,
@@ -49,11 +83,17 @@ class PaymentController extends Controller {
                 throw new Exception("Invalid request method");
             }
 
+            // Check if user is logged in
+            if (!isset($_SESSION['user_id'])) {
+                throw new Exception("User not authenticated");
+            }
+
             if (!isset($_POST['queue_number'])) {
                 throw new Exception("Missing queue number parameter");
             }
 
             $queueNumber = trim($_POST['queue_number']);
+            $userId = (int)$_SESSION['user_id'];
             
             // Validate queue number format (e.g., "T-1", "V-2", etc.)
             if (!preg_match('/^[A-Z]-\d+$/', $queueNumber)) {
@@ -77,8 +117,8 @@ class PaymentController extends Controller {
                 throw new Exception("Payment has already been completed for this queue number");
             }
 
-            // Process the payment
-            $success = $queueModel->completePayment($queueNumber);
+            // Process the payment with user tracking
+            $success = $queueModel->completePayment($queueNumber, $userId);
             
             if (!$success) {
                 throw new Exception("Failed to process payment");
@@ -91,6 +131,35 @@ class PaymentController extends Controller {
             error_log("Payment completion error: " . $e->getMessage());
             $response["error"] = $e->getMessage();
             $response["message"] = "Payment processing failed: " . $e->getMessage();
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+    /**
+     * Retrieves payment history for the current day
+     * @return void
+     */
+    public function getPaymentHistory() {
+        ob_clean();
+        
+        try {
+            $queueModel = $this->model('Queue');
+            $history = $queueModel->getPaymentHistory();
+            
+            $response = [
+                "success" => true,
+                "history" => $history
+            ];
+            
+        } catch (Exception $e) {
+            error_log("Error fetching payment history: " . $e->getMessage());
+            $response = [
+                "success" => false,
+                "error" => "Failed to fetch payment history"
+            ];
         }
         
         header('Content-Type: application/json');

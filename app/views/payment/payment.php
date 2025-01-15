@@ -1,99 +1,292 @@
+<?php include '../app/views/header.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Queue - RajahQueue</title>
+    <title>Payment Dashboard - RajahQueue</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
         }
-        .queue-item {
+
+        .dashboard-header {
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, .08);
+            padding: 1rem 0;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, .05);
+        }
+
+        .dashboard-header h2 {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .payment-stats {
             background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
-            margin-bottom: 1rem;
-            padding: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
             text-align: center;
         }
-        .queue-number {
-            font-size: 1.5rem;
-            font-weight: bold;
+
+        .stats-pending {
+            border-left: 4px solid #ffc107;
         }
-        .customer-name, .service-type {
-            font-size: 1.2rem;
+
+        .stats-completed {
+            border-left: 4px solid #28a745;
         }
+
+        .payment-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+
         .loading-spinner {
             display: none;
             text-align: center;
             margin-top: 2rem;
         }
+
+        .search-container {
+            max-width: 400px;
+            margin-bottom: 1rem;
+        }
+
+        .refresh-timer {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .refresh-button {
+            padding: 0.625rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, .08);
+        }
     </style>
 </head>
+
 <body>
-    <div class="container mt-5">
-        <h2>Payment Queue</h2>
-        <div id="paymentQueue" class="row">
-            <!-- Payment queue items will be loaded here -->
+    <div class="dashboard-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Payment Dashboard</h2>
+            <div class="d-flex align-items-center gap-3">
+                <span class="refresh-timer">
+                    Auto-refresh in: <span id="countdown">15</span>s
+                </span>
+                <button class="btn btn-primary refresh-button" onclick="loadPaymentQueue()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh Now
+                    <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </div>
         </div>
+    </div>
+
+    <div class="container">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control"
+                    placeholder="Search by customer name or queue number" onkeyup="searchPayments()">
+            </div>
+        </div>
+
+        <!-- Payment Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="payment-stats stats-pending">
+                    <h4 class="mb-2">Pending Payments</h4>
+                    <h2 class="mb-0" id="pendingCount">0</h2>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="payment-stats stats-completed">
+                    <h4 class="mb-2">Completed Today</h4>
+                    <h2 class="mb-0" id="completedCount">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Queue Table -->
+        <div class="payment-card">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Queue #</th>
+                            <th class="text-center">Customer Name</th>
+                            <th class="text-center">Service Type</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentTableBody">
+                        <!-- Payment items will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+                <button class="btn btn-secondary" id="prevPage" onclick="changePage(currentPage - 1)" disabled>
+                    <i class="bi bi-chevron-left"></i> Previous
+                </button>
+                <button class="btn btn-secondary" id="nextPage" onclick="changePage(currentPage + 1)">
+                    Next <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            <span id="pageInfo" class="text-muted"></span>
+        </div>
+
+        <!-- Loading Spinner -->
         <div class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
+
+        <!-- Error Message -->
         <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        let currentPage = 1;
+        let countdownValue = 15;
+        let countdownInterval;
+
+        function startCountdown() {
+            clearInterval(countdownInterval);
+            countdownValue = 15;
+            updateCountdown();
+            countdownInterval = setInterval(() => {
+                countdownValue--;
+                updateCountdown();
+                if (countdownValue <= 0) {
+                    loadPaymentQueue();
+                }
+            }, 1000);
+        }
+
+        function updateCountdown() {
+            document.getElementById('countdown').textContent = countdownValue;
+        }
+
         function loadPaymentQueue() {
             $('.loading-spinner').show();
             $('#errorMessage').hide();
+            $('#refreshSpinner').removeClass('d-none');
+
             $.ajax({
                 url: '/RajahQueue/public/PaymentController/getPaymentQueue',
                 method: 'GET',
+                data: {
+                    page: currentPage,
+                    search: $('#searchInput').val()
+                },
                 dataType: 'json',
                 success: function (data) {
-                    updatePaymentQueue(data);
-                    $('.loading-spinner').hide();
+                    updatePaymentDashboard(data);
+                    startCountdown();
                 },
                 error: function (xhr, status, error) {
                     console.error('Error fetching payment queue data:', error);
                     $('#errorMessage').text('Failed to load payment queue. Please try again later.').show();
+                },
+                complete: function () {
                     $('.loading-spinner').hide();
+                    $('#refreshSpinner').addClass('d-none');
                 }
             });
         }
 
-        function updatePaymentQueue(data) {
-            const paymentQueue = $('#paymentQueue');
-            paymentQueue.empty(); // Clear existing items
+        function updatePaymentDashboard(data) {
+            // Update statistics
+            $('#pendingCount').text(data.stats?.pending || 0);
+            $('#completedCount').text(data.stats?.completed || 0);
 
-            if (data.length === 0) {
-                paymentQueue.append(`
-                    <div class="col-12 text-center text-muted">
-                        No customers in the payment queue.
-                    </div>
+            // Update payment table
+            const paymentTableBody = $('#paymentTableBody');
+            paymentTableBody.empty();
+
+            if (!data.payments || data.payments.length === 0) {
+                paymentTableBody.append(`
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No payments pending.</td>
+                    </tr>
                 `);
             } else {
-                data.forEach(item => {
-                    paymentQueue.append(`
-                        <div class="col-md-4">
-                            <div class="queue-item">
-                                <div class="queue-number">${item.queue_number}</div>
-                                <div class="customer-name">${item.customer_name}</div>
-                                <div class="service-type">${item.service_type}</div>
-                                <button class="btn btn-success mt-2" onclick="completePayment('${item.queue_number}')">Complete Payment</button>
-                            </div>
-                        </div>
+                data.payments.forEach(item => {
+                    paymentTableBody.append(`
+                        <tr>
+                            <td class="text-center">${item.queue_number}</td>
+                            <td class="text-center">${item.customer_name}</td>
+                            <td class="text-center">${item.service_type}</td>
+                            <td class="text-center">
+                                <span class="badge bg-warning">Pending Payment</span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-success btn-sm" onclick="completePayment('${item.queue_number}')">
+                                    <i class="bi bi-check-circle"></i> Complete Payment
+                                </button>
+                            </td>
+                        </tr>
                     `);
                 });
             }
+
+            // Update pagination
+            updatePagination(data.totalCount || 0);
+        }
+
+        function updatePagination(totalCount) {
+            const itemsPerPage = 10;
+            const totalPages = Math.ceil(totalCount / itemsPerPage);
+
+            $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
+            $('#prevPage').prop('disabled', currentPage === 1);
+            $('#nextPage').prop('disabled', currentPage === totalPages);
+        }
+
+        function changePage(newPage) {
+            currentPage = newPage;
+            loadPaymentQueue();
+        }
+
+        function searchPayments() {
+            currentPage = 1; // Reset to first page when searching
+            loadPaymentQueue();
         }
 
         function completePayment(queueNumber) {
+            if (!confirm('Are you sure you want to mark this payment as completed?')) {
+                return;
+            }
+
             $.ajax({
                 url: '/RajahQueue/public/PaymentController/completePayment',
                 method: 'POST',
@@ -103,7 +296,7 @@
                     if (response.success) {
                         loadPaymentQueue();
                     } else {
-                        alert('Failed to complete payment. Please try again.');
+                        alert(response.message || 'Failed to complete payment. Please try again.');
                     }
                 },
                 error: function (xhr, status, error) {
@@ -119,4 +312,6 @@
         });
     </script>
 </body>
+
 </html>
+<?php include '../app/views/footer.php'; ?>

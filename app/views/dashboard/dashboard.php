@@ -17,18 +17,17 @@
 
 <body>
     <div class="dashboard-header">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 class="mb-0">Queue Dashboard</h2>
-                <div class="d-flex align-items-center gap-3">
-                    <span class="refresh-timer">
-                        Auto-refresh in: <span id="countdown">15</span>s
-                    </span>
-                    <button class="btn btn-primary refresh-button" onclick="refreshDashboard()">
-                        <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                        <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    </button>
-                </div>
+        <div class="container d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Queue Dashboard</h2>
+            <div class="d-flex align-items-center gap-3">
+                <span class="refresh-timer">
+                    Auto-refresh in: <span id="countdown">15</span>s
+                </span>
+                <button class="btn btn-primary refresh-button" onclick="refreshDashboard()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh Now
+                    <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status"
+                        aria-hidden="true"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -46,21 +45,15 @@
                                 <span class="input-group-text" id="search-addon">
                                     <i class="bi bi-search"></i>
                                 </span>
-                                <input type="text" 
-                                       id="searchInput" 
-                                       class="form-control" 
-                                       placeholder="Search by customer name or queue number" 
-                                       onkeyup="searchQueue()" 
-                                       aria-label="Search" 
-                                       aria-describedby="search-addon">
+                                <input type="text" id="searchInput" class="form-control"
+                                    placeholder="Search by customer name or queue number" onkeyup="searchQueue()"
+                                    aria-label="Search" aria-describedby="search-addon">
                             </div>
                         </div>
-                        
+
                         <!-- Counter Dropdown -->
                         <div class="counter-container">
-                            <select id="counterSelect" 
-                                    class="counter-select" 
-                                    onchange="updateUserCounter()">
+                            <select id="counterSelect" class="counter-select" onchange="updateUserCounter()">
                                 <option value="" disabled selected>Choose Counter</option>
                                 <option value="release">Release Counter</option>
                                 <option value="1">Counter 1</option>
@@ -257,9 +250,9 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                ${item.status === 'Serving' ? 
-                                    (item.first_name ? `${item.first_name} ${item.last_name}` : 'Not assigned') : 
-                                    ''}
+                                ${item.status === 'Serving' ?
+                            (item.first_name ? `${item.first_name} ${item.last_name}` : 'Not assigned') :
+                            ''}
                             </td>
                             <td class="text-center">
                                 ${getActionButtons(item)}
@@ -372,7 +365,7 @@
                         alert(response.message || 'Failed to update status');
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error updating status:', error);
                     alert('Error updating status. Please try again.');
                 },
@@ -563,8 +556,8 @@
             $.ajax({
                 url: "/RajahQueue/public/UserController/updateCounter",
                 method: "POST",
-                data: { 
-                    counter_number: isReleasingCounter ? null : selectedCounter 
+                data: {
+                    counter_number: isReleasingCounter ? null : selectedCounter
                 },
                 success: function (response) {
                     try {
@@ -607,7 +600,7 @@
                     try {
                         const data = typeof response === 'string' ? JSON.parse(response) : response;
                         const select = document.getElementById("counterSelect");
-                        
+
                         // If user has an assigned counter, select it
                         if (data.counter_number) {
                             select.value = data.counter_number;
@@ -625,7 +618,7 @@
         }
 
         // Add event listener for counter select changes
-        document.getElementById("counterSelect").addEventListener("change", function(e) {
+        document.getElementById("counterSelect").addEventListener("change", function (e) {
             const selectedValue = e.target.value;
             if (selectedValue && selectedValue !== "release") {
                 // Check if counter is already assigned
@@ -633,7 +626,7 @@
                     url: "/RajahQueue/public/UserController/checkCounterAvailability",
                     method: "POST",
                     data: { counter_number: selectedValue },
-                    success: function(response) {
+                    success: function (response) {
                         try {
                             const data = typeof response === 'string' ? JSON.parse(response) : response;
                             if (!data.available) {
@@ -649,7 +642,7 @@
                             refreshCounterSelect();
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         console.error("Error checking counter availability:", error);
                         alert("An error occurred while checking counter availability.");
                         refreshCounterSelect();
