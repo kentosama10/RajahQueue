@@ -4,9 +4,14 @@ body {
 }
 .dashboard-header {
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
-    padding: 1rem 0;
-    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,.08);
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+}
+.dashboard-header h2 {
+    font-weight: 600;
+    color: #2c3e50;
 }
 .queue-card {
     background-color: #fff;
@@ -29,7 +34,7 @@ body {
 }
 .status-waiting { background-color: #ffc107; color: #000; }
 .status-serving { background-color: #0d6efd; color: #fff; }
-.status-done { background-color: #198754; color: #fff; }
+.status-done { background-color: #00ff88; color: #fff; }
 .status-skipped { background-color: #dc3545; color: #fff; }
 .table th { 
     background-color: #f8f9fa;
@@ -37,7 +42,8 @@ body {
 }
 .refresh-timer {
     font-size: 0.9rem;
-    color: #6c757d;
+    color: #64748b;
+    font-weight: 500;
 }
 .status-no-show {
     background-color: #ffc107;
@@ -108,4 +114,60 @@ body {
 }
 #prevPage:hover, #nextPage:hover {
     background-color: #e2e6ea;
+}
+.controls-wrapper {
+    background-color: #fff;
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.04);
+    margin-bottom: 1.5rem;
+}
+.search-container {
+    position: relative;
+    flex: 1;
+    max-width: 500px;
+}
+.search-container .input-group {
+    max-width: 100%;
+}
+.search-container .input-group-text {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-right: none;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+.search-container .form-control {
+    border: 1px solid #e2e8f0;
+    padding: 0.625rem 1rem;
+    font-size: 0.95rem;
+}
+.search-container .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+.counter-container {
+    min-width: 200px;
+}
+.counter-select {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+.counter-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+.refresh-button {
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.refresh-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,.08);
 }

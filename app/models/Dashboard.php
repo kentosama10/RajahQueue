@@ -30,6 +30,7 @@ class Dashboard extends Model {
             FROM queue 
             WHERE status IN ('No Show', 'Recalled', 'Serving', 'Done', 'Skipped')
             AND DATE(updated_at) = CURDATE()
+            AND reset_flag = 0
             ORDER BY updated_at DESC
             LIMIT 10
         ");
@@ -43,6 +44,7 @@ class Dashboard extends Model {
             SELECT * FROM queue 
             WHERE (customer_name LIKE :searchTerm OR queue_number LIKE :searchTerm)
             AND status IN ('Waiting', 'Serving', 'No Show', 'Recalled')
+            AND reset_flag = 0
             ORDER BY 
                 CASE status
                     WHEN 'Serving' THEN 1
@@ -72,6 +74,7 @@ class Dashboard extends Model {
             SELECT COUNT(*) as count FROM queue 
             WHERE (customer_name LIKE :searchTerm OR queue_number LIKE :searchTerm)
             AND status IN ('Waiting', 'Serving', 'No Show')
+            AND reset_flag = 0
         ");
         
         $searchTerm = "%$searchTerm%"; // Prepare the search term for LIKE
@@ -94,6 +97,7 @@ class Dashboard extends Model {
             LEFT JOIN users u ON q.serving_user_id = u.id
             LEFT JOIN counters c ON c.active_user_id = u.id
             WHERE q.status IN ('Waiting', 'Serving', 'No Show')
+            AND q.reset_flag = 0
             ORDER BY 
                 CASE q.status
                     WHEN 'Serving' THEN 1
@@ -116,7 +120,12 @@ class Dashboard extends Model {
     }
 
     public function getTotalQueueCount() {
-        $stmt = $this->db->query("SELECT COUNT(*) as count FROM queue WHERE status IN ('Waiting', 'Serving')");
+        $stmt = $this->db->query("
+            SELECT COUNT(*) as count 
+            FROM queue 
+            WHERE status IN ('Waiting', 'Serving')
+            AND reset_flag = 0
+        ");
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 }

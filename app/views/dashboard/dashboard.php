@@ -20,14 +20,13 @@
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <h2 class="mb-0">Queue Dashboard</h2>
-                <div class="d-flex align-items-center">
-                    <span class="refresh-timer me-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="refresh-timer">
                         Auto-refresh in: <span id="countdown">15</span>s
                     </span>
-                    <button class="btn btn-primary me-3" onclick="refreshDashboard()">
+                    <button class="btn btn-primary refresh-button" onclick="refreshDashboard()">
                         <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                        <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status"
-                            aria-hidden="true"></span>
+                        <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
                 </div>
             </div>
@@ -39,36 +38,44 @@
         <div class="row">
             <!-- Main Queue Content -->
             <div class="col-lg-9">
-                <div class="mb-3 d-flex align-items-center gap-3">
-                    <!-- Search Bar -->
-                    <div class="input-group me-3" style="flex: 1;">
-                        <span class="input-group-text" id="search-addon">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" id="searchInput" class="form-control"
-                            placeholder="Search by customer name or queue number" onkeyup="searchQueue()"
-                            aria-label="Search" aria-describedby="search-addon"
-                            style="border: 1px solid #ced4da; border-radius: 0.25rem;">
+                <div class="controls-wrapper">
+                    <div class="d-flex align-items-center gap-4">
+                        <!-- Search Bar -->
+                        <div class="search-container">
+                            <div class="input-group">
+                                <span class="input-group-text" id="search-addon">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" 
+                                       id="searchInput" 
+                                       class="form-control" 
+                                       placeholder="Search by customer name or queue number" 
+                                       onkeyup="searchQueue()" 
+                                       aria-label="Search" 
+                                       aria-describedby="search-addon">
+                            </div>
+                        </div>
+                        
+                        <!-- Counter Dropdown -->
+                        <div class="counter-container">
+                            <select id="counterSelect" 
+                                    class="counter-select" 
+                                    onchange="updateUserCounter()">
+                                <option value="" disabled selected>Choose Counter</option>
+                                <option value="release">Release Counter</option>
+                                <option value="1">Counter 1</option>
+                                <option value="2">Counter 2</option>
+                                <option value="3">Counter 3</option>
+                                <option value="4">Counter 4</option>
+                                <option value="5">Counter 5</option>
+                                <option value="6">Counter 6</option>
+                                <option value="7">Counter 7</option>
+                                <option value="8">Counter 8</option>
+                                <option value="9">Counter 9</option>
+                                <option value="10">Counter 10</option>
+                            </select>
+                        </div>
                     </div>
-                    <!-- Counter Dropdown -->
-                    <div>
-                        <select id="counterSelect" class="form-select form-select-sm" onchange="updateUserCounter()"
-                            style="width: 160px;">
-                            <option value="" disabled selected>Choose Counter</option>
-                            <option value="release">Release Counter</option>
-                            <option value="1">Counter 1</option>
-                            <option value="2">Counter 2</option>
-                            <option value="3">Counter 3</option>
-                            <option value="4">Counter 4</option>
-                            <option value="5">Counter 5</option>
-                            <option value="6">Counter 6</option>
-                            <option value="7">Counter 7</option>
-                            <option value="8">Counter 8</option>
-                            <option value="9">Counter 9</option>
-                            <option value="10">Counter 10</option>
-                        </select>
-                    </div>
-
                 </div>
                 <!-- Queue Statistics -->
                 <div class="row mb-4">
