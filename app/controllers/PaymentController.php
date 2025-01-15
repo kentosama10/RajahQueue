@@ -166,4 +166,62 @@ class PaymentController extends Controller {
         echo json_encode($response);
         exit;
     }
+
+    /**
+     * Handles payment cancellation
+     * @return void
+     */
+    public function cancelPayment() {
+        ob_clean();
+        
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        $response = [
+            "success" => false,
+            "message" => "",
+            "error" => null
+        ];
+        
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Invalid request method");
+            }
+
+            if (!isset($_SESSION['user_id'])) {
+                throw new Exception("User not authenticated");
+            }
+
+            if (!isset($_POST['queue_number'])) {
+                throw new Exception("Missing queue number parameter");
+            }
+
+            $queueNumber = trim($_POST['queue_number']);
+            $userId = (int)$_SESSION['user_id'];
+            
+            if (!preg_match('/^[A-Z]-\d+$/', $queueNumber)) {
+                throw new Exception("Invalid queue number format");
+            }
+
+            $queueModel = $this->model('Queue');
+            $success = $queueModel->cancelPayment($queueNumber, $userId);
+            
+            if (!$success) {
+                throw new Exception("Failed to cancel payment");
+            }
+
+            $response["success"] = true;
+            $response["message"] = "Payment cancelled successfully";
+
+        } catch (Exception $e) {
+            error_log("Payment cancellation error: " . $e->getMessage());
+            $response["error"] = $e->getMessage();
+            $response["message"] = "Payment cancellation failed: " . $e->getMessage();
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
 }

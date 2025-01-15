@@ -18,7 +18,7 @@
         .dashboard-header {
             background-color: #fff;
             box-shadow: 0 4px 6px rgba(0, 0, 0, .08);
-            padding: 1rem 0;
+            padding: 0.5rem 0;
             margin-bottom: 0.5rem;
             border-bottom: 1px solid rgba(0, 0, 0, .05);
         }
@@ -55,12 +55,6 @@
             background-color: #f8f9fa;
         }
 
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            margin-top: 2rem;
-        }
-
         .search-container {
             max-width: 400px;
             margin-bottom: 1rem;
@@ -95,7 +89,6 @@
                 </span>
                 <button class="btn btn-primary refresh-button" onclick="loadPaymentQueue()">
                     <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                    <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
                 </button>
             </div>
         </div>
@@ -138,6 +131,7 @@
                             <th class="text-center">Queue #</th>
                             <th class="text-center">Customer Name</th>
                             <th class="text-center">Service Type</th>
+                            <th class="text-center">Served By</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Actions</th>
                         </tr>
@@ -160,13 +154,6 @@
                 </button>
             </div>
             <span id="pageInfo" class="text-muted"></span>
-        </div>
-
-        <!-- Loading Spinner -->
-        <div class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
         </div>
 
         <!-- Error Message -->
@@ -197,9 +184,7 @@
         }
 
         function loadPaymentQueue() {
-            $('.loading-spinner').show();
             $('#errorMessage').hide();
-            $('#refreshSpinner').removeClass('d-none');
 
             $.ajax({
                 url: '/RajahQueue/public/PaymentController/getPaymentQueue',
@@ -217,10 +202,6 @@
                     console.error('Error fetching payment queue data:', error);
                     $('#errorMessage').text('Failed to load payment queue. Please try again later.').show();
                 },
-                complete: function () {
-                    $('.loading-spinner').hide();
-                    $('#refreshSpinner').addClass('d-none');
-                }
             });
         }
 
@@ -246,13 +227,19 @@
                             <td class="text-center">${item.queue_number}</td>
                             <td class="text-center">${item.customer_name}</td>
                             <td class="text-center">${item.service_type}</td>
+                            <td class="text-center">${item.first_name ? `${item.first_name} ${item.last_name}` : 'Not assigned'}</td>
                             <td class="text-center">
                                 <span class="badge bg-warning">Pending Payment</span>
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-success btn-sm" onclick="completePayment('${item.queue_number}')">
-                                    <i class="bi bi-check-circle"></i> Complete Payment
-                                </button>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-success btn-sm" onclick="completePayment('${item.queue_number}')">
+                                        <i class="bi bi-check-circle"></i> Complete
+                                    </button>
+                                    <button class="btn btn-danger btn-sm ms-2" onclick="cancelPayment('${item.queue_number}')">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `);
@@ -302,6 +289,30 @@
                 error: function (xhr, status, error) {
                     console.error('Error completing payment:', error);
                     alert('Error completing payment. Please try again.');
+                }
+            });
+        }
+
+        function cancelPayment(queueNumber) {
+            if (!confirm('Are you sure you want to cancel this payment?')) {
+                return;
+            }
+
+            $.ajax({
+                url: '/RajahQueue/public/PaymentController/cancelPayment',
+                method: 'POST',
+                data: { queue_number: queueNumber },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        loadPaymentQueue();
+                    } else {
+                        alert(response.message || 'Failed to cancel payment. Please try again.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error canceling payment:', error);
+                    alert('Error canceling payment. Please try again.');
                 }
             });
         }

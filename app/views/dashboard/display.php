@@ -13,11 +13,12 @@
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
+            padding: 20px;
         }
 
         .display-header {
             background-color: #343a40;
-            color: white;
+            color: #fff;
             padding: 1rem 0;
             text-align: center;
             margin-bottom: 20px;
@@ -25,73 +26,55 @@
         }
 
         .queue-item {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+            padding: 0;
             transition: transform 0.2s ease;
+            overflow: hidden;
         }
 
         .queue-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .15);
         }
 
         .counter-header {
             background-color: #0d6efd;
             color: white;
-            padding: 10px 0;
-            border-radius: 10px 10px 0 0;
-            font-size: 1.5rem;
+            border-radius: 8px 8px 0 0;
         }
 
         .queue-number {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: bold;
             color: #0d6efd;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 768px) {
-            .queue-number {
-                font-size: 2rem;
-            }
-
-            .counter-header {
-                font-size: 1.2rem;
-            }
+            padding: 0 15px;
         }
     </style>
 </head>
 
 <body>
-
-
-    <div class="container">
-        <!-- Header: Currently Serving -->
-        <div class="display-header mt-5">
-            <h2>Currently Serving</h2>
-        </div>
+    <div class="display-header">
+        <h2>Currently Serving</h2>
+    </div>
+    <div class="container mt-5">
 
         <div id="servingQueue" class="row">
-            <!-- Queue items dynamically loaded here -->
+            <!-- Serving queue items will be loaded here -->
         </div>
-
-        <!-- Header: Continuing Clients -->
         <div class="display-header mt-5">
             <h2>Continuing Clients</h2>
         </div>
         <div id="paymentQueue" class="row">
-            <!-- Payment queue items dynamically loaded here -->
+            <!-- Payment queue items will be loaded here -->
         </div>
     </div>
 
     <script>
-        // Refresh and update display
         function refreshDisplay() {
             $.ajax({
                 url: '/RajahQueue/public/DashboardController/getDashboardData',
@@ -106,42 +89,54 @@
             });
         }
 
-        // Update the display with serving and payment queue data
         function updateDisplay(data) {
             const servingQueue = $('#servingQueue');
             servingQueue.empty(); // Clear existing items
 
-            if (!data.queue || data.queue.length === 0) {
+            if (data.queue.length === 0) {
                 servingQueue.append(`
                     <div class="col-12 text-center text-muted">
                         <h3>No customers are currently being served.</h3>
                     </div>
                 `);
             } else {
-                const groupedByCounter = {};
+                // Group serving customers by counter
+                const servingByCounter = {};
+                
                 data.queue.forEach(item => {
                     if (item.status.toLowerCase() === 'serving') {
-                        groupedByCounter[item.counter_number] = item.queue_number;
+                        if (item.counter_number) {
+                            if (!servingByCounter[item.counter_number]) {
+                                servingByCounter[item.counter_number] = [];
+                            }
+                            servingByCounter[item.counter_number].push(item);
+                        }
                     }
                 });
 
-                // Display queue items by counter
-                Object.keys(groupedByCounter).sort((a, b) => parseInt(a) - parseInt(b)).forEach(counterNumber => {
-                    servingQueue.append(`
-                        <div class="col-md-4 mb-4">
-                            <div class="queue-item text-center">
-                                <div class="counter-header">
-                                    Counter ${counterNumber}
+                // Sort counters numerically
+                const sortedCounters = Object.keys(servingByCounter).sort((a, b) => parseInt(a) - parseInt(b));
+
+                sortedCounters.forEach(counterNumber => {
+                    const items = servingByCounter[counterNumber];
+                    items.forEach(item => {
+                        servingQueue.append(`
+                            <div class="col-md-4 mb-4">
+                                <div class="queue-item text-center">
+                                    <div class="counter-header bg-primary text-white py-2 mb-3">
+                                        <h4 class="mb-0">Counter ${item.counter_number}</h4>
+                                    </div>
+                                    <div class="queue-number mb-2">${item.queue_number}</div>
                                 </div>
-                                <div class="queue-number mt-3">${groupedByCounter[counterNumber]}</div>
                             </div>
-                        </div>
-                    `);
+                        `);
+                    });
                 });
             }
 
+            // Update the payment queue section
             const paymentQueue = $('#paymentQueue');
-            paymentQueue.empty(); // Clear existing items
+            paymentQueue.empty();
 
             if (!data.paymentQueue || data.paymentQueue.length === 0) {
                 paymentQueue.append(`
@@ -154,10 +149,8 @@
                     paymentQueue.append(`
                         <div class="col-md-4 mb-4">
                             <div class="queue-item text-center">
-                                <div class="counter-header">
-                                    Queue
-                                </div>
-                                <div class="queue-number mt-3">${item.queue_number}</div>
+                                <div class="queue-number mb-2">${item.queue_number}</div>
+                                <div class="customer-name">${item.customer_name}</div>
                             </div>
                         </div>
                     `);
@@ -165,10 +158,10 @@
             }
         }
 
-        // Initial load and refresh every 15 seconds
+        // Initial load
         $(document).ready(function () {
             refreshDisplay();
-            setInterval(refreshDisplay, 15000);
+            setInterval(refreshDisplay, 15000); // Refresh every 15 seconds
         });
     </script>
 </body>

@@ -1,39 +1,3 @@
-<?php if (isset($_SESSION['success_message'])):
-    $queueNumber = $_SESSION['success_message']['queue_number'];
-    unset($_SESSION['success_message']); // Clear session after showing the message
-    ?>
-    <!-- Success Modal -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0">
-                <!-- Modal Header -->
-                <div class="modal-header text-white" style="background-color: #F08221;">
-                    <h5 class="modal-title fw-bold" id="successModalLabel">Queue Added Successfully!</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <!-- Modal Body -->
-                <div class="modal-body text-center">
-                    <h3 class="fw-bold" style="color: #F08221;">Your Queue Number</h3>
-                    <p class="display-4 fw-bold" style="color: #2A4D69;"><?= $queueNumber; ?></p>
-                    <p class="text-muted">Please wait for your turn. Thank you!</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var successModal = new bootstrap.Modal(document.getElementById('successModal'), {
-                backdrop: 'static', // Prevent closing by clicking outside
-                keyboard: false     // Prevent closing with the escape key
-            });
-            successModal.show();
-        });
-    </script>
-<?php endif; ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -97,7 +61,7 @@
         }
 
         .btn-primary:hover {
-            background-color: #2A4D69;
+            background-color: #CE007C;
             border-color: #0056b3;
         }
 
@@ -221,6 +185,41 @@
             });
         });
     </script>
+
+<?php if (isset($_SESSION['success_message'])):
+    $queueNumber = $_SESSION['success_message']['queue_number'];
+    unset($_SESSION['success_message']); // Clear session after showing the message
+    ?>
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <!-- Modal Header -->
+                <div class="modal-header text-white" style="background-color: #F08221;">
+                    <h5 class="modal-title fw-bold" id="successModalLabel">Queue Added Successfully!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body text-center">
+                    <h3 class="fw-bold" style="color: #F08221;">Your Queue Number</h3>
+                    <p class="display-4 fw-bold" style="color: #CE007C;"><?= $queueNumber; ?></p>
+                    <p class="text-muted">Please wait for your turn. Thank you!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'), {
+                backdrop: 'static', // Prevent closing by clicking outside
+                keyboard: false     // Prevent closing with the escape key
+            });
+            successModal.show();
+        });
+    </script>
+<?php endif; ?>
 </body>
 
 </html>

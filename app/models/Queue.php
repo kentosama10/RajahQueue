@@ -576,4 +576,47 @@ class Queue extends Model
         }
     }
 
+    /**
+     * Cancel a payment and track the user who cancelled it
+     * @param string $queueNumber Queue number to cancel
+     * @param int|null $userId ID of user cancelling the payment
+     * @return bool Success status
+     */
+    public function cancelPayment($queueNumber, $userId) {
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare("
+                UPDATE queue 
+                SET 
+                    payment_status = 'Cancelled',
+                    completed_by_user_id = :userId,
+                    payment_completed_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE queue_number = :queueNumber
+                AND payment_status = 'Pending'
+                AND status = 'Done'
+                AND reset_flag = 0
+            ");
+
+            $stmt->bindParam(':queueNumber', $queueNumber, PDO::PARAM_STR);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            
+            $success = $stmt->execute();
+            
+            if ($success && $stmt->rowCount() > 0) {
+                $this->db->commit();
+                return true;
+            }
+            
+            $this->db->rollBack();
+            return false;
+
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            error_log("Error cancelling payment: " . $e->getMessage());
+            return false;
+        }
+    }
+
 }
