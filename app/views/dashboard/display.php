@@ -141,25 +141,24 @@
             background: linear-gradient(135deg, #e9ecef, #dee2e6);
         }
 
-        .no-data-animation {
-            max-width: 250px;
-            width: 100%;
-            animation: float 3s ease-in-out infinite;
-            margin: 0 auto;
-            display: block;
+        .no-data-translate {
+            opacity: 0;
+            transform: translateY(20px);
+            /* Start from below */
+            animation: translateIn 0.5s forwards;
         }
 
-        @keyframes float {
-            0% {
-                transform: translateY(0px);
+        @keyframes translateIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+                /* Start from below */
             }
 
-            50% {
-                transform: translateY(-15px);
-            }
-
-            100% {
-                transform: translateY(0px);
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                /* End at original position */
             }
         }
     </style>
@@ -312,74 +311,84 @@
 
             return { allItems: queue, items, nextPage };
         }
-
         function renderQueue(queueElement, items, previousData, animationClass) {
             const fragment = document.createDocumentFragment();
 
-            // Find existing items based on queue_number
-            const existingItems = previousData.map(prev => prev.queue_number);
+            if (items.length === 0) {
+                // Show fallback animation when no data is available
+                queueElement.empty();
+                queueElement.append(`
+            <div class="col-12 text-center mt-5 no-data-fade-in">
+                <h3 class="mt-3 text-muted">No customers are currently being served.</h3>
+            </div>
+        `);
+            } else {
+                // Render items with transitions for new data
+                const existingItems = previousData.map(prev => prev.queue_number);
 
-            items.forEach((item, index) => {
-                const isNew = !existingItems.includes(item.queue_number); // Check if item is new
+                items.forEach((item, index) => {
+                    const isNew = !existingItems.includes(item.queue_number);
 
-                const div = document.createElement('div');
-                div.className = `col-md-4 mb-4 ${isNew ? `animate__animated ${animationClass}` : ''}`;
-                div.style.animationDelay = isNew ? `${index * 0.1}s` : ''; // Set animation delay for new items
-                div.innerHTML = `
-                    <div class="queue-item text-center">
-                        <div class="counter-header">
-                            <div class="status-indicator bg-success"></div>
-                            <h4 class="mb-0">Counter ${item.counter_number || 'N/A'}</h4>
-                        </div>
-                        <div class="queue-number">${item.queue_number}</div>
+                    const div = document.createElement('div');
+                    div.className = `col-md-4 mb-4 ${isNew ? `animate__animated ${animationClass}` : ''}`;
+                    div.style.animationDelay = isNew ? `${index * 0.1}s` : '';
+                    div.innerHTML = `
+                <div class="queue-item text-center">
+                    <div class="counter-header">
+                        <div class="status-indicator bg-success"></div>
+                        <h4 class="mb-0">Counter ${item.counter_number || 'N/A'}</h4>
                     </div>
-                `;
+                    <div class="queue-number">${item.queue_number}</div>
+                </div>
+            `;
 
-                fragment.appendChild(div);
-            });
+                    fragment.appendChild(div);
+                });
 
-            // Clear previous items and append new content
-            queueElement.empty();
-            queueElement.append(fragment);
+                queueElement.empty();
+                queueElement.append(fragment);
+            }
         }
+
 
 
         function renderPaymentQueue(paymentQueue, items, previousData) {
             const fragment = document.createDocumentFragment();
 
-            // Find existing items based on queue_number
-            const existingItems = previousData.map(prev => prev.queue_number);
-
-            // Apply fade-out to existing items before replacing
-            const existingElements = paymentQueue.children();
-            existingElements.each(function() {
-                $(this).addClass('fade-out'); // Use jQuery to add the class
-            });
-
-            setTimeout(() => {
-                paymentQueue.empty(); // Clear after fade-out
+            if (items.length === 0) {
+                // Show fallback animation when no data is available
+                paymentQueue.empty();
+                paymentQueue.append(`
+            <div class="col-12 text-center mt-5 no-data-fade-in">
+                <h3 class="mt-3 text-muted">No pending for payments.</h3>
+            </div>
+        `);
+            } else {
+                // Render items with transitions for new data
+                const existingItems = previousData.map(prev => prev.queue_number);
 
                 items.forEach((item, index) => {
-                    const isNew = !existingItems.includes(item.queue_number); // Check if item is new
+                    const isNew = !existingItems.includes(item.queue_number);
 
                     const div = document.createElement('div');
                     div.className = `col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}`;
                     div.style.animationDelay = isNew ? `${index * 0.1}s` : '';
                     div.innerHTML = `
-                        <div class="queue-item text-center">
-                            <div class="queue-number">
-                                <i class="bi bi-credit-card me-2"></i>${item.queue_number}
-                            </div>
-                        </div>
-                    `;
+                <div class="queue-item text-center">
+                    <div class="queue-number">
+                        <i class="bi bi-credit-card me-2"></i>${item.queue_number}
+                    </div>
+                </div>
+            `;
 
                     fragment.appendChild(div);
                 });
 
-                // Append new content
+                paymentQueue.empty();
                 paymentQueue.append(fragment);
-            }, 500); // Matches fade-out duration
+            }
         }
+
 
 
         function showError(message) {
