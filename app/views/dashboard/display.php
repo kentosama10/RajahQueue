@@ -9,6 +9,7 @@
     <link rel="icon" href="/RajahQueue/app/assets/images/RTC LOGO 2017 - Vector-02-ORB.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -101,6 +102,28 @@
 
         #paymentQueue .queue-item:hover {
             background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        }
+
+        .no-data-animation {
+            max-width: 250px;
+            width: 100%;
+            animation: float 3s ease-in-out infinite;
+            margin: 0 auto;
+            display: block;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
         }
     </style>
 </head>
@@ -235,23 +258,36 @@
         }
 
         function renderQueue(queueElement, items, previousData, animationClass, currentPage) {
-            if (JSON.stringify(items) !== JSON.stringify(previousData)) {
+            if (items.length === 0) {
+                // If no data, display cartoon animation for "No customers being served"
+                queueElement.fadeOut(300, function () {
+                    queueElement.empty().append(`
+                <div class="col-12 text-center mt-5 animate__animated animate__bounceIn">
+                    <img src="/RajahQueue/app/assets/svg/waiting-svgrepo-com.svg" alt="No customers being served" class="no-data-animation">
+
+                    <h3 class="mt-3 text-muted">No customers are currently being served.</h3>
+                </div>
+            `);
+                    queueElement.fadeIn(300);
+                });
+            } else if (JSON.stringify(items) !== JSON.stringify(previousData)) {
+                // If data exists and has changed, render items with animation
                 queueElement.fadeOut(300, function () {
                     queueElement.empty();
                     items.forEach((item, index) => {
                         const isNew = !previousData.some(prev => prev.queue_number === item.queue_number);
                         queueElement.append(`
-                        <div class="col-md-4 mb-4 ${isNew ? `animate__animated ${animationClass}` : ''}" 
-                             style="${isNew ? `animation-delay: ${index * 0.1}s` : ''}">
-                            <div class="queue-item text-center">
-                                <div class="counter-header">
-                                    <div class="status-indicator bg-success"></div>
-                                    <h4 class="mb-0">Counter ${item.counter_number || 'N/A'}</h4>
-                                </div>
-                                <div class="queue-number">${item.queue_number}</div>
+                    <div class="col-md-4 mb-4 ${isNew ? `animate__animated ${animationClass}` : ''}" 
+                         style="${isNew ? `animation-delay: ${index * 0.1}s` : ''}">
+                        <div class="queue-item text-center">
+                            <div class="counter-header">
+                                <div class="status-indicator bg-success"></div>
+                                <h4 class="mb-0">Counter ${item.counter_number || 'N/A'}</h4>
                             </div>
+                            <div class="queue-number">${item.queue_number}</div>
                         </div>
-                    `);
+                    </div>
+                `);
                     });
                     queueElement.fadeIn(300);
                 });
@@ -259,26 +295,39 @@
         }
 
         function renderPaymentQueue(paymentQueue, items, previousData, currentPage) {
-            if (JSON.stringify(items) !== JSON.stringify(previousData)) {
+            if (items.length === 0) {
+                // If no data, display cartoon animation for "No pending payments"
+                paymentQueue.fadeOut(300, function () {
+                    paymentQueue.empty().append(`
+                <div class="col-12 text-center mt-5 animate__animated animate__fadeIn">
+                    <img src="/RajahQueue/app/assets/svg/payment-svgrepo-com.svg" alt="No pending payments" class="no-data-animation">
+                    <h3 class="mt-3 text-muted">No pending for payments.</h3>
+                </div>
+            `);
+                    paymentQueue.fadeIn(300);
+                });
+            } else if (JSON.stringify(items) !== JSON.stringify(previousData)) {
+                // If data exists and has changed, render items with animation
                 paymentQueue.fadeOut(300, function () {
                     paymentQueue.empty();
                     items.forEach((item, index) => {
                         const isNew = !previousData.some(prev => prev.queue_number === item.queue_number);
                         paymentQueue.append(`
-                        <div class="col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}" 
-                             style="${isNew ? `animation-delay: ${index * 0.1}s` : ''}">
-                            <div class="queue-item text-center">
-                                <div class="queue-number">
-                                    <i class="bi bi-credit-card me-2"></i>${item.queue_number}
-                                </div>
+                    <div class="col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}" 
+                         style="${isNew ? `animation-delay: ${index * 0.1}s` : ''}">
+                        <div class="queue-item text-center">
+                            <div class="queue-number">
+                                <i class="bi bi-credit-card me-2"></i>${item.queue_number}
                             </div>
                         </div>
-                    `);
+                    </div>
+                `);
                     });
                     paymentQueue.fadeIn(300);
                 });
             }
         }
+
 
         function showError(message) {
             const errorDiv = document.createElement('div');
