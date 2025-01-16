@@ -432,7 +432,7 @@ class Queue extends Model
      * @param int $limit Items per page
      * @return array Array of payment queue items
      */
-    public function getPaymentQueue($page = 1, $limit = 10) {
+    public function getPaymentQueue($page = 1, $limit = 15) {
         try {
             $offset = ($page - 1) * $limit;
             
