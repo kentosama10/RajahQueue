@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+
     <style>
         :root {
             --primary-color: #F08221;
@@ -23,7 +23,7 @@
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
-            padding: 20px;
+            padding: 10px;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -43,9 +43,9 @@
             border-radius: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
             padding: 0;
-            transition: all var(--transition-speed) ease;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
             overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.1);
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .queue-item:hover {
@@ -65,38 +65,13 @@
             font-weight: bold;
             color: var(--secondary-color);
             padding: 0.5rem 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .clock-display {
             font-size: 1.5rem;
             color: #fff;
-            margin-bottom: 1rem;
-        }
-
-        .refresh-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 20px;
-            border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 0;
         }
 
         .dashboard-layout {
@@ -106,7 +81,8 @@
 
         .dashboard-column {
             flex: 1;
-            min-width: 0; /* Prevents flex items from overflowing */
+            min-width: 0;
+            /* Prevents flex items from overflowing */
         }
 
         .queue-section {
@@ -147,7 +123,7 @@
             <!-- Continuing Clients Column -->
             <div class="dashboard-column">
                 <div class="display-header">
-                    <h2><i class="bi bi-arrow-repeat me-2"></i>Continuing Clients</h2>
+                    <h2><i class="bi bi-credit-card me-2"></i>For Payment</h2>
                 </div>
                 <div id="paymentQueue" class="row">
                     <!-- Payment queue items will be loaded here -->
@@ -156,11 +132,13 @@
         </div>
     </div>
 
-    <div class="refresh-indicator" id="refreshIndicator">
-        Next refresh in: <span id="countdown">15</span>s
-    </div>
-
     <script>
+        let currentServingPage = 0;
+        let currentPaymentPage = 0;
+        let previousServingData = [];
+        let previousPaymentData = [];
+        let countdown;
+
         function updateClock() {
             const clockDisplay = document.getElementById("clockDisplay");
             const now = new Date();
@@ -171,8 +149,11 @@
             });
         }
 
-        function updateCountdown(seconds) {
-            document.getElementById("countdown").textContent = seconds;
+        function updateCountdownDisplay(countdownValue) {
+            const countdownDisplay = document.getElementById("countdownDisplay");
+            if (countdownDisplay) {
+                countdownDisplay.textContent = `Next update in ${countdownValue} seconds`;
+            }
         }
 
         function refreshDisplay() {
@@ -180,114 +161,146 @@
                 url: '/RajahQueue/public/DashboardController/getDashboardData',
                 method: 'GET',
                 dataType: 'json',
-                success: function(data) {
-                    updateDisplay(data);
-                    // Start countdown
-                    let countdown = 15;
-                    const countdownInterval = setInterval(() => {
-                        countdown--;
-                        updateCountdown(countdown);
-                        if (countdown <= 0) clearInterval(countdownInterval);
+                success: function (data) {
+                    // Update UI with data
+                    updateUI(data);
+
+                    // Reset countdown
+                    clearInterval(countdown);
+                    let countdownValue = 15; // Reset countdown value
+                    updateCountdownDisplay(countdownValue);
+                    countdown = setInterval(() => {
+                        countdownValue--;
+                        updateCountdownDisplay(countdownValue);
+                        if (countdownValue <= 0) {
+                            clearInterval(countdown);
+                        }
                     }, 1000);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error fetching display data:', error);
                     showError('Failed to fetch queue data. Retrying...');
                 }
             });
         }
 
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
-            errorDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.querySelector('.container').prepend(errorDiv);
-            setTimeout(() => errorDiv.remove(), 5000);
+        function updateUI(data) {
+            const ITEMS_PER_PAGE_SERVING = 12;
+            const ITEMS_PER_PAGE_PAYMENT = 6;
+
+            // Process Serving Queue
+            const servingQueue = $('#servingQueue');
+            const servingData = processServingQueue(data.queue, ITEMS_PER_PAGE_SERVING);
+            renderQueue(servingQueue, servingData.items, previousServingData, 'fadeInUp', currentServingPage);
+            previousServingData = servingData.allItems;
+            currentServingPage = servingData.nextPage;
+
+            // Process Payment Queue
+            const paymentQueue = $('#paymentQueue');
+            const paymentData = processPaymentQueue(data.paymentQueue, ITEMS_PER_PAGE_PAYMENT);
+            renderPaymentQueue(paymentQueue, paymentData.items, previousPaymentData, currentPaymentPage);
+            previousPaymentData = paymentData.allItems;
+            currentPaymentPage = paymentData.nextPage;
         }
 
-        function updateDisplay(data) {
-            const servingQueue = $('#servingQueue');
-            servingQueue.empty();
-
-            if (data.queue.length === 0) {
-                servingQueue.append(`
-                    <div class="col-12 text-center text-muted animate__animated animate__fadeIn">
-                        <h3><i class="bi bi-info-circle me-2"></i>No customers are currently being served.</h3>
-                    </div>
-                `);
-            } else {
-                // Group serving customers by counter
-                const servingByCounter = {};
-
-                data.queue.forEach(item => {
-                    if (item.status.toLowerCase() === 'serving') {
-                        if (item.counter_number) {
-                            if (!servingByCounter[item.counter_number]) {
-                                servingByCounter[item.counter_number] = [];
-                            }
-                            servingByCounter[item.counter_number].push(item);
-                        }
+        function processServingQueue(queue, itemsPerPage) {
+            const servingByCounter = {};
+            queue.forEach(item => {
+                if (item.status.toLowerCase() === 'serving' && item.counter_number) {
+                    if (!servingByCounter[item.counter_number]) {
+                        servingByCounter[item.counter_number] = [];
                     }
-                });
+                    servingByCounter[item.counter_number].push(item);
+                }
+            });
 
-                // Sort counters numerically
-                const sortedCounters = Object.keys(servingByCounter).sort((a, b) => parseInt(a) - parseInt(b));
+            const sortedCounters = Object.keys(servingByCounter).sort((a, b) => parseInt(a) - parseInt(b));
+            const allItems = sortedCounters.flatMap(counter => servingByCounter[counter]);
+            const totalPages = Math.ceil(allItems.length / itemsPerPage);
 
-                sortedCounters.forEach(counterNumber => {
-                    const items = servingByCounter[counterNumber];
-                    items.forEach(item => {
-                        servingQueue.append(`
-                            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp">
-                                <div class="queue-item text-center">
-                                    <div class="counter-header">
-                                        <div class="status-indicator bg-success"></div>
-                                        <h4 class="mb-0">Counter ${item.counter_number}</h4>
-                                    </div>
-                                    <div class="queue-number">${item.queue_number}</div>
+            const start = currentServingPage * itemsPerPage;
+            const items = allItems.slice(start, start + itemsPerPage);
+            const nextPage = (currentServingPage + 1) % totalPages;
+
+            return { allItems, items, nextPage };
+        }
+
+        function processPaymentQueue(queue, itemsPerPage) {
+            const totalPages = Math.ceil(queue.length / itemsPerPage);
+            const start = currentPaymentPage * itemsPerPage;
+            const items = queue.slice(start, start + itemsPerPage);
+            const nextPage = (currentPaymentPage + 1) % totalPages;
+
+            return { allItems: queue, items, nextPage };
+        }
+
+        function renderQueue(queueElement, items, previousData, animationClass, currentPage) {
+            if (JSON.stringify(items) !== JSON.stringify(previousData)) {
+                queueElement.fadeOut(300, function () {
+                    queueElement.empty();
+                    items.forEach((item, index) => {
+                        const isNew = !previousData.some(prev => prev.queue_number === item.queue_number);
+                        queueElement.append(`
+                        <div class="col-md-4 mb-4 ${isNew ? `animate__animated ${animationClass}` : ''}" 
+                             style="${isNew ? `animation-delay: ${index * 0.1}s` : ''}">
+                            <div class="queue-item text-center">
+                                <div class="counter-header">
+                                    <div class="status-indicator bg-success"></div>
+                                    <h4 class="mb-0">Counter ${item.counter_number || 'N/A'}</h4>
                                 </div>
+                                <div class="queue-number">${item.queue_number}</div>
                             </div>
-                        `);
+                        </div>
+                    `);
                     });
+                    queueElement.fadeIn(300);
                 });
             }
+        }
 
-            // Update the payment queue section with animations
-            const paymentQueue = $('#paymentQueue');
-            paymentQueue.empty();
-
-            if (!data.paymentQueue || data.paymentQueue.length === 0) {
-                paymentQueue.append(`
-                    <div class="col-12 text-center text-muted animate__animated animate__fadeIn">
-                        <h3><i class="bi bi-info-circle me-2"></i>No pending payments.</h3>
-                    </div>
-                `);
-            } else {
-                data.paymentQueue.forEach((item, index) => {
-                    paymentQueue.append(`
-                        <div class="col-12 mb-4 animate__animated animate__fadeInRight" 
-                             style="animation-delay: ${index * 0.1}s">
+        function renderPaymentQueue(paymentQueue, items, previousData, currentPage) {
+            if (JSON.stringify(items) !== JSON.stringify(previousData)) {
+                paymentQueue.fadeOut(300, function () {
+                    paymentQueue.empty();
+                    items.forEach((item, index) => {
+                        const isNew = !previousData.some(prev => prev.queue_number === item.queue_number);
+                        paymentQueue.append(`
+                        <div class="col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}" 
+                             style="${isNew ? `animation-delay: ${index * 0.1}s` : ''}">
                             <div class="queue-item text-center">
                                 <div class="queue-number">
-                                    <i class="bi bi-arrow-repeat me-2"></i>${item.queue_number}
+                                    <i class="bi bi-credit-card me-2"></i>${item.queue_number}
                                 </div>
                             </div>
                         </div>
                     `);
+                    });
+                    paymentQueue.fadeIn(300);
                 });
             }
         }
 
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+            errorDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+            document.querySelector('.container').prepend(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
         // Initialize
-        $(document).ready(function() {
+        $(document).ready(function () {
             updateClock();
             setInterval(updateClock, 1000);
-            refreshDisplay();
             setInterval(refreshDisplay, 15000);
+            refreshDisplay();
         });
     </script>
+
+
 </body>
 
 </html>
