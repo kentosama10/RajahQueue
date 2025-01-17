@@ -161,6 +161,43 @@
                 /* End at original position */
             }
         }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            margin: 0;
+        }
+
+        .marquee p {
+            padding: 0;
+            margin: 0;
+            color: black;
+        }
+
+        .marquee {
+            white-space: nowrap;
+            box-sizing: border-box;
+            animation: marquee 25s linear infinite;
+            margin: 0;
+            padding: 0;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
     </style>
 </head>
 
@@ -311,8 +348,13 @@
 
             return { allItems: queue, items, nextPage };
         }
+
         function renderQueue(queueElement, items, previousData, animationClass) {
             const fragment = document.createDocumentFragment();
+            const existingItems = previousData.map(prev => prev.queue_number);
+
+            // Sound effect for new items
+            const newItemSound = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
 
             if (items.length === 0) {
                 // Show fallback animation when no data is available
@@ -324,10 +366,13 @@
         `);
             } else {
                 // Render items with transitions for new data
-                const existingItems = previousData.map(prev => prev.queue_number);
-
                 items.forEach((item, index) => {
                     const isNew = !existingItems.includes(item.queue_number);
+
+                    if (isNew) {
+                        // Play sound effect for new items
+                        newItemSound.play();
+                    }
 
                     const div = document.createElement('div');
                     div.className = `col-md-4 mb-4 ${isNew ? `animate__animated ${animationClass}` : ''}`;
@@ -354,6 +399,10 @@
 
         function renderPaymentQueue(paymentQueue, items, previousData) {
             const fragment = document.createDocumentFragment();
+            const existingItems = previousData.map(prev => prev.queue_number);
+
+            // Sound effect for new items
+            const newItemSound = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
 
             if (items.length === 0) {
                 // Show fallback animation when no data is available
@@ -365,10 +414,13 @@
         `);
             } else {
                 // Render items with transitions for new data
-                const existingItems = previousData.map(prev => prev.queue_number);
-
                 items.forEach((item, index) => {
                     const isNew = !existingItems.includes(item.queue_number);
+
+                    if (isNew) {
+                        // Play sound effect for new items
+                        newItemSound.play();
+                    }
 
                     const div = document.createElement('div');
                     div.className = `col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}`;
@@ -411,7 +463,15 @@
         });
     </script>
 
-
+    <!-- Footer Marquee -->
+    <footer>
+        <div class="marquee">
+            <p>Contact Us: Telephone: +63 (02) 8894-0886 | E-mail: webinquiry@rajahtravel.com | Address: 3rd Floor 331
+                Building
+                Sen. Gil Puyat Ave. Makati | Room 202 GLC Building
+                A. Mabini cor. T.M. Kalaw Sts. Manila</p>
+        </div>
+    </footer>
 
 </body>
 
