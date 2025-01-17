@@ -179,6 +179,7 @@
             padding: 0;
             margin: 0;
             color: black;
+            font-weight: bold;
         }
 
         .marquee {
