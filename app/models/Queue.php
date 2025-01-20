@@ -50,6 +50,10 @@ class Queue extends Model
 
     private function resetQueueNumbers()
     {
+        // Update the status of currently serving and waiting queue numbers to "Skipped"
+        $stmt = $this->db->prepare("UPDATE queue SET status = 'Skipped' WHERE status IN ('Serving', 'Waiting')");
+        $stmt->execute();
+    
         // Archive old queue numbers by updating the reset_flag column
         $stmt = $this->db->prepare("UPDATE queue SET reset_flag = 1 WHERE reset_flag = 0");
         $stmt->execute();
