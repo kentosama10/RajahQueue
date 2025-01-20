@@ -185,7 +185,7 @@
         .marquee {
             white-space: nowrap;
             box-sizing: border-box;
-            animation: marquee 25s linear infinite;
+            animation: marquee 40s linear infinite;
             margin: 0;
             padding: 0;
         }

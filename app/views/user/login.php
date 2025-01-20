@@ -72,6 +72,11 @@
                         <h3 class="mb-0">Login</h3>
                     </div>
                     <div class="card-body">
+                        <?php if (isset($data['error'])): ?>
+                            <div id="error-alert" class="alert alert-danger" role="alert">
+                                <?php echo htmlspecialchars($data['error']); ?>
+                            </div>
+                        <?php endif; ?>
                         <form action="/RajahQueue/public/UserController/login" method="POST">
                             <!-- Username Input -->
                             <div class="mb-3">
@@ -103,7 +108,16 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const errorAlert = document.getElementById('error-alert');
+            if (errorAlert) {
+                setTimeout(() => {
+                    errorAlert.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 
 </html>
