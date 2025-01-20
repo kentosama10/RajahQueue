@@ -152,4 +152,45 @@ class DashboardController extends Controller {
         $this->view('report/reports', $data);
     }
 
+    public function filterQueueData() {
+        if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
+            $startDate = $_GET['start_date'];
+            $endDate = $_GET['end_date'];
+    
+            $queueModel = $this->model('Queue');
+            $filteredData = $queueModel->getQueueDataByDateRange($startDate, $endDate);
+    
+            header('Content-Type: application/json');
+            echo json_encode($filteredData);
+            exit;
+        }
+    }
+    
+    public function exportQueueData() {
+        if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
+            $startDate = $_GET['start_date'];
+            $endDate = $_GET['end_date'];
+    
+            $queueModel = $this->model('Queue');
+            $filteredData = $queueModel->getQueueDataByDateRange($startDate, $endDate);
+    
+            header('Content-Type: text/csv');
+            header('Content-Disposition: attachment; filename="queue_data.csv"');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+    
+            $output = fopen('php://output', 'w');
+            fputcsv($output, ['ID', 'Customer Name', 'Service Type', 'Region', 'Priority', 'Priority Type', 'Queue Number', 'Status', 'Created At', 'Updated At', 'Payment Status', 'Serving User Name', 'Completed By User Name', 'Payment Completed At']);
+    
+            foreach ($filteredData as $row) {
+                fputcsv($output, [
+                    $row['id'], $row['customer_name'], $row['service_type'], $row['region'], $row['priority'], $row['priority_type'], $row['queue_number'], $row['status'], $row['created_at'], $row['updated_at'], $row['payment_status'], $row['serving_user_name'], $row['completed_by_user_name'], $row['payment_completed_at']
+                ]);
+            }
+    
+            fclose($output);
+            exit;
+        }
+    }
+    
 }

@@ -120,6 +120,10 @@ class UserController extends Controller {
 
                 if ($user['role'] == 'kiosk') {
                     header('Location: /RajahQueue/public/QueueController/index');
+                } else if ($user['role'] == 'user') {
+                    header('Location: /RajahQueue/public/DashboardController/index');
+                } else if ($user['role'] == 'cashier') {
+                    header('Location: /RajahQueue/public/PaymentController/index');
                 } else {
                     header('Location: /RajahQueue/public/DashboardController/index');
                 }

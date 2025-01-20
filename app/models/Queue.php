@@ -15,24 +15,24 @@ class Queue extends Model
     {
         // Ensure reset logic runs
         $this->resetQueueNumbersIfNeeded();
-    
+
         // Determine the service initial letter
         $serviceInitial = $this->getServiceInitial($serviceType);
-    
+
         // Generate queue number
         $nextNumber = $this->getNextQueueNumberByService($serviceInitial);
         $queueNumber = $serviceInitial . '-' . $nextNumber;
-    
+
         // Insert into database
         $stmt = $this->db->prepare("INSERT INTO queue 
             (customer_name, service_type, region, priority, priority_type, queue_number, reset_flag) 
             VALUES (?, ?, ?, ?, ?, ?, 0)");
         $stmt->execute([$customerName, $serviceType, $region, $priority, $priorityType, $queueNumber]);
-    
+
         // Return the queue number for confirmation
         return $queueNumber;
     }
-    
+
 
     private function resetQueueNumbersIfNeeded()
     {
@@ -53,16 +53,16 @@ class Queue extends Model
         // Update the status of currently serving and waiting queue numbers to "Skipped"
         $stmt = $this->db->prepare("UPDATE queue SET status = 'Skipped' WHERE status IN ('Serving', 'Waiting')");
         $stmt->execute();
-    
+
         // Archive old queue numbers by updating the reset_flag column
         $stmt = $this->db->prepare("UPDATE queue SET reset_flag = 1 WHERE reset_flag = 0");
         $stmt->execute();
-    
+
         // Insert the new reset date into the queue_reset table
         $stmt = $this->db->prepare("INSERT INTO queue_reset (reset_date) VALUES (CURDATE())");
         $stmt->execute();
     }
-    
+
 
 
     private function getServiceInitial($serviceType)
@@ -219,7 +219,7 @@ class Queue extends Model
             }
 
             return [
-                'success' => true, 
+                'success' => true,
                 'message' => 'Status updated successfully',
                 'showPaymentModal' => ($status === 'Done')
             ];
@@ -318,7 +318,8 @@ class Queue extends Model
      * @param int|null $userId ID of user completing the payment
      * @return bool Success status
      */
-    public function completePayment($queueNumber, $userId) {
+    public function completePayment($queueNumber, $userId)
+    {
         try {
             $this->db->beginTransaction();
 
@@ -337,14 +338,14 @@ class Queue extends Model
 
             $stmt->bindParam(':queueNumber', $queueNumber, PDO::PARAM_STR);
             $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-            
+
             $success = $stmt->execute();
-            
+
             if ($success && $stmt->rowCount() > 0) {
                 $this->db->commit();
                 return true;
             }
-            
+
             $this->db->rollBack();
             return false;
 
@@ -366,7 +367,8 @@ class Queue extends Model
      * @param string $queueNumber The queue number to verify
      * @return array|false Queue item data if valid, false otherwise
      */
-    public function verifyQueueForPayment($queueNumber) {
+    public function verifyQueueForPayment($queueNumber)
+    {
         try {
             $stmt = $this->db->prepare("
                 SELECT 
@@ -379,10 +381,10 @@ class Queue extends Model
                 AND status = 'Done'
                 LIMIT 1
             ");
-            
+
             $stmt->execute([$queueNumber]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
         } catch (PDOException $e) {
             error_log("Error verifying queue for payment: " . $e->getMessage());
             return false;
@@ -394,7 +396,8 @@ class Queue extends Model
      * @param string $status Payment status to count
      * @return int Count of payments with given status
      */
-    public function getPaymentCountByStatus($status) {
+    public function getPaymentCountByStatus($status)
+    {
         try {
             $stmt = $this->db->prepare("
                 SELECT COUNT(*) as count 
@@ -403,7 +406,7 @@ class Queue extends Model
                 AND reset_flag = 0
             ");
             $stmt->execute([$status]);
-            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            return (int) $stmt->fetch(PDO::FETCH_ASSOC)['count'];
         } catch (PDOException $e) {
             error_log("Error getting payment count: " . $e->getMessage());
             return 0;
@@ -414,7 +417,8 @@ class Queue extends Model
      * Get count of payments completed today
      * @return int Count of payments completed today
      */
-    public function getPaymentsCompletedToday() {
+    public function getPaymentsCompletedToday()
+    {
         try {
             $stmt = $this->db->query("
                 SELECT COUNT(*) as count 
@@ -423,7 +427,7 @@ class Queue extends Model
                 AND DATE(updated_at) = CURDATE()
                 AND reset_flag = 0
             ");
-            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            return (int) $stmt->fetch(PDO::FETCH_ASSOC)['count'];
         } catch (PDOException $e) {
             error_log("Error getting completed payments: " . $e->getMessage());
             return 0;
@@ -436,10 +440,11 @@ class Queue extends Model
      * @param int $limit Items per page
      * @return array Array of payment queue items
      */
-    public function getPaymentQueue($page = 1, $limit = 15) {
+    public function getPaymentQueue($page = 1, $limit = 15)
+    {
         try {
             $offset = ($page - 1) * $limit;
-            
+
             $stmt = $this->db->prepare("
                 SELECT 
                     q.*,
@@ -453,11 +458,11 @@ class Queue extends Model
                 ORDER BY q.updated_at ASC
                 LIMIT :limit OFFSET :offset
             ");
-            
+
             $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
             $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
-            
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error getting payment queue: " . $e->getMessage());
@@ -472,10 +477,11 @@ class Queue extends Model
      * @param int $limit Items per page
      * @return array Array of matching payment queue items
      */
-    public function searchPaymentQueue($searchTerm, $page = 1, $limit = 10) {
+    public function searchPaymentQueue($searchTerm, $page = 1, $limit = 10)
+    {
         try {
             $offset = ($page - 1) * $limit;
-            
+
             $stmt = $this->db->prepare("
                 SELECT 
                     q.*,
@@ -491,13 +497,13 @@ class Queue extends Model
                 ORDER BY q.updated_at ASC
                 LIMIT :limit OFFSET :offset
             ");
-            
+
             $searchTerm = "%$searchTerm%";
             $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
             $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
             $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
-            
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error searching payment queue: " . $e->getMessage());
@@ -509,7 +515,8 @@ class Queue extends Model
      * Get total count of pending payments
      * @return int Total count of pending payments
      */
-    public function getTotalPendingPayments() {
+    public function getTotalPendingPayments()
+    {
         try {
             $stmt = $this->db->query("
                 SELECT COUNT(*) as count 
@@ -518,7 +525,7 @@ class Queue extends Model
                 AND status = 'Done'
                 AND reset_flag = 0
             ");
-            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+            return (int) $stmt->fetch(PDO::FETCH_ASSOC)['count'];
         } catch (PDOException $e) {
             error_log("Error getting total pending payments: " . $e->getMessage());
             return 0;
@@ -530,7 +537,8 @@ class Queue extends Model
      * @param string $searchTerm Search term
      * @return int Count of matching payment items
      */
-    public function getPaymentSearchCount($searchTerm) {
+    public function getPaymentSearchCount($searchTerm)
+    {
         try {
             $stmt = $this->db->prepare("
                 SELECT COUNT(*) as count 
@@ -541,12 +549,12 @@ class Queue extends Model
                 AND status = 'Done'
                 AND reset_flag = 0
             ");
-            
+
             $searchTerm = "%$searchTerm%";
             $stmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
             $stmt->execute();
-            
-            return (int)$stmt->fetch(PDO::FETCH_ASSOC)['count'];
+
+            return (int) $stmt->fetch(PDO::FETCH_ASSOC)['count'];
         } catch (PDOException $e) {
             error_log("Error getting payment search count: " . $e->getMessage());
             return 0;
@@ -557,7 +565,8 @@ class Queue extends Model
      * Get payment history for the current day
      * @return array Array of payment history items
      */
-    public function getPaymentHistory() {
+    public function getPaymentHistory()
+    {
         try {
             $stmt = $this->db->query("
                 SELECT 
@@ -572,7 +581,7 @@ class Queue extends Model
                 ORDER BY q.updated_at DESC
                 LIMIT 50
             ");
-            
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error getting payment history: " . $e->getMessage());
@@ -586,7 +595,8 @@ class Queue extends Model
      * @param int|null $userId ID of user cancelling the payment
      * @return bool Success status
      */
-    public function cancelPayment($queueNumber, $userId) {
+    public function cancelPayment($queueNumber, $userId)
+    {
         try {
             $this->db->beginTransaction();
 
@@ -605,14 +615,14 @@ class Queue extends Model
 
             $stmt->bindParam(':queueNumber', $queueNumber, PDO::PARAM_STR);
             $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-            
+
             $success = $stmt->execute();
-            
+
             if ($success && $stmt->rowCount() > 0) {
                 $this->db->commit();
                 return true;
             }
-            
+
             $this->db->rollBack();
             return false;
 
@@ -623,7 +633,8 @@ class Queue extends Model
         }
     }
 
-    public function getDailySummary() {
+    public function getDailySummary()
+    {
         $stmt = $this->db->query("
             SELECT 
                 COUNT(*) as totalQueues,
@@ -635,7 +646,8 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getMonthlySummary() {
+    public function getMonthlySummary()
+    {
         $stmt = $this->db->query("
             SELECT 
                 COUNT(*) as totalQueues,
@@ -648,7 +660,8 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getServiceTypeBreakdown() {
+    public function getServiceTypeBreakdown()
+    {
         $stmt = $this->db->query("
             SELECT 
                 SUM(CASE WHEN service_type = 'Tour Packages' THEN 1 ELSE 0 END) as tourPackages,
@@ -660,7 +673,8 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getPriorityQueueReport() {
+    public function getPriorityQueueReport()
+    {
         $stmt = $this->db->query("
             SELECT 
                 SUM(CASE WHEN priority = 'Yes' THEN 1 ELSE 0 END) as priorityQueues,
@@ -671,4 +685,20 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getQueueDataByDateRange($startDate, $endDate)
+    {
+        $stmt = $this->db->prepare("
+            SELECT 
+                q.id, q.customer_name, q.service_type, q.region, q.priority, q.priority_type, q.queue_number, q.status, q.created_at, q.updated_at, q.payment_status, q.serving_user_id, q.completed_by_user_id, q.payment_completed_at,
+                CONCAT(su.first_name, ' ', su.last_name) as serving_user_name, CONCAT(cu.first_name, ' ', cu.last_name) as completed_by_user_name
+            FROM queue q
+            LEFT JOIN users su ON q.serving_user_id = su.id
+            LEFT JOIN users cu ON q.completed_by_user_id = cu.id
+            WHERE DATE(q.created_at) BETWEEN :startDate AND :endDate
+        ");
+        $stmt->bindParam(':startDate', $startDate);
+        $stmt->bindParam(':endDate', $endDate);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

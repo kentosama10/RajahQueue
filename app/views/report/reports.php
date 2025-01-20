@@ -130,7 +130,111 @@
                 </div>
             </div>
         </div>
+
+        <!-- Date Range Filter Form -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="report-card">
+                    <h4>Queue Data by Date Range</h4>
+                    <form id="dateRangeForm" method="GET" onsubmit="filterQueueData(event)">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" id="startDate" name="start_date" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" id="endDate" name="end_date" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-5 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                                <button type="button" class="btn btn-success ms-2" onclick="exportToCSV()">Export to CSV</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtered Queue Data Table -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="report-card">
+                    <h4>Filtered Queue Data</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer Name</th>
+                                    <th>Service Type</th>
+                                    <th>Region</th>
+                                    <th>Priority</th>
+                                    <th>Priority Type</th>
+                                    <th>Queue Number</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Payment Status</th>
+                                    <th>Serving User Name</th>
+                                    <th>Completed By User Name</th>
+                                    <th>Payment Completed At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="filteredQueueData">
+                                <!-- Filtered data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function filterQueueData(event) {
+            event.preventDefault();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            fetch(`/RajahQueue/public/DashboardController/filterQueueData?start_date=${startDate}&end_date=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('filteredQueueData');
+                    tbody.innerHTML = '';
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${row.id}</td>
+                            <td>${row.customer_name}</td>
+                            <td>${row.service_type}</td>
+                            <td>${row.region}</td>
+                            <td>${row.priority}</td>
+                            <td>${row.priority_type}</td>
+                            <td>${row.queue_number}</td>
+                            <td>${row.status}</td>
+                            <td>${row.created_at}</td>
+                            <td>${row.updated_at}</td>
+                            <td>${row.payment_status}</td>
+                            <td>${row.serving_user_name}</td>
+                            <td>${row.completed_by_user_name}</td>
+                            <td>${row.payment_completed_at}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        function exportToCSV() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            window.location.href = `/RajahQueue/public/DashboardController/exportQueueData?start_date=${startDate}&end_date=${endDate}`;
+        }
+    </script>
 </body>
 
 </html>
