@@ -92,6 +92,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/RajahQueue/public/QueueController/index">Queue Form</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/RajahQueue/public/DashboardController/reports">Reports</a>
+                    </li>
                     
                     <!-- Welcome Message -->
                     <?php if (isset($_SESSION['first_name'])): ?>

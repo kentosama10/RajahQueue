@@ -134,4 +134,22 @@ class DashboardController extends Controller {
         $this->view('dashboard/display');
     }
 
+    public function reports() {
+        $queueModel = $this->model('Queue');
+        $data = [
+            'totalQueueCount' => $queueModel->getTotalQueueCount(),
+            'completedToday' => $queueModel->getCompletedToday(),
+            'waitingCount' => $queueModel->getCountByStatus('Waiting'),
+            'servingCount' => $queueModel->getCountByStatus('Serving'),
+            'skippedCount' => $queueModel->getCountByStatus('Skipped'),
+            'noShowCount' => $queueModel->getCountByStatus('No Show'),
+            'recalledCount' => $queueModel->getCountByStatus('Recalled'),
+            'dailySummary' => $queueModel->getDailySummary(),
+            'monthlySummary' => $queueModel->getMonthlySummary(),
+            'serviceTypeBreakdown' => $queueModel->getServiceTypeBreakdown(),
+            'priorityQueue' => $queueModel->getPriorityQueueReport(),
+        ];
+        $this->view('report/reports', $data);
+    }
+
 }

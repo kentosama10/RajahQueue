@@ -30,6 +30,7 @@ class Router {
 
         // Add this route in the Router constructor or wherever you define routes
         $this->addRoute('GET', 'DashboardController/display', 'DashboardController@display');
+        $this->addRoute('GET', 'DashboardController/reports', 'DashboardController@reports');
     }
 
     private function parseUrl() {

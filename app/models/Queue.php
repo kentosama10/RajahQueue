@@ -623,4 +623,52 @@ class Queue extends Model
         }
     }
 
+    public function getDailySummary() {
+        $stmt = $this->db->query("
+            SELECT 
+                COUNT(*) as totalQueues,
+                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as completedQueues,
+                SUM(CASE WHEN status = 'Skipped' THEN 1 ELSE 0 END) as skippedQueues
+            FROM queue
+            WHERE DATE(created_at) = CURDATE()
+        ");
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getMonthlySummary() {
+        $stmt = $this->db->query("
+            SELECT 
+                COUNT(*) as totalQueues,
+                SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) as completedQueues,
+                SUM(CASE WHEN status = 'Skipped' THEN 1 ELSE 0 END) as skippedQueues
+            FROM queue
+            WHERE MONTH(created_at) = MONTH(CURDATE())
+            AND YEAR(created_at) = YEAR(CURDATE())
+        ");
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getServiceTypeBreakdown() {
+        $stmt = $this->db->query("
+            SELECT 
+                SUM(CASE WHEN service_type = 'Tour Packages' THEN 1 ELSE 0 END) as tourPackages,
+                SUM(CASE WHEN service_type = 'Travel Insurance' THEN 1 ELSE 0 END) as travelInsurance,
+                SUM(CASE WHEN service_type = 'Flights' THEN 1 ELSE 0 END) as flights
+            FROM queue
+            WHERE reset_flag = 1
+        ");
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getPriorityQueueReport() {
+        $stmt = $this->db->query("
+            SELECT 
+                SUM(CASE WHEN priority = 'Yes' THEN 1 ELSE 0 END) as priorityQueues,
+                SUM(CASE WHEN priority = 'No' THEN 1 ELSE 0 END) as nonPriorityQueues
+            FROM queue
+            WHERE reset_flag = 1
+        ");
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 }
