@@ -64,7 +64,7 @@
             font-size: 3rem;
             font-weight: bold;
             color: var(--secondary-color);
-            padding: 0.5rem 0;
+            padding: 0.5rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -135,6 +135,7 @@
         #paymentQueue .queue-item {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             transition: all 0.3s ease;
+
         }
 
         #paymentQueue .queue-item:hover {
@@ -180,6 +181,9 @@
             margin: 0;
             color: black;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .marquee {
@@ -188,6 +192,10 @@
             animation: marquee 40s linear infinite;
             margin: 0;
             padding: 0;
+        }
+
+        .social-icons a {
+            margin-left: 10px;
         }
 
         @keyframes marquee {
@@ -470,7 +478,13 @@
             <p>Contact Us: Telephone: +63 (02) 8894-0886 | E-mail: webinquiry@rajahtravel.com | Address: 3rd Floor 331
                 Building
                 Sen. Gil Puyat Ave. Makati | Room 202 GLC Building
-                A. Mabini cor. T.M. Kalaw Sts. Manila</p>
+                A. Mabini cor. T.M. Kalaw Sts. Manila
+                <span class="social-icons">
+                    <span class="text-black ms-3"><i class="bi bi-facebook"></i> rajahtravel.com</span>
+                    <span class="text-black ms-3"><i class="bi bi-twitter"></i> rajahtravel.com</span>
+                    <span class="text-black ms-3"><i class="bi bi-instagram"></i> rajahtravel_com</span>
+                </span>
+            </p>
         </div>
     </footer>
 

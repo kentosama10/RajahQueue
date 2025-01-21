@@ -16,27 +16,33 @@
         }
 
         .navbar {
-            background-color: #F08221; /* Header background color */
+            background-color: #F08221;
+            /* Header background color */
         }
 
         .navbar-nav .nav-link {
-            color: white !important; /* Default link color */
+            color: white !important;
+            /* Default link color */
             font-weight: 500;
-            transition: color 0.3s ease; /* Smooth hover transition */
+            transition: color 0.3s ease;
+            /* Smooth hover transition */
         }
 
         .navbar-nav .nav-link:hover {
-            color: #CE007C !important; /* Lightened hover effect */
+            color: #CE007C !important;
+            /* Lightened hover effect */
         }
 
         .navbar-brand img {
-            height: 50px; /* Set consistent logo size */
+            height: 50px;
+            /* Set consistent logo size */
         }
 
         .btn-logout {
             display: flex;
             align-items: center;
-            gap: 0.3rem; /* Add spacing between icon and text */
+            gap: 0.3rem;
+            /* Add spacing between icon and text */
             font-size: 0.9rem;
             padding: 0.5rem 1rem;
             background-color: #dc3545;
@@ -45,7 +51,8 @@
         }
 
         .btn-logout:hover {
-            background-color: #c82333; /* Darker red on hover */
+            background-color: #c82333;
+            /* Darker red on hover */
             border-color: #c82333;
         }
 
@@ -55,7 +62,8 @@
             }
 
             .btn-logout {
-                width: 100%; /* Full width on smaller screens */
+                width: 100%;
+                /* Full width on smaller screens */
                 justify-content: center;
             }
         }
@@ -81,6 +89,9 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
+                        <a class="nav-link" href="/RajahQueue/public/QueueController/index">Queue Form</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/RajahQueue/public/DashboardController/index">Queue Dashboard</a>
                     </li>
                     <li class="nav-item">
@@ -90,12 +101,9 @@
                         <a class="nav-link" href="/RajahQueue/public/DashboardController/display">Customer Serving</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/QueueController/index">Queue Form</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="/RajahQueue/public/DashboardController/reports">Reports</a>
                     </li>
-                    
+
                     <!-- Welcome Message -->
                     <?php if (isset($_SESSION['first_name'])): ?>
                         <li class="nav-item" style="margin-right: 10px;">
