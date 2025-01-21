@@ -320,58 +320,57 @@
         }
 
         function updateStatus(queueNumber, newStatus) {
-            let confirmMessage = '';
-            switch (newStatus.toLowerCase()) {
-                case 'no show':
-                    confirmMessage = 'Mark this customer as No Show?';
-                    break;
-                case 'skipped':
-                    confirmMessage = 'Are you sure you want to skip this customer?';
-                    break;
-                case 'done':
-                    confirmMessage = 'Mark this service as completed?';
-                    break;
-            }
-
-            if (confirmMessage && !confirm(confirmMessage)) {
-                return;
-            }
-
-            // Add loading state to buttons
-            const buttons = $(`button[onclick*="${queueNumber}"]`).prop('disabled', true);
-
+            // Check the current status of the queue number before updating
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/updateStatus',
+                url: '/RajahQueue/public/DashboardController/checkQueueStatus',
                 method: 'POST',
-                data: {
-                    queue_number: queueNumber,
-                    status: newStatus
-                },
+                data: { queue_number: queueNumber },
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
-                        if (newStatus.toLowerCase() === 'recalled') {
-                            // Show alert for recalled number
-                            alert(`Queue number ${queueNumber} has been recalled!`);
+                        if (response.current_status === 'Serving' && response.serving_user_id !== null) {
+                            alert('This queue number is already being served by another user.');
+                            return;
                         }
-                        refreshDashboard();
-                    } else if (response.promptPayment) {
-                        if (confirm(response.message)) {
-                            updatePaymentStatus(queueNumber, 'Pending');
-                        } else {
-                            updatePaymentStatus(queueNumber, 'Not Required');
-                        }
+
+                        // Proceed with updating the status if no conflict
+                        $.ajax({
+                            url: '/RajahQueue/public/DashboardController/updateStatus',
+                            method: 'POST',
+                            data: {
+                                queue_number: queueNumber,
+                                status: newStatus
+                            },
+                            dataType: 'json',
+                            success: function (response) {
+                                if (response.success) {
+                                    if (newStatus.toLowerCase() === 'recalled') {
+                                        // Show alert for recalled number
+                                        alert(`Queue number ${queueNumber} has been recalled!`);
+                                    }
+                                    refreshDashboard();
+                                } else if (response.promptPayment) {
+                                    if (confirm(response.message)) {
+                                        updatePaymentStatus(queueNumber, 'Pending');
+                                    } else {
+                                        updatePaymentStatus(queueNumber, 'Not Required');
+                                    }
+                                } else {
+                                    alert(response.message || 'Failed to update status');
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error updating status:', error);
+                                alert('Error updating status. Please try again.');
+                            }
+                        });
                     } else {
-                        alert(response.message || 'Failed to update status');
+                        alert(response.message || 'Failed to check queue status');
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error('Error updating status:', error);
-                    alert('Error updating status. Please try again.');
-                },
-                complete: function () {
-                    // Re-enable buttons
-                    buttons.prop('disabled', false);
+                    console.error('Error checking queue status:', error);
+                    alert('Error checking queue status. Please try again.');
                 }
             });
         }

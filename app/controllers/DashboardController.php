@@ -193,4 +193,40 @@ class DashboardController extends Controller {
         }
     }
     
+    public function checkQueueStatus() {
+        header('Content-Type: application/json');
+
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception("Invalid request method");
+            }
+
+            if (!isset($_POST['queue_number'])) {
+                throw new Exception("Missing queue number parameter");
+            }
+
+            $queueNumber = trim($_POST['queue_number']);
+            $queueModel = $this->model('Queue');
+            $queueItem = $queueModel->getQueueItem($queueNumber);
+
+            if (!$queueItem) {
+                throw new Exception("Queue number not found");
+            }
+
+            $response = [
+                'success' => true,
+                'current_status' => $queueItem['status'],
+                'serving_user_id' => $queueItem['serving_user_id']
+            ];
+        } catch (Exception $e) {
+            error_log("Error checking queue status: " . $e->getMessage());
+            $response = [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+
+        echo json_encode($response);
+        exit;
+    }
 }

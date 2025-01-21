@@ -701,4 +701,21 @@ class Queue extends Model
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getQueueItem($queueNumber) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT status, serving_user_id 
+                FROM queue 
+                WHERE queue_number = ?
+                AND reset_flag = 0
+                LIMIT 1
+            ");
+            $stmt->execute([$queueNumber]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error getting queue item: " . $e->getMessage());
+            return false;
+        }
+    }
 }
