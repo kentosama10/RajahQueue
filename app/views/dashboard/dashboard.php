@@ -164,7 +164,11 @@
     </div>
 
 
+
+        
+
     <script>
+        var currentUserId = <?php echo json_encode($_SESSION['user_id']); ?>;
         let countdownValue = 15;
         let countdownInterval;
         let currentPage = 1; // Track the current page
@@ -329,8 +333,10 @@
                 success: function (response) {
                     if (response.success) {
                         if (response.current_status === 'Serving' && response.serving_user_id !== null) {
-                            alert('This queue number is already being served by another user.');
-                            return;
+                            if (newStatus === 'Done' && response.serving_user_id !== currentUserId) {
+                                alert('Only the user currently serving this customer can complete the status.');
+                                return;
+                            }
                         }
 
                         // Proceed with updating the status if no conflict

@@ -75,23 +75,23 @@ class DashboardController extends Controller {
                 $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
                 
                 $queueModel = $this->model('Queue');
-                $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId);
+                $queueItem = $queueModel->getQueueItem($queueNumber);
                 
-                if ($success) {
-                    if ($newStatus === 'Done') {
-                        $response['promptPayment'] = true;
-                        $response['message'] = 'Status updated successfully. Do you wish to proceed to payment?';
+                if ($queueItem) {
+                    if ($newStatus === 'Done' && $queueItem['serving_user_id'] !== $userId) {
+                        $response['message'] = 'Only the user currently serving this customer can complete the status.';
                     } else {
-                        $response['success'] = true;
-                        $response['message'] = 'Status updated successfully';
+                        $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId);
+                        
+                        if ($success) {
+                            $response['success'] = true;
+                            $response['message'] = 'Status updated successfully';
+                        } else {
+                            $response['message'] = 'Failed to update status';
+                        }
                     }
                 } else {
-                    $response['success'] = false;
-                    if ($newStatus === 'Serving') {
-                        $response['message'] = 'Cannot serve this queue number. It may be completed, reset, or no longer valid.';
-                    } else {
-                        $response['message'] = 'Failed to update status';
-                    }
+                    $response['message'] = 'Queue number not found';
                 }
             }
         } else {
