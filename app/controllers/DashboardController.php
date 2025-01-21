@@ -253,4 +253,13 @@ class DashboardController extends Controller {
         echo json_encode($response);
         exit;
     }
+
+    public function getActiveCounters() {
+        $userModel = $this->model('User');
+        $activeCounters = $userModel->getActiveCounters();
+
+        header('Content-Type: application/json');
+        echo json_encode(['activeCounters' => $activeCounters]);
+        exit;
+    }
 }

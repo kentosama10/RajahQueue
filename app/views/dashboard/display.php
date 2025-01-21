@@ -189,13 +189,13 @@
         .marquee {
             white-space: nowrap;
             box-sizing: border-box;
-            animation: marquee 40s linear infinite;
+            animation: marquee 30s linear infinite;
             margin: 0;
             padding: 0;
         }
 
         .social-icons a {
-            margin-left: 10px;
+            margin-left: 5px;
         }
 
         @keyframes marquee {
@@ -481,7 +481,7 @@
                 A. Mabini cor. T.M. Kalaw Sts. Manila
                 <span class="social-icons">
                     <span class="text-black ms-3"><i class="bi bi-facebook"></i> rajahtravel.com</span>
-                    <span class="text-black ms-3"><i class="bi bi-twitter"></i> rajahtravel.com</span>
+                    <span class="text-black ms-3"><i class="bi bi-twitter-x"></i> rajahtravel.com</span>
                     <span class="text-black ms-3"><i class="bi bi-instagram"></i> rajahtravel_com</span>
                 </span>
             </p>

@@ -68,6 +68,14 @@
                                 <option value="10">Counter 10</option>
                             </select>
                         </div>
+
+                        <!-- Active Counters -->
+                        <div class="active-counters mt-2">
+                            <h4>
+                                <button id="toggleActiveCounters" class="btn btn-primary" onclick="toggleActiveCounters()">Show Active Counter</button>
+                            </h4>
+                            <ul id="activeCountersList" class="list-group mt-2" style="display: none; transition: max-height 0.5s ease-out; overflow: hidden;"></ul>
+                        </div>
                     </div>
                 </div>
                 <!-- Queue Statistics -->
@@ -158,6 +166,8 @@
                             </div>
                         </div>
                     </div>
+
+
                 </div>
             </div>
         </div>
@@ -165,7 +175,7 @@
 
 
 
-        
+
 
     <script>
         var currentUserId = <?php echo json_encode($_SESSION['user_id']); ?>;
@@ -644,6 +654,25 @@
             });
         }
 
+        // Function to fetch active counters
+        function fetchActiveCounters() {
+            $.ajax({
+                url: '/RajahQueue/public/DashboardController/getActiveCounters',
+                method: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    const activeCountersList = $('#activeCountersList');
+                    activeCountersList.empty();
+                    response.activeCounters.forEach(counter => {
+                        activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.username}</li>`);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching active counters:', error);
+                }
+            });
+        }
+
         // Add event listener for counter select changes
         document.getElementById("counterSelect").addEventListener("change", function (e) {
             const selectedValue = e.target.value;
@@ -685,7 +714,20 @@
         $(document).ready(function () {
             refreshCounterSelect();
             refreshDashboard();
+            fetchActiveCounters();
+            setInterval(fetchActiveCounters, 15000); // Refresh every 15 seconds
         });
+
+        function toggleActiveCounters() {
+            var activeCountersList = $('#activeCountersList');
+            if (activeCountersList.css('display') === 'none') {
+                activeCountersList.css('display', 'block').hide().slideDown();
+            } else {
+                activeCountersList.slideUp(function() {
+                    $(this).css('display', 'none');
+                });
+            }
+        }
     </script>
 </body>
 

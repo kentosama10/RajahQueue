@@ -1,7 +1,7 @@
     </div> <!-- Close container -->
     <footer class=" text-center py-3 mt-5" style="background-color: #fad9bc;">
         <div class="container">
-        <p class="mb-0"> RajahQueue. All rights reserved. Copyright &copy; <span id="currentYear">2023</span> Rajah Travel Corporation</p>
+        <p class="mb-0">&copy; <span id="currentYear">2023</span> RajahQueue. All rights reserved. Rajah Travel Corporation.</p>
         </div>
     </footer>
     <script>

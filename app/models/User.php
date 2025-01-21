@@ -135,4 +135,14 @@ class User extends Model
         }
     }
 
+    public function getActiveCounters() {
+        $stmt = $this->db->query("
+            SELECT counter_number, u.username 
+            FROM counters c
+            INNER JOIN users u ON c.active_user_id = u.id
+            WHERE c.active_user_id IS NOT NULL
+        ");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
