@@ -144,8 +144,7 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 
-    public function updateStatus($queueNumber, $status, $userId = null)
-    {
+    public function updateStatus($queueNumber, $status, $userId = null, $paymentStatus = null) {
         $allowedStatuses = ['Waiting', 'Serving', 'Done', 'Skipped', 'No Show', 'Recalled'];
 
         if (!in_array($status, $allowedStatuses)) {
@@ -205,13 +204,13 @@ class Queue extends Model
                     UPDATE queue 
                     SET 
                         status = ?,
-                        payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
+                        payment_status = CASE WHEN ? = 'Done' THEN ? ELSE payment_status END,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE queue_number = ? 
                     AND reset_flag = 0
                 ";
                 $stmt = $this->db->prepare($sql);
-                $result = $stmt->execute([$status, $status, $queueNumber]);
+                $result = $stmt->execute([$status, $status, $paymentStatus, $queueNumber]);
             }
 
             if (!$result || $stmt->rowCount() === 0) {

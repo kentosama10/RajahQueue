@@ -283,7 +283,10 @@
                     return `
                         <div class="btn-group" role="group">
                             <button class="btn btn-sm btn-success" onclick="updateStatus('${item.queue_number}', 'Done')">
-                                <i class="bi bi-check-lg"></i> Complete
+                                <i class="bi bi-check-lg"></i> Done
+                            </button>
+                            <button class="btn btn-sm btn-success ms-1" onclick="updateStatus('${item.queue_number}', 'Done + Payment')">
+                                <i class="bi bi-cash"></i> Done + Payment
                             </button>
                             <button class="btn btn-sm btn-warning ms-1" onclick="updateStatus('${item.queue_number}', 'No Show')">
                                 <i class="bi bi-person-x"></i> No Show
@@ -324,6 +327,22 @@
         }
 
         function updateStatus(queueNumber, newStatus) {
+            // Confirmation messages for different statuses
+            const confirmationMessages = {
+                'Done': 'Are you sure you want to mark this queue as Done?',
+                'Done + Payment': 'Are you sure you want to mark this queue as Done and proceed to payment?',
+                'No Show': 'Are you sure you want to mark this queue as No Show?',
+                'Recalled': 'Are you sure you want to recall this queue?',
+                'Skipped': 'Are you sure you want to skip this queue?'
+            };
+
+            // Show confirmation dialog if the new status requires validation
+            if (confirmationMessages[newStatus]) {
+                if (!confirm(confirmationMessages[newStatus])) {
+                    return; // Exit if the user cancels the confirmation
+                }
+            }
+
             // Check the current status of the queue number before updating
             $.ajax({
                 url: '/RajahQueue/public/DashboardController/checkQueueStatus',
@@ -332,8 +351,11 @@
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
-                        if (response.current_status === 'Serving' && response.serving_user_id !== null) {
-                            if (newStatus === 'Done' && response.serving_user_id !== currentUserId) {
+                        const servingUserId = parseInt(response.serving_user_id, 10);
+                        const currentUserIdInt = parseInt(currentUserId, 10);
+
+                        if (response.current_status === 'Serving' && servingUserId !== null) {
+                            if (newStatus === 'Done' && servingUserId !== currentUserIdInt) {
                                 alert('Only the user currently serving this customer can complete the status.');
                                 return;
                             }
@@ -366,8 +388,8 @@
                                 }
                             },
                             error: function (xhr, status, error) {
-                                console.error('Error updating status:', error);
-                                alert('Error updating status. Please try again.');
+                                console.error('Error updating status:', xhr.responseText);
+                                alert('Error updating status. Please try again.', xhr.responseText);
                             }
                         });
                     } else {
