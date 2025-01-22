@@ -72,7 +72,7 @@
                         <!-- Active Counters -->
                         <div class="active-counters mt-2">
                             <h4>
-                                <button id="toggleActiveCounters" class="btn btn-primary" onclick="toggleActiveCounters()">Show Active Counter</button>
+                                <button id="toggleActiveCounters" class="btn btn-primary" onclick="toggleActiveCounters()">Show Active Counters</button>
                             </h4>
                             <ul id="activeCountersList" class="list-group mt-2" style="display: none; transition: max-height 0.5s ease-out; overflow: hidden;"></ul>
                         </div>

@@ -174,6 +174,18 @@
             width: 100%;
             z-index: 1000;
             margin: 0;
+            overflow: hidden;
+            /* Prevent overflow issues */
+        }
+
+        .marquee {
+            white-space: nowrap;
+            box-sizing: border-box;
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+            margin: 0;
+            padding: 0;
+            position: relative;
         }
 
         .marquee p {
@@ -186,16 +198,13 @@
             justify-content: center;
         }
 
-        .marquee {
-            white-space: nowrap;
-            box-sizing: border-box;
-            animation: marquee 30s linear infinite;
-            margin: 0;
-            padding: 0;
+        .marquee:hover {
+            animation-play-state: paused;
+            /* Pause animation on hover */
         }
 
         .social-icons a {
-            margin-left: 5px;
+            margin-left: 0;
         }
 
         @keyframes marquee {
@@ -207,6 +216,28 @@
                 transform: translateX(-100%);
             }
         }
+
+        /* Gradient fade effect on both sides */
+        footer::before,
+        footer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50px;
+            background: linear-gradient(to right, var(--primary-color), transparent);
+            z-index: 1001;
+        }
+
+        footer::before {
+            left: 0;
+        }
+
+        footer::after {
+            right: 0;
+            transform: rotateY(180deg);
+        }
+    </style>
     </style>
 </head>
 
@@ -475,16 +506,17 @@
     <!-- Footer Marquee -->
     <footer>
         <div class="marquee">
-            <p>Contact Us: Telephone: +63 (02) 8894-0886 | E-mail: webinquiry@rajahtravel.com | Address: 3rd Floor 331
-                Building
-                Sen. Gil Puyat Ave. Makati | Room 202 GLC Building
-                A. Mabini cor. T.M. Kalaw Sts. Manila
+            <p>Contact Us: Telephone: +63 (02) 8894-0886 &nbsp; | &nbsp; E-mail: webinquiry@rajahtravel.com &nbsp; |
+                &nbsp;
+                Address: 3rd Floor 331 Building Sen. Gil Puyat Ave. Makati &nbsp; | &nbsp; Room 202 GLC Building
+                A. Mabini cor. T.M. Kalaw Sts. Manila &nbsp; | &nbsp; Follow us on:
                 <span class="social-icons">
                     <span class="text-black ms-3"><i class="bi bi-facebook"></i> rajahtravel.com</span>
                     <span class="text-black ms-3"><i class="bi bi-twitter-x"></i> rajahtravel.com</span>
                     <span class="text-black ms-3"><i class="bi bi-instagram"></i> rajahtravel_com</span>
                 </span>
             </p>
+
         </div>
     </footer>
 
