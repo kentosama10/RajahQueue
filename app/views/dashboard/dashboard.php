@@ -296,7 +296,7 @@
                                 <i class="bi bi-check-lg"></i> Done
                             </button>
                             <button class="btn btn-sm btn-success ms-1" onclick="updateStatus('${item.queue_number}', 'Done + Payment')">
-                                <i class="bi bi-cash"></i> Done + Payment
+                                <i class="bi bi-cash"></i> Payment
                             </button>
                             <button class="btn btn-sm btn-warning ms-1" onclick="updateStatus('${item.queue_number}', 'No Show')">
                                 <i class="bi bi-person-x"></i> No Show
@@ -664,7 +664,7 @@
                     const activeCountersList = $('#activeCountersList');
                     activeCountersList.empty();
                     response.activeCounters.forEach(counter => {
-                        activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.username}</li>`);
+                        activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.first_name}</li>`);
                     });
                 },
                 error: function (xhr, status, error) {

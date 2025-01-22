@@ -182,7 +182,7 @@
             white-space: nowrap;
             box-sizing: border-box;
             display: inline-block;
-            animation: marquee 30s linear infinite;
+            animation: marquee 40s linear infinite;
             margin: 0;
             padding: 0;
             position: relative;

@@ -137,7 +137,7 @@ class User extends Model
 
     public function getActiveCounters() {
         $stmt = $this->db->query("
-            SELECT counter_number, u.username 
+            SELECT counter_number, u.first_name 
             FROM counters c
             INNER JOIN users u ON c.active_user_id = u.id
             WHERE c.active_user_id IS NOT NULL
