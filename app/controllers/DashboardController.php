@@ -167,11 +167,11 @@ class DashboardController extends Controller {
             'servingCount' => $queueModel->getCountByStatus('Serving'),
             'skippedCount' => $queueModel->getCountByStatus('Skipped'),
             'noShowCount' => $queueModel->getCountByStatus('No Show'),
-            'recalledCount' => $queueModel->getCountByStatus('Recalled'),
+            'averageQueueTimeSpent' => $queueModel->getAverageQueueTimeSpent(),
+            'averageTimeSpentByService' => $queueModel->getAverageTimeSpentByService(),
             'dailySummary' => $queueModel->getDailySummary(),
             'monthlySummary' => $queueModel->getMonthlySummary(),
             'serviceTypeBreakdown' => $queueModel->getServiceTypeBreakdown(),
-            'priorityQueue' => $queueModel->getPriorityQueueReport(),
         ];
         $this->view('report/reports', $data);
     }
@@ -204,11 +204,11 @@ class DashboardController extends Controller {
             header('Expires: 0');
     
             $output = fopen('php://output', 'w');
-            fputcsv($output, ['ID', 'Customer Name', 'Service Type', 'Region', 'Priority', 'Priority Type', 'Queue Number', 'Status', 'Created At', 'Updated At', 'Payment Status', 'Serving User Name', 'Completed By User Name', 'Payment Completed At']);
+            fputcsv($output, ['ID', 'Customer Name', 'Service Type', 'Queue Number', 'Status', 'Created At', 'Updated At', 'Payment Status', 'Serving User Name', 'Completed By User Name', 'Payment Completed At']);
     
             foreach ($filteredData as $row) {
                 fputcsv($output, [
-                    $row['id'], $row['customer_name'], $row['service_type'], $row['region'], $row['priority'], $row['priority_type'], $row['queue_number'], $row['status'], $row['created_at'], $row['updated_at'], $row['payment_status'], $row['serving_user_name'], $row['completed_by_user_name'], $row['payment_completed_at']
+                    $row['id'], $row['customer_name'], $row['service_type'], $row['region'], $row['queue_number'], $row['status'], $row['created_at'], $row['updated_at'], $row['payment_status'], $row['serving_user_name'], $row['completed_by_user_name'], $row['payment_completed_at']
                 ]);
             }
     

@@ -81,12 +81,6 @@
                     <p><?php echo $data['noShowCount']; ?></p>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="report-card">
-                    <h4>Recalled Count</h4>
-                    <p><?php echo $data['recalledCount']; ?></p>
-                </div>
-            </div>
         </div>
 
         <!-- Custom Reports -->
@@ -115,21 +109,22 @@
             <div class="col-md-6">
                 <div class="report-card">
                     <h4>Service Type Breakdown</h4>
-                    <p>Tour Packages: <?php echo $data['serviceTypeBreakdown']['tourPackages']; ?></p>
+                    <p>Visa: <?php echo $data['serviceTypeBreakdown']['visa']; ?></p>
+                    <p>Tours / Cruise: <?php echo $data['serviceTypeBreakdown']['tourPackages']; ?></p>
                     <p>Travel Insurance: <?php echo $data['serviceTypeBreakdown']['travelInsurance']; ?></p>
                     <p>Flights: <?php echo $data['serviceTypeBreakdown']['flights']; ?></p>
                 </div>
             </div>
 
             <!-- Priority Queue Report -->
-            <div class="col-md-6">
+            <!-- <div class="col-md-6">
                 <div class="report-card">
                     <h4>Priority Queue Report</h4>
                     <p>Priority Queues: <?php echo $data['priorityQueue']['priorityQueues']; ?></p>
                     <p>Non-Priority Queues: <?php echo $data['priorityQueue']['nonPriorityQueues']; ?></p>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Date Range Filter Form -->
         <div class="row">
@@ -172,9 +167,9 @@
                                     <th>ID</th>
                                     <th>Customer Name</th>
                                     <th>Service Type</th>
-                                    <th>Region</th>
+                                    <!-- <th>Region</th>
                                     <th>Priority</th>
-                                    <th>Priority Type</th>
+                                    <th>Priority Type</th> -->
                                     <th>Queue Number</th>
                                     <th>Status</th>
                                     <th>Created At</th>
@@ -212,9 +207,6 @@
                             <td>${row.id}</td>
                             <td>${row.customer_name}</td>
                             <td>${row.service_type}</td>
-                            <td>${row.region}</td>
-                            <td>${row.priority}</td>
-                            <td>${row.priority_type}</td>
                             <td>${row.queue_number}</td>
                             <td>${row.status}</td>
                             <td>${row.created_at}</td>

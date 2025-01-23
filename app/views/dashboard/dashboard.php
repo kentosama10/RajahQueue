@@ -72,9 +72,11 @@
                         <!-- Active Counters -->
                         <div class="active-counters mt-2">
                             <h4>
-                                <button id="toggleActiveCounters" class="btn btn-primary" onclick="toggleActiveCounters()">Show Active Counters</button>
+                                <button id="toggleActiveCounters" class="btn btn-primary"
+                                    onclick="toggleActiveCounters()">Show Active Counters</button>
                             </h4>
-                            <ul id="activeCountersList" class="list-group mt-2" style="display: none; transition: max-height 0.5s ease-out; overflow: hidden;"></ul>
+                            <ul id="activeCountersList" class="list-group mt-2"
+                                style="display: none; transition: max-height 0.5s ease-out; overflow: hidden;"></ul>
                         </div>
                     </div>
                 </div>
@@ -109,7 +111,7 @@
                                     <th class="text-center">Queue #</th>
                                     <th class="text-center">Customer Name</th>
                                     <th class="text-center">Service</th>
-                                    <th class="text-center">Priority</th>
+                                    <!-- <th class="text-center">Priority</th> -->
                                     <th class="text-center">Status</th>
                                     <th class="text-center">Served By</th>
                                     <th class="text-center">Actions</th>
@@ -254,11 +256,6 @@
                             <td class="text-center">${item.customer_name}</td>
                             <td class="text-center">${item.service_type}${item.region ? ` - ${item.region}` : ''}</td>
                             <td class="text-center">
-                                <span class="badge ${item.priority.toLowerCase() === 'yes' ? 'bg-success' : 'bg-secondary'}">
-                                    ${item.priority}
-                                </span>
-                            </td>
-                            <td class="text-center">
                                 <span class="badge ${getStatusBadgeClass(item.status)}">
                                     ${item.status}
                                 </span>
@@ -284,9 +281,6 @@
                         <div class="btn-group" role="group">
                             <button class="btn btn-sm btn-primary" onclick="updateStatus('${item.queue_number}', 'Serving')">
                                 <i class="bi bi-play-fill"></i> Start
-                            </button>
-                            <button class="btn btn-sm btn-danger ms-1" onclick="updateStatus('${item.queue_number}', 'Skipped')">
-                                <i class="bi bi-skip-forward-fill"></i> Skip
                             </button>
                         </div>`;
                 case 'serving':
@@ -723,11 +717,12 @@
             if (activeCountersList.css('display') === 'none') {
                 activeCountersList.css('display', 'block').hide().slideDown();
             } else {
-                activeCountersList.slideUp(function() {
+                activeCountersList.slideUp(function () {
                     $(this).css('display', 'none');
                 });
             }
         }
+
     </script>
 </body>
 

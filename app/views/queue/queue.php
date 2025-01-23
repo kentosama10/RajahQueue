@@ -120,14 +120,15 @@
                                 <label for="service_type" class="form-label">Select Service</label>
                                 <select name="service_type" id="service_type" class="form-select" required>
                                     <option value="" disabled selected>-- Select Service --</option>
-                                    <!-- <option value="Visa">Visa</option> -->
-                                    <option value="Tour Packages">Tour Packages</option>
-                                    <option value="Flights">Flights</option>
-                                    <option value="Travel Insurance">Travel Insurance</option>
+                                    <!-- <option value="Visa">Visa Only</option> -->
+                                    <option value="Tours / Cruise">Tours / Cruise Only</option>
+                                    <option value="Flights">Flights Only</option>
+                                    <option value="Travel Insurance">Travel Insurance Only</option>
+                                    <option value="Multiple Services">Multiple Services</option>
                                 </select>
                             </div>
 
-                            <!-- Region Dropdown -->
+                            <!-- Region Dropdown
                             <div class="mb-3 dropdown-field" id="region_field">
                                 <label for="region" class="form-label">Select Region</label>
                                 <select name="region" id="region" class="form-select">
@@ -140,9 +141,9 @@
                                     <option value="Australia">Australia</option>
                                     <option value="Others">Others</option>
                                 </select>
-                            </div>
+                            </div> -->
 
-                            <!-- Priority Lane Dropdown -->
+                            <!-- Priority Lane Dropdown
                             <div class="mb-3">
                                 <label for="priority" class="form-label">Priority Lane</label>
                                 <select name="priority" id="priority" class="form-select" required>
@@ -151,7 +152,7 @@
                                 </select>
                             </div>
 
-                            <!-- Priority Type Dropdown -->
+                            Priority Type Dropdown
                             <div class="mb-3 dropdown-field" id="priority_type_field">
                                 <label for="priority_type" class="form-label">Select Priority Type</label>
                                 <select name="priority_type" id="priority_type" class="form-select">
@@ -160,7 +161,7 @@
                                     <option value="Pregnant">Pregnant</option>
                                     <option value="Senior Citizen">Senior Citizen</option>
                                 </select>
-                            </div>
+                            </div> -->
 
                             <!-- Submit Button -->
                             <div class="d-grid">
@@ -173,32 +174,32 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts
     <script>
         $(document).ready(function () {
-            // Toggle region dropdown with animation when "Tour Packages" is selected
-            $('#service_type').on('change', function () {
-                if ($(this).val() === 'Tour Packages') {
-                    $('#region_field').addClass('show'); // Add class to show
-                    $('#region').attr('required', 'required');
-                } else {
-                    $('#region_field').removeClass('show'); // Remove class to hide
-                    $('#region').removeAttr('required').val('');
-                }
-            });
+        //     // Toggle region dropdown with animation when "Tour Packages" is selected
+        //     $('#service_type').on('change', function () {
+        //         if ($(this).val() === 'Tour Packages') {
+        //             $('#region_field').addClass('show'); // Add class to show
+        //             $('#region').attr('required', 'required');
+        //         } else {
+        //             $('#region_field').removeClass('show'); // Remove class to hide
+        //             $('#region').removeAttr('required').val('');
+        //         }
+        //     });
 
-            // Toggle priority type dropdown with animation when "Yes" is selected
-            $('#priority').on('change', function () {
-                if ($(this).val() === 'Yes') {
-                    $('#priority_type_field').addClass('show'); // Add class to show
-                    $('#priority_type').attr('required', 'required');
-                } else {
-                    $('#priority_type_field').removeClass('show'); // Remove class to hide
-                    $('#priority_type').removeAttr('required').val('');
-                }
-            });
-        });
-    </script>
+        //     // Toggle priority type dropdown with animation when "Yes" is selected
+        //     $('#priority').on('change', function () {
+        //         if ($(this).val() === 'Yes') {
+        //             $('#priority_type_field').addClass('show'); // Add class to show
+        //             $('#priority_type').attr('required', 'required');
+        //         } else {
+        //             $('#priority_type_field').removeClass('show'); // Remove class to hide
+        //             $('#priority_type').removeAttr('required').val('');
+        //         }
+        //     });
+        // });
+    </script> -->
 
 <?php if (isset($_SESSION['success_message'])):
     $queueNumber = $_SESSION['success_message']['queue_number'];

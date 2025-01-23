@@ -11,7 +11,7 @@ class Queue extends Model
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function add($customerName, $serviceType, $region = null, $priority = 'No', $priorityType = null)
+    public function add($customerName, $serviceType)
     {
         // Ensure reset logic runs
         $this->resetQueueNumbersIfNeeded();
@@ -25,9 +25,9 @@ class Queue extends Model
 
         // Insert into database
         $stmt = $this->db->prepare("INSERT INTO queue 
-            (customer_name, service_type, region, priority, priority_type, queue_number, reset_flag) 
-            VALUES (?, ?, ?, ?, ?, ?, 0)");
-        $stmt->execute([$customerName, $serviceType, $region, $priority, $priorityType, $queueNumber]);
+            (customer_name, service_type, queue_number, reset_flag) 
+            VALUES (?, ?, ?, 0)");
+        $stmt->execute([$customerName, $serviceType, $queueNumber]);
 
         // Return the queue number for confirmation
         return $queueNumber;
@@ -68,7 +68,7 @@ class Queue extends Model
     private function getServiceInitial($serviceType)
     {
         switch ($serviceType) {
-            case 'Tour Packages':
+            case 'Tours / Cruise':
                 return 'T';
             case 'Travel Insurance':
                 return 'I'; // Use I for Travel Insurance to avoid conflict
@@ -76,6 +76,8 @@ class Queue extends Model
                 return 'V';
             case 'Flights':
                 return 'F';
+            case 'Multiple Services':
+                return 'M';
             default:
                 return 'U'; // Default to 'U' for Unknown
         }
@@ -663,33 +665,34 @@ class Queue extends Model
     {
         $stmt = $this->db->query("
             SELECT 
-                SUM(CASE WHEN service_type = 'Tour Packages' THEN 1 ELSE 0 END) as tourPackages,
+                SUM(CASE WHEN service_type = 'Visa' THEN 1 ELSE 0 END) as visa,
+                SUM(CASE WHEN service_type = 'Tours / Cruise' THEN 1 ELSE 0 END) as tourPackages,
                 SUM(CASE WHEN service_type = 'Travel Insurance' THEN 1 ELSE 0 END) as travelInsurance,
                 SUM(CASE WHEN service_type = 'Flights' THEN 1 ELSE 0 END) as flights
             FROM queue
-            WHERE reset_flag = 1
         ");
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getPriorityQueueReport()
-    {
-        $stmt = $this->db->query("
-            SELECT 
-                SUM(CASE WHEN priority = 'Yes' THEN 1 ELSE 0 END) as priorityQueues,
-                SUM(CASE WHEN priority = 'No' THEN 1 ELSE 0 END) as nonPriorityQueues
-            FROM queue
-            WHERE reset_flag = 1
-        ");
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    // public function getPriorityQueueReport()
+    // {
+    //     $stmt = $this->db->query("
+    //         SELECT 
+    //             SUM(CASE WHEN priority = 'Yes' THEN 1 ELSE 0 END) as priorityQueues,
+    //             SUM(CASE WHEN priority = 'No' THEN 1 ELSE 0 END) as nonPriorityQueues
+    //         FROM queue
+    //         WHERE reset_flag = 1
+    //     ");
+    //     return $stmt->fetch(PDO::FETCH_ASSOC);
+    // }
 
     public function getQueueDataByDateRange($startDate, $endDate)
     {
         $stmt = $this->db->prepare("
             SELECT 
                 q.id, q.customer_name, q.service_type, q.region, q.priority, q.priority_type, q.queue_number, q.status, q.created_at, q.updated_at, q.payment_status, q.serving_user_id, q.completed_by_user_id, q.payment_completed_at,
-                CONCAT(su.first_name, ' ', su.last_name) as serving_user_name, CONCAT(cu.first_name, ' ', cu.last_name) as completed_by_user_name
+                CONCAT(su.first_name, ' ', su.last_name) as serving_user_name, CONCAT(cu.first_name, ' ', cu.last_name) as completed_by_user_name,
+                TIMESTAMPDIFF(MINUTE, q.created_at, q.updated_at) AS time_spent
             FROM queue q
             LEFT JOIN users su ON q.serving_user_id = su.id
             LEFT JOIN users cu ON q.completed_by_user_id = cu.id
@@ -716,5 +719,25 @@ class Queue extends Model
             error_log("Error getting queue item: " . $e->getMessage());
             return false;
         }
+    }
+
+    public function getAverageQueueTimeSpent() {
+        $sql = "SELECT AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) AS average_time_spent FROM queue WHERE status = 'Done'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return round($stmt->fetchColumn());
+    }
+    
+    public function getAverageTimeSpentByService() {
+        $sql = "SELECT service_type, AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) AS average_time_spent FROM queue WHERE status = 'Done' GROUP BY service_type";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        $averageTimeSpentByService = [];
+        foreach ($results as $row) {
+            $averageTimeSpentByService[$row['service_type']] = round($row['average_time_spent']);
+        }
+        return $averageTimeSpentByService;
     }
 }

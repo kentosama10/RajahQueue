@@ -21,12 +21,9 @@ class QueueController extends Controller {
             // Sanitize inputs
             $customerName = trim($_POST['customer_name']);
             $serviceType = $_POST['service_type'];
-            $region = isset($_POST['region']) ? $_POST['region'] : null;
-            $priority = $_POST['priority'];
-            $priorityType = ($priority === 'Yes') ? $_POST['priority_type'] : null;
 
             // Add to queue and get formatted queue number
-            $queueNumber = $queueModel->add($customerName, $serviceType, $region, $priority, $priorityType);
+            $queueNumber = $queueModel->add($customerName, $serviceType);
 
             // Store success message in session
             session_start();
