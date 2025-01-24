@@ -25,8 +25,6 @@
                 </span>
                 <button class="btn btn-primary refresh-button" onclick="refreshDashboard()">
                     <i class="bi bi-arrow-clockwise"></i> Refresh Now
-                    <span id="refreshSpinner" class="spinner-border spinner-border-sm d-none" role="status"
-                        aria-hidden="true"></span>
                 </button>
             </div>
         </div>
@@ -247,7 +245,6 @@
         }
 
         function refreshDashboard() {
-            $('#refreshSpinner').removeClass('d-none'); // Show spinner
             const selectedServices = Array.from(document.querySelectorAll('#serviceFilter .form-check-input:checked')).map(checkbox => checkbox.value);
             currentFilter = selectedServices.join(','); // Save the current filter state as a comma-separated string
 
@@ -266,9 +263,6 @@
                     console.error('Error fetching dashboard data:', error);
                     console.log('Response Text:', xhr.responseText);
                 },
-                complete: function () {
-                    $('#refreshSpinner').addClass('d-none'); // Hide spinner
-                }
             });
         }
 
