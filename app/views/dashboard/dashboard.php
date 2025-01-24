@@ -377,6 +377,13 @@
         }
 
         function updateStatus(queueNumber, newStatus) {
+            const selectedCounter = document.querySelector('#counterSelect').value; // Assuming there's a select element with id 'counterSelect' for counters
+
+            if (!selectedCounter) {
+                alert('Please choose a counter first.');
+                return;
+            }
+
             // Confirmation messages for different statuses
             const confirmationMessages = {
                 'Done': 'Are you sure you want to mark this queue as Done?',
@@ -417,7 +424,8 @@
                             method: 'POST',
                             data: {
                                 queue_number: queueNumber,
-                                status: newStatus
+                                status: newStatus,
+                                counter: selectedCounter
                             },
                             dataType: 'json',
                             success: function (response) {
