@@ -163,7 +163,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let currentPage = 1;
-        let countdownValue = 20;
+        let countdownValue = 15;
         let countdownInterval;
 
         function startCountdown() {
@@ -251,7 +251,7 @@
         }
 
         function updatePagination(totalCount) {
-            const itemsPerPage = 10;
+            const itemsPerPage = 20;
             const totalPages = Math.ceil(totalCount / itemsPerPage);
 
             $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
