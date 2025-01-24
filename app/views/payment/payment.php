@@ -162,6 +162,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        const userRole = '<?php echo $_SESSION['role']; ?>';
         let currentPage = 1;
         let countdownValue = 15;
         let countdownInterval;
@@ -233,12 +234,14 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-success btn-sm" onclick="completePayment('${item.queue_number}')">
-                                        <i class="bi bi-check-circle"></i> Complete
-                                    </button>
-                                    <button class="btn btn-danger btn-sm ms-2" onclick="cancelPayment('${item.queue_number}')">
-                                        <i class="bi bi-x-circle"></i> Cancel
-                                    </button>
+                                    ${userRole === 'cashier'  ? `
+                                        <button class="btn btn-success btn-sm" onclick="completePayment('${item.queue_number}')">
+                                            <i class="bi bi-check-circle"></i> Complete
+                                        </button>
+                                        <button class="btn btn-danger btn-sm ms-2" onclick="cancelPayment('${item.queue_number}')">
+                                            <i class="bi bi-x-circle"></i> Cancel
+                                        </button>
+                                    ` : ''}
                                 </div>
                             </td>
                         </tr>
