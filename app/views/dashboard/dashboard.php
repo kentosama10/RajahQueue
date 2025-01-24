@@ -788,7 +788,7 @@
         }
 
         // Call refreshDashboard at regular intervals
-        setInterval(refreshDashboard, 5000); // Adjust the interval as needed
+        setInterval(refreshDashboard, 15000); // Adjust the interval as needed
 
     </script>
     <script>
