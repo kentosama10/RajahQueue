@@ -163,7 +163,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let currentPage = 1;
-        let countdownValue = 15;
+        let countdownValue = 20;
         let countdownInterval;
 
         function startCountdown() {

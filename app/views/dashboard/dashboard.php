@@ -588,7 +588,7 @@
         }
 
         function updatePagination(totalCount) {
-            const itemsPerPage = 10;
+            const itemsPerPage = 20;
             const totalPages = Math.ceil(totalCount / itemsPerPage);
 
             $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
@@ -599,7 +599,7 @@
         }
 
         function changePage(newPage) {
-            if (newPage < 1 || newPage > Math.ceil(totalCount / 10)) return; // Prevent invalid page numbers
+            if (newPage < 1 || newPage > Math.ceil(totalCount / 20)) return; // Prevent invalid page numbers
             currentPage = newPage;
             refreshDashboard(); // Refresh the dashboard with the new page
         }
