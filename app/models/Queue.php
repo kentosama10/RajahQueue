@@ -266,7 +266,7 @@ class Queue extends Model
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function searchQueue($searchTerm, $page = 1, $limit = 10)
+    public function searchQueue($searchTerm, $page = 1, $limit = 20)
     {
         $offset = ($page - 1) * $limit; // Calculate the offset for pagination
 
@@ -441,7 +441,7 @@ class Queue extends Model
      * @param int $limit Items per page
      * @return array Array of payment queue items
      */
-    public function getPaymentQueue($page = 1, $limit = 15)
+    public function getPaymentQueue($page = 1, $limit = 20)
     {
         try {
             $offset = ($page - 1) * $limit;
@@ -478,7 +478,7 @@ class Queue extends Model
      * @param int $limit Items per page
      * @return array Array of matching payment queue items
      */
-    public function searchPaymentQueue($searchTerm, $page = 1, $limit = 10)
+    public function searchPaymentQueue($searchTerm, $page = 1, $limit = 20)
     {
         try {
             $offset = ($page - 1) * $limit;

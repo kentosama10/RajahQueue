@@ -68,7 +68,6 @@
                                 <option value="10">Counter 10</option>
                             </select>
                         </div>
-
                         <!-- Active Counters -->
                         <div class="active-counters mt-2">
                             <h4>
@@ -78,10 +77,13 @@
                             <ul id="activeCountersList" class="list-group mt-2"
                                 style="display: none; transition: max-height 0.5s ease-out; overflow: hidden;"></ul>
                         </div>
+
+
+
                     </div>
                 </div>
                 <!-- Queue Statistics -->
-                <div class="row mb-4">
+                <div class="row mb-2">
                     <div class="col-md-4">
                         <div class="queue-stats stats-waiting">
                             <h4 class="mb-2">Waiting</h4>
@@ -98,6 +100,46 @@
                         <div class="queue-stats stats-completed">
                             <h4 class="mb-2">Completed Today</h4>
                             <h2 class="mb-0" id="completedCount">0</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Filter -->
+                <div class="service-filter-container">
+                    <label for="serviceFilter" class="form-label">Filter by Service:</label>
+                    <div id="serviceFilter" class="row">
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Visa" id="serviceVisa">
+                                <label class="form-check-label" for="serviceVisa">Visa</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Tours / Cruise"
+                                    id="serviceToursCruise">
+                                <label class="form-check-label" for="serviceToursCruise">Tours / Cruise</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Flights" id="serviceFlights">
+                                <label class="form-check-label" for="serviceFlights">Flights</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Travel Insurance"
+                                    id="serviceTravelInsurance">
+                                <label class="form-check-label" for="serviceTravelInsurance">Travel Insurance</label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Multiple Services"
+                                    id="serviceMultipleServices">
+                                <label class="form-check-label" for="serviceMultipleServices">Multiple Services</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -185,6 +227,7 @@
         let countdownInterval;
         let currentPage = 1; // Track the current page
         let totalCount = 0; // Declare totalCount globally
+        let currentFilter = '';
 
         function startCountdown() {
             clearInterval(countdownInterval);
@@ -205,19 +248,23 @@
 
         function refreshDashboard() {
             $('#refreshSpinner').removeClass('d-none'); // Show spinner
+            const selectedServices = Array.from(document.querySelectorAll('#serviceFilter .form-check-input:checked')).map(checkbox => checkbox.value);
+            currentFilter = selectedServices.join(','); // Save the current filter state as a comma-separated string
+
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage, // Correct URL
+                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&services=' + encodeURIComponent(currentFilter), // Pass the selected services
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
                     totalCount = data.totalCount; // Set totalCount from the response
-                    updateDashboard(data);
+                    updateDashboard(data, selectedServices);
                     updateRecallPanel(data);
                     updatePagination(totalCount); // Update pagination
                     startCountdown();
                 },
                 error: function (xhr, status, error) {
                     console.error('Error fetching dashboard data:', error);
+                    console.log('Response Text:', xhr.responseText);
                 },
                 complete: function () {
                     $('#refreshSpinner').addClass('d-none'); // Hide spinner
@@ -225,7 +272,7 @@
             });
         }
 
-        function updateDashboard(data) {
+        function updateDashboard(data, selectedServices = []) {
             // Check if stats exist in the response
             if (data.stats) {
                 $('#waitingCount').text(data.stats.waiting);
@@ -242,14 +289,19 @@
             const queueTableBody = $('#queueTableBody');
             queueTableBody.empty(); // Clear existing rows
 
-            if (data.queue.length === 0) {
+            let filteredQueue = data.queue;
+            if (selectedServices.length > 0) {
+                filteredQueue = filteredQueue.filter(item => selectedServices.includes(item.service_type));
+            }
+
+            if (filteredQueue.length === 0) {
                 queueTableBody.append(`
                     <tr>
                         <td colspan="6" class="text-center text-muted">No results found.</td>
                     </tr>
                 `);
             } else {
-                data.queue.forEach(item => {
+                filteredQueue.forEach(item => {
                     queueTableBody.append(`
                         <tr>
                             <td class="text-center">${item.queue_number}</td>
@@ -554,14 +606,16 @@
 
         function searchQueue() {
             const searchTerm = document.getElementById('searchInput').value;
+            const selectedServices = Array.from(document.querySelectorAll('#serviceFilter .form-check-input:checked')).map(checkbox => checkbox.value);
             currentPage = 1; // Reset to the first page on new search
+
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm), // Pass the search term
+                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm) + '&services=' + encodeURIComponent(selectedServices.join(',')), // Pass the search term and selected services
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
                     totalCount = data.totalCount; // Set totalCount from the response
-                    updateDashboard(data);
+                    updateDashboard(data, selectedServices);
                     updateRecallPanel(data);
                     updatePagination(totalCount); // Update pagination
                     startCountdown();
@@ -723,6 +777,121 @@
             }
         }
 
+        document.getElementById('serviceFilter').addEventListener('change', searchQueue);
+
+        function applyFilter() {
+            // Logic to apply the filter based on currentFilter
+            if (currentFilter) {
+                // Apply the filter logic here
+                console.log(`Applying filter: ${currentFilter}`);
+            }
+        }
+
+        // Call refreshDashboard at regular intervals
+        setInterval(refreshDashboard, 5000); // Adjust the interval as needed
+
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load selected services from localStorage
+            const selectedServices = JSON.parse(localStorage.getItem('selectedServices')) || [];
+            selectedServices.forEach(service => {
+                document.querySelector(`input[value="${service}"]`).checked = true;
+            });
+
+            // Add event listeners to checkboxes
+            document.querySelectorAll('#serviceFilter .form-check-input').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    searchQueue();
+                    saveSelectedServices();
+                });
+            });
+
+            // Initial search with persisted services
+            searchQueue();
+        });
+
+        function saveSelectedServices() {
+            const selectedServices = Array.from(document.querySelectorAll('#serviceFilter .form-check-input:checked')).map(checkbox => checkbox.value);
+            localStorage.setItem('selectedServices', JSON.stringify(selectedServices));
+        }
+
+        function searchQueue() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const selectedServices = Array.from(document.querySelectorAll('#serviceFilter .form-check-input:checked')).map(checkbox => checkbox.value);
+            currentPage = 1; // Reset to the first page on new search
+
+            $.ajax({
+                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm) + '&services=' + encodeURIComponent(selectedServices.join(',')), // Pass the search term and selected services
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    totalCount = data.totalCount; // Set totalCount from the response
+                    updateDashboard(data, selectedServices);
+                    updateRecallPanel(data);
+                    updatePagination(totalCount); // Update pagination
+                    startCountdown();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching dashboard data:', error);
+                    console.log('Response Text:', xhr.responseText);
+                }
+            });
+        }
+
+        function updateDashboard(data, selectedServices = []) {
+            // Check if stats exist in the response
+            if (data.stats) {
+                $('#waitingCount').text(data.stats.waiting);
+                $('#servingCount').text(data.stats.serving);
+                $('#completedCount').text(data.stats.completed);
+            } else {
+                // If stats are not available, reset the counts
+                $('#waitingCount').text('0');
+                $('#servingCount').text('0');
+                $('#completedCount').text('0');
+            }
+
+            // Update the queue table
+            const queueTableBody = $('#queueTableBody');
+            queueTableBody.empty(); // Clear existing rows
+
+            let filteredQueue = data.queue;
+            if (selectedServices.length > 0) {
+                filteredQueue = filteredQueue.filter(item => selectedServices.includes(item.service_type));
+            }
+
+            if (filteredQueue.length === 0) {
+                queueTableBody.append(`
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No results found.</td>
+                    </tr>
+                `);
+            } else {
+                filteredQueue.forEach(item => {
+                    queueTableBody.append(`
+                        <tr>
+                            <td class="text-center">${item.queue_number}</td>
+                            <td class="text-center">${item.customer_name}</td>
+                            <td class="text-center">${item.service_type}${item.region ? ` - ${item.region}` : ''}</td>
+                            <td class="text-center">
+                                <span class="badge ${getStatusBadgeClass(item.status)}">
+                                    ${item.status}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                ${item.status === 'Serving' ?
+                            (item.first_name ? `${item.first_name} ${item.last_name}` : 'Not assigned') :
+                            ''}
+                            </td>
+                            <td class="text-center">
+                                ${getActionButtons(item)}
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+        }
     </script>
 </body>
 
