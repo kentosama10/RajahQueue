@@ -219,6 +219,7 @@
 
 
 
+
     <script>
         var currentUserId = <?php echo json_encode($_SESSION['user_id']); ?>;
         let countdownValue = 15;
@@ -896,5 +897,5 @@
         }
     </script>
 </body>
-
+<footer class=" text-center py-3 mt-4"></footer>
 </html>
