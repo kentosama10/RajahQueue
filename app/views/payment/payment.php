@@ -45,6 +45,11 @@
             border-left: 4px solid #28a745;
         }
 
+        .stats-cancelled {
+            border-left: 4px solid #d3212d;
+        }
+
+
         .payment-card {
             background-color: #fff;
             border-radius: 8px;
@@ -108,16 +113,22 @@
 
         <!-- Payment Statistics -->
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="payment-stats stats-pending">
                     <h4 class="mb-2">Pending Payments</h4>
                     <h2 class="mb-0" id="pendingCount">0</h2>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="payment-stats stats-completed">
                     <h4 class="mb-2">Completed Today</h4>
                     <h2 class="mb-0" id="completedCount">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="payment-stats stats-cancelled">
+                    <h4 class="mb-2">Cancelled Payments</h4>
+                    <h2 class="mb-0" id="cancelledCount">0</h2>
                 </div>
             </div>
         </div>
@@ -210,6 +221,7 @@
             // Update statistics
             $('#pendingCount').text(data.stats?.pending || 0);
             $('#completedCount').text(data.stats?.completed || 0);
+            $('#cancelledCount').text(data.stats?.cancelled || 0);
 
             // Update payment table
             const paymentTableBody = $('#paymentTableBody');

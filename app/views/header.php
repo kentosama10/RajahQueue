@@ -89,7 +89,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/QueueController/index">Queue Form</a>
+                        <a class="nav-link" href="/RajahQueue/public/QueueController/index">Form</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/RajahQueue/public/DashboardController/index">Queue Dashboard</a>

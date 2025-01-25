@@ -146,7 +146,8 @@ class Queue extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 
-    public function updateStatus($queueNumber, $status, $userId = null, $paymentStatus = null) {
+    public function updateStatus($queueNumber, $status, $userId = null, $paymentStatus = null)
+    {
         $allowedStatuses = ['Waiting', 'Serving', 'Done', 'Skipped', 'No Show', 'Recalled'];
 
         if (!in_array($status, $allowedStatuses)) {
@@ -372,16 +373,16 @@ class Queue extends Model
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT 
-                    queue_number,
-                    status,
-                    payment_status,
-                    reset_flag
-                FROM queue 
-                WHERE queue_number = ?
-                AND status = 'Done'
-                LIMIT 1
-            ");
+            SELECT 
+                queue_number,
+                status,
+                payment_status,
+                reset_flag
+            FROM queue 
+            WHERE queue_number = ?
+            AND status = 'Done'
+            LIMIT 1
+        ");
 
             $stmt->execute([$queueNumber]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -389,6 +390,11 @@ class Queue extends Model
         } catch (PDOException $e) {
             error_log("Error verifying queue for payment: " . $e->getMessage());
             return false;
+        } 
+        
+        if ($queueItem["payment_status"] === "Completed") {
+            error_log("Payment status for queue number {$queueNumber}: " . $queueItem["payment_status"]);
+            throw new Exception("Payment has already been completed for this queue number");
         }
     }
 
@@ -434,6 +440,25 @@ class Queue extends Model
             return 0;
         }
     }
+
+    
+    public function getCancelledPayments()
+    {
+        try {
+            $stmt = $this->db->query("
+                SELECT COUNT(*) as count 
+                FROM queue 
+                WHERE payment_status = 'Cancelled'
+                AND DATE(updated_at) = CURDATE()
+                AND reset_flag = 0
+            ");
+            return (int) $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        } catch (PDOException $e) {
+            error_log("Error getting cancelled payments: " . $e->getMessage());
+            return 0;
+        }
+    }
+
 
     /**
      * Get paginated payment queue
@@ -704,7 +729,8 @@ class Queue extends Model
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getQueueItem($queueNumber) {
+    public function getQueueItem($queueNumber)
+    {
         try {
             $stmt = $this->db->prepare("
                 SELECT status, serving_user_id 
@@ -721,19 +747,21 @@ class Queue extends Model
         }
     }
 
-    public function getAverageQueueTimeSpent() {
+    public function getAverageQueueTimeSpent()
+    {
         $sql = "SELECT AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) AS average_time_spent FROM queue WHERE status = 'Done'";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return round($stmt->fetchColumn());
     }
-    
-    public function getAverageTimeSpentByService() {
+
+    public function getAverageTimeSpentByService()
+    {
         $sql = "SELECT service_type, AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) AS average_time_spent FROM queue WHERE status = 'Done' GROUP BY service_type";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
         $averageTimeSpentByService = [];
         foreach ($results as $row) {
             $averageTimeSpentByService[$row['service_type']] = round($row['average_time_spent']);

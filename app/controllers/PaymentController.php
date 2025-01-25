@@ -27,7 +27,8 @@ class PaymentController extends Controller {
             // Get payment statistics
             $stats = [
                 'pending' => $queueModel->getPaymentCountByStatus('Pending'),
-                'completed' => $queueModel->getPaymentsCompletedToday()
+                'completed' => $queueModel->getPaymentsCompletedToday(),
+                'cancelled' => $queueModel->getCancelledPayments()
             ];
             
             // Get paginated payment queue
