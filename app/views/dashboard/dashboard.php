@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
 
 </head>
 
@@ -208,17 +209,15 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
     </div>
 
-
-
-
-
+    <div id="loadingSpinner" class="spinner-border text-primary" role="status"
+        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
 
     <script>
         var currentUserId = <?php echo json_encode($_SESSION['user_id']); ?>;
@@ -245,7 +244,17 @@
             document.getElementById('countdown').textContent = countdownValue;
         }
 
+        function showLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
         function refreshDashboard() {
+            showLoadingSpinner(); // Show spinner
+
             const selectedServices = Array.from(document.querySelectorAll('#serviceFilter .form-check-input:checked')).map(checkbox => checkbox.value);
             currentFilter = selectedServices.join(','); // Save the current filter state as a comma-separated string
 
@@ -259,10 +268,12 @@
                     updateRecallPanel(data);
                     updatePagination(totalCount); // Update pagination
                     startCountdown();
+                    hideLoadingSpinner(); // Hide spinner after success
                 },
                 error: function (xhr, status, error) {
                     console.error('Error fetching dashboard data:', error);
                     console.log('Response Text:', xhr.responseText);
+                    hideLoadingSpinner(); // Hide spinner after error
                 },
             });
         }
@@ -378,10 +389,13 @@
         }
 
         function updateStatus(queueNumber, newStatus) {
+            showLoadingSpinner(); // Show spinner
+
             const selectedCounter = document.querySelector('#counterSelect').value; // Assuming there's a select element with id 'counterSelect' for counters
 
             if (!selectedCounter) {
                 alert('Please choose a counter first.');
+                hideLoadingSpinner(); // Hide spinner if no counter is selected
                 return;
             }
 
@@ -397,6 +411,7 @@
             // Show confirmation dialog if the new status requires validation
             if (confirmationMessages[newStatus]) {
                 if (!confirm(confirmationMessages[newStatus])) {
+                    hideLoadingSpinner(); // Hide spinner if user cancels confirmation
                     return; // Exit if the user cancels the confirmation
                 }
             }
@@ -415,6 +430,7 @@
                         if (response.current_status === 'Serving' && servingUserId !== null) {
                             if (newStatus === 'Done' && servingUserId !== currentUserIdInt) {
                                 alert('Only the user currently serving this customer can complete the status.');
+                                hideLoadingSpinner(); // Hide spinner if there's a conflict
                                 return;
                             }
                         }
@@ -445,19 +461,23 @@
                                 } else {
                                     alert(response.message || 'Failed to update status');
                                 }
+                                hideLoadingSpinner(); // Hide spinner after success
                             },
                             error: function (xhr, status, error) {
                                 console.error('Error updating status:', xhr.responseText);
                                 alert('Error updating status. Please try again.', xhr.responseText);
+                                hideLoadingSpinner(); // Hide spinner after error
                             }
                         });
                     } else {
                         alert(response.message || 'Failed to check queue status');
+                        hideLoadingSpinner(); // Hide spinner if check fails
                     }
                 },
                 error: function (xhr, status, error) {
                     console.error('Error checking queue status:', error);
                     alert('Error checking queue status. Please try again.');
+                    hideLoadingSpinner(); // Hide spinner after error
                 }
             });
         }
@@ -898,4 +918,5 @@
     </script>
 </body>
 <footer class=" text-center py-3 mt-4"></footer>
+
 </html>

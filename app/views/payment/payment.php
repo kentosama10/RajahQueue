@@ -169,6 +169,12 @@
 
         <!-- Error Message -->
         <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="text-center" style="display: none;">
+            <div class="spinner-border text-primary" role="status" >
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -195,7 +201,16 @@
             document.getElementById('countdown').textContent = countdownValue;
         }
 
+        function showLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideLoadingSpinner() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
         function loadPaymentQueue() {
+            showLoadingSpinner(); // Show spinner
             $('#errorMessage').hide();
 
             $.ajax({
@@ -209,10 +224,12 @@
                 success: function (data) {
                     updatePaymentDashboard(data);
                     startCountdown();
+                    hideLoadingSpinner(); // Hide spinner after success
                 },
                 error: function (xhr, status, error) {
                     console.error('Error fetching payment queue data:', error);
                     $('#errorMessage').text('Failed to load payment queue. Please try again later.').show();
+                    hideLoadingSpinner(); // Hide spinner after error
                 },
             });
         }
@@ -289,6 +306,8 @@
                 return;
             }
 
+            showLoadingSpinner(); // Show spinner
+
             $.ajax({
                 url: '/RajahQueue/public/PaymentController/completePayment',
                 method: 'POST',
@@ -300,10 +319,12 @@
                     } else {
                         alert(response.message || 'Failed to complete payment. Please try again.');
                     }
+                    hideLoadingSpinner(); // Hide spinner after success
                 },
                 error: function (xhr, status, error) {
                     console.error('Error completing payment:', error);
                     alert('Error completing payment. Please try again.');
+                    hideLoadingSpinner(); // Hide spinner after error
                 }
             });
         }
@@ -312,6 +333,8 @@
             if (!confirm('Are you sure you want to cancel this payment?')) {
                 return;
             }
+
+            showLoadingSpinner(); // Show spinner
 
             $.ajax({
                 url: '/RajahQueue/public/PaymentController/cancelPayment',
@@ -324,10 +347,12 @@
                     } else {
                         alert(response.message || 'Failed to cancel payment. Please try again.');
                     }
+                    hideLoadingSpinner(); // Hide spinner after success
                 },
                 error: function (xhr, status, error) {
                     console.error('Error canceling payment:', error);
                     alert('Error canceling payment. Please try again.');
+                    hideLoadingSpinner(); // Hide spinner after error
                 }
             });
         }
