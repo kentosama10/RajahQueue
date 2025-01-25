@@ -90,6 +90,18 @@
                     <p><?php echo formatTime($data['averageQueueTimeSpent']); ?></p>
                 </div>
             </div>
+            <div class="col-md-4">
+                <div class="report-card">
+                    <h4>Completed Payments</h4>
+                    <p><?php echo $data['completedPaymentsCount']; ?></p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="report-card">
+                    <h4>Cancelled Payments</h4>
+                    <p><?php echo $data['cancelledPaymentsCount']; ?></p>
+                </div>
+            </div>
         </div>
 
         <!-- Custom Reports -->

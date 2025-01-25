@@ -172,6 +172,8 @@ class DashboardController extends Controller {
             'dailySummary' => $queueModel->getDailySummary(),
             'monthlySummary' => $queueModel->getMonthlySummary(),
             'serviceTypeBreakdown' => $queueModel->getServiceTypeBreakdown(),
+            'completedPaymentsCount' =>$queueModel->getCompletedPaymentsCount(),
+            'cancelledPaymentsCount' =>$queueModel->getCancelledPaymentsCount(),
         ];
         $this->view('report/reports', $data);
     }

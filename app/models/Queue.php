@@ -459,6 +459,37 @@ class Queue extends Model
         }
     }
 
+    public function getCompletedPaymentsCount() {
+        try {
+            $stmt = $this->db->query("
+                SELECT COUNT(*) as count
+                FROM queue 
+                WHERE payment_status = 'Completed'
+                AND reset_flag = 0
+            ");
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'];
+        } catch (PDOException $e) {
+            error_log("Error fetching completed payments count: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    public function getCancelledPaymentsCount() {
+        try {
+            $stmt = $this->db->query("
+                SELECT COUNT(*) as count
+                FROM queue 
+                WHERE payment_status = 'Cancelled'
+                AND reset_flag = 0
+            ");
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['count'];
+        } catch (PDOException $e) {
+            error_log("Error fetching cancelled payments count: " . $e->getMessage());
+            return 0;
+        }
+    }
 
     /**
      * Get paginated payment queue
