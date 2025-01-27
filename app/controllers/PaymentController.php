@@ -102,27 +102,12 @@ class PaymentController extends Controller {
             }
 
             $queueModel = $this->model('Queue');
-            
-            // First verify the queue item exists and is valid for payment
-            $queueItem = $queueModel->verifyQueueForPayment($queueNumber);
-            
-            if (!$queueItem) {
-                throw new Exception("Queue number not found or not eligible for payment");
-            }
-            
-            if ($queueItem["reset_flag"] === 1) {
-                throw new Exception("This queue number has been reset");
-            }
-            
-            if ($queueItem["payment_status"] === "Completed") {
-                throw new Exception("Payment has already been completed for this queue number");
-            }
 
             // Process the payment with user tracking
             $success = $queueModel->completePayment($queueNumber, $userId);
             
             if (!$success) {
-                throw new Exception("Failed to process payment");
+                throw new Exception("Failed to process payment. $queueNumber may be already complete or cancelled.");
             }
 
             $response["success"] = true;

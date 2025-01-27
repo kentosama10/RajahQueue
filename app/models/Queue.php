@@ -365,40 +365,6 @@ class Queue extends Model
     }
 
     /**
-     * Verifies if a queue number is valid for payment processing
-     * @param string $queueNumber The queue number to verify
-     * @return array|false Queue item data if valid, false otherwise
-     */
-    public function verifyQueueForPayment($queueNumber)
-    {
-        try {
-            $stmt = $this->db->prepare("
-            SELECT 
-                queue_number,
-                status,
-                payment_status,
-                reset_flag
-            FROM queue 
-            WHERE queue_number = ?
-            AND status = 'Done'
-            LIMIT 1
-        ");
-
-            $stmt->execute([$queueNumber]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-
-        } catch (PDOException $e) {
-            error_log("Error verifying queue for payment: " . $e->getMessage());
-            return false;
-        } 
-        
-        if ($queueItem["payment_status"] === "Completed") {
-            error_log("Payment status for queue number {$queueNumber}: " . $queueItem["payment_status"]);
-            throw new Exception("Payment has already been completed for this queue number");
-        }
-    }
-
-    /**
      * Get count of payments by status
      * @param string $status Payment status to count
      * @return int Count of payments with given status
