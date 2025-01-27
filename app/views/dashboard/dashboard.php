@@ -22,7 +22,7 @@
             <h2 class="mb-0">Queue Dashboard</h2>
             <div class="d-flex align-items-center gap-3">
                 <span class="refresh-timer">
-                    Auto-refresh in: <span id="countdown">15</span>s
+                    Auto-refresh in: <span id="countdown">10</span>s
                 </span>
                 <button class="btn btn-primary refresh-button" onclick="refreshDashboard()">
                     <i class="bi bi-arrow-clockwise"></i> Refresh Now
@@ -229,7 +229,7 @@
 
         function startCountdown() {
             clearInterval(countdownInterval);
-            countdownValue = 15;
+            countdownValue = 10;
             updateCountdown();
             countdownInterval = setInterval(() => {
                 countdownValue--;
@@ -611,7 +611,7 @@
         }
 
         function updatePagination(totalCount) {
-            const itemsPerPage = 20;
+            const itemsPerPage = 15;
             const totalPages = Math.ceil(totalCount / itemsPerPage);
 
             $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
@@ -622,7 +622,7 @@
         }
 
         function changePage(newPage) {
-            if (newPage < 1 || newPage > Math.ceil(totalCount / 20)) return; // Prevent invalid page numbers
+            if (newPage < 1 || newPage > Math.ceil(totalCount / 15)) return; // Prevent invalid page numbers
             currentPage = newPage;
             refreshDashboard(); // Refresh the dashboard with the new page
         }
@@ -813,7 +813,7 @@
         }
 
         // Call refreshDashboard at regular intervals
-        setInterval(refreshDashboard, 15000); // Adjust the interval as needed
+        setInterval(refreshDashboard, 10000); // Adjust the interval as needed
 
     </script>
     <script>

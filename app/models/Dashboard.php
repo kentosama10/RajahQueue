@@ -84,7 +84,7 @@ class Dashboard extends Model {
         return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
     }
 
-    public function getActiveQueue($page = 1, $limit = 15) {
+    public function getActiveQueue($page = 1, $limit = 24) {
         $offset = ($page - 1) * $limit;
 
         $stmt = $this->db->prepare("

@@ -90,7 +90,7 @@
             <h2 class="mb-0">Payment Dashboard</h2>
             <div class="d-flex align-items-center gap-3">
                 <span class="refresh-timer">
-                    Auto-refresh in: <span id="countdown">15</span>s
+                    Auto-refresh in: <span id="countdown">10</span>s
                 </span>
                 <button class="btn btn-primary refresh-button" onclick="loadPaymentQueue()">
                     <i class="bi bi-arrow-clockwise"></i> Refresh Now
@@ -181,12 +181,12 @@
     <script>
         const userRole = '<?php echo $_SESSION['role']; ?>';
         let currentPage = 1;
-        let countdownValue = 15;
+        let countdownValue = 10;
         let countdownInterval;
 
         function startCountdown() {
             clearInterval(countdownInterval);
-            countdownValue = 15;
+            countdownValue = 10;
             updateCountdown();
             countdownInterval = setInterval(() => {
                 countdownValue--;
