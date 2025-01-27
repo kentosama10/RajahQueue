@@ -65,6 +65,11 @@
                                 <option value="8">Counter 8</option>
                                 <option value="9">Counter 9</option>
                                 <option value="10">Counter 10</option>
+                                <option value="11">Counter 11</option>
+                                <option value="12">Counter 12</option>
+                                <option value="13">Counter 13</option>
+                                <option value="14">Counter 14</option>
+                                <option value="15">Counter 15</option>
                             </select>
                         </div>
                         <!-- Active Counters -->
@@ -259,7 +264,7 @@
             currentFilter = selectedServices.join(','); // Save the current filter state as a comma-separated string
 
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&services=' + encodeURIComponent(currentFilter), // Pass the selected services
+                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&services=' + encodeURIComponent(currentFilter) + '&limit=24', // Pass the selected services and limit
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -611,7 +616,7 @@
         }
 
         function updatePagination(totalCount) {
-            const itemsPerPage = 15;
+            const itemsPerPage = 24; // Set items per page to 24
             const totalPages = Math.ceil(totalCount / itemsPerPage);
 
             $('#pageInfo').text(`Page ${currentPage} of ${totalPages}`);
@@ -622,7 +627,8 @@
         }
 
         function changePage(newPage) {
-            if (newPage < 1 || newPage > Math.ceil(totalCount / 15)) return; // Prevent invalid page numbers
+            const itemsPerPage = 24;
+            if (newPage < 1 || newPage > Math.ceil(totalCount / itemsPerPage)) return; // Prevent invalid page numbers
             currentPage = newPage;
             refreshDashboard(); // Refresh the dashboard with the new page
         }
