@@ -728,19 +728,21 @@
         // Function to fetch active counters
         function fetchActiveCounters() {
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getActiveCounters',
-                method: 'GET',
-                dataType: 'json',
-                success: function (response) {
-                    const activeCountersList = $('#activeCountersList');
-                    activeCountersList.empty();
-                    response.activeCounters.forEach(counter => {
-                        activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.first_name}</li>`);
-                    });
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error fetching active counters:', error);
-                }
+            url: '/RajahQueue/public/DashboardController/getActiveCounters',
+            method: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                const activeCountersList = $('#activeCountersList');
+                activeCountersList.empty();
+                // Sort counters by counter_number
+                response.activeCounters.sort((a, b) => a.counter_number - b.counter_number);
+                response.activeCounters.forEach(counter => {
+                activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.first_name}</li>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching active counters:', error);
+            }
             });
         }
 
