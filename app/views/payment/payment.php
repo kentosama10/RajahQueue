@@ -263,7 +263,7 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    ${userRole === 'cashier'  ? `
+                                    ${userRole === 'cashier' || userRole === 'admin' ? `
                                         <button class="btn btn-success btn-sm" onclick="completePayment('${item.queue_number}')">
                                             <i class="bi bi-check-circle"></i> Complete
                                         </button>

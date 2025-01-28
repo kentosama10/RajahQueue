@@ -349,7 +349,7 @@
                 case 'serving':
                     return `
                         <div class="btn-group" role="group">
-                            <button class="btn btn-sm btn-success" onclick="updateStatus('${item.queue_number}', 'Done')">
+                            <button class="btn btn-sm btn-info" onclick="updateStatus('${item.queue_number}', 'Done')">
                                 <i class="bi bi-check-lg"></i> Done
                             </button>
                             <button class="btn btn-sm btn-success ms-1" onclick="updateStatus('${item.queue_number}', 'Done + Payment')">
