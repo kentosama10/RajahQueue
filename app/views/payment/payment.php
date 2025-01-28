@@ -16,11 +16,16 @@
         }
 
         .dashboard-header {
+            position: sticky;
+            top: 0;
+            /* Sticks to the top of the viewport */
+            z-index: 1000;
+            /* Ensure it stays above other elements */
             background-color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, .08);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
             padding: 0.5rem 0;
             margin-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, .05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .dashboard-header h2 {
@@ -171,7 +176,7 @@
         <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
         <!-- Loading Spinner -->
         <div id="loadingSpinner" class="text-center" style="display: none;">
-            <div class="spinner-border text-primary" role="status" >
+            <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
@@ -363,4 +368,5 @@
         });
     </script>
 </body>
+
 </html>
