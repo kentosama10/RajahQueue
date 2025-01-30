@@ -120,11 +120,13 @@
                                 <label for="service_type" class="form-label">Select Service</label>
                                 <select name="service_type" id="service_type" class="form-select" required>
                                     <option value="" disabled selected>-- Select Service --</option>
-                                    <option value="Visa">Visa Only</option>
+                                    <!-- <option value="Visa">Visa Only</option> -->
+                                    <option value="Payment">Payment Only</option>
                                     <option value="Tours / Cruise">Tours / Cruise Only</option>
                                     <option value="Flights">Flights Only</option>
                                     <option value="Travel Insurance">Travel Insurance Only</option>
                                     <option value="Multiple Services">Multiple Services</option>
+                                    
                                 </select>
                             </div>
 

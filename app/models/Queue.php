@@ -32,6 +32,41 @@ class Queue extends Model
         // Return the queue number for confirmation
         return $queueNumber;
     }
+    public function addQueueItem($customerName, $serviceType, $paymentStatus = null)
+    {
+        try {
+            // Ensure reset logic runs
+            $this->resetQueueNumbersIfNeeded();
+    
+            // Determine the service initial letter
+            $serviceInitial = $this->getServiceInitial($serviceType);
+    
+            // Generate queue number
+            $nextNumber = $this->getNextQueueNumberByService($serviceInitial);
+            $queueNumber = $serviceInitial . '-' . $nextNumber;
+    
+            // Determine the status
+            $status = ($serviceType === 'Payment') ? 'Done' : 'Waiting';
+    
+            // Insert into database
+            $stmt = $this->db->prepare("
+                INSERT INTO queue (customer_name, service_type, payment_status, queue_number, status, created_at, updated_at)
+                VALUES (:customer_name, :service_type, :payment_status, :queue_number, :status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ");
+            $stmt->bindParam(':customer_name', $customerName);
+            $stmt->bindParam(':service_type', $serviceType);
+            $stmt->bindParam(':payment_status', $paymentStatus);
+            $stmt->bindParam(':queue_number', $queueNumber);
+            $stmt->bindParam(':status', $status);
+            $stmt->execute();
+    
+            // Return the queue number for confirmation
+            return $queueNumber;
+        } catch (PDOException $e) {
+            error_log("Error adding queue item: " . $e->getMessage());
+            return null;
+        }
+    }
 
 
     private function resetQueueNumbersIfNeeded()
@@ -78,6 +113,8 @@ class Queue extends Model
                 return 'F';
             case 'Multiple Services':
                 return 'M';
+            case 'Payment':
+                return 'P';
             default:
                 return 'U'; // Default to 'U' for Unknown
         }
@@ -407,7 +444,7 @@ class Queue extends Model
         }
     }
 
-    
+
     public function getCancelledPayments()
     {
         try {
@@ -425,7 +462,8 @@ class Queue extends Model
         }
     }
 
-    public function getCompletedPaymentsCount() {
+    public function getCompletedPaymentsCount()
+    {
         try {
             $stmt = $this->db->query("
                 SELECT COUNT(*) as count
@@ -441,7 +479,8 @@ class Queue extends Model
         }
     }
 
-    public function getCancelledPaymentsCount() {
+    public function getCancelledPaymentsCount()
+    {
         try {
             $stmt = $this->db->query("
                 SELECT COUNT(*) as count
