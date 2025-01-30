@@ -89,11 +89,12 @@ class PaymentController extends Controller {
                 throw new Exception("User not authenticated");
             }
 
-            if (!isset($_POST['queue_number'])) {
-                throw new Exception("Missing queue number parameter");
+            if (!isset($_POST['queue_number']) || !isset($_POST['receipt_number'])) {
+                throw new Exception("Missing required parameters");
             }
 
             $queueNumber = trim($_POST['queue_number']);
+            $receiptNumber = trim($_POST['receipt_number']);
             $userId = (int)$_SESSION['user_id'];
             
             // Validate queue number format (e.g., "T-1", "V-2", etc.)
@@ -103,8 +104,11 @@ class PaymentController extends Controller {
 
             $queueModel = $this->model('Queue');
 
-            // Process the payment with user tracking
-            $success = $queueModel->completePayment($queueNumber, $userId);
+            // Log the input parameters for debugging
+            error_log("completePayment called with queueNumber: $queueNumber, receiptNumber: $receiptNumber, userId: $userId");
+
+            // Process the payment with user tracking and receipt number
+            $success = $queueModel->completePayment($queueNumber, $userId, $receiptNumber);
             
             if (!$success) {
                 throw new Exception("Failed to process payment. $queueNumber may be already complete or cancelled.");

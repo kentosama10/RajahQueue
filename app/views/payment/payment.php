@@ -262,7 +262,7 @@
                             <td class="text-center">${item.queue_number}</td>
                             <td class="text-center">${item.customer_name}</td>
                             <td class="text-center">${item.service_type}</td>
-                            <td class="text-center">${item.first_name ? `${item.first_name} ${item.last_name}` : 'Not assigned'}</td>
+                            <td class="text-center">${item.first_name ? `${item.first_name} ${item.last_name}` : '—'}</td>
                             <td class="text-center">
                                 <span class="badge bg-warning">Pending Payment</span>
                             </td>
@@ -307,18 +307,23 @@
         }
 
         function completePayment(queueNumber) {
-            if (!confirm('Are you sure you want to mark this payment as completed?')) {
+            const receiptNumber = prompt('Please enter the receipt number:');
+            if (!receiptNumber) {
+                alert('Receipt number is required to complete the payment.');
                 return;
             }
+
+            console.log('completePayment called with queueNumber:', queueNumber, 'receiptNumber:', receiptNumber);
 
             showLoadingSpinner(); // Show spinner
 
             $.ajax({
                 url: '/RajahQueue/public/PaymentController/completePayment',
                 method: 'POST',
-                data: { queue_number: queueNumber },
+                data: { queue_number: queueNumber, receipt_number: receiptNumber },
                 dataType: 'json',
                 success: function (response) {
+                    console.log('completePayment response:', response);
                     if (response.success) {
                         loadPaymentQueue();
                     } else {

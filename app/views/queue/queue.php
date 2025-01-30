@@ -126,7 +126,6 @@
                                     <option value="Flights">Flights Only</option>
                                     <option value="Travel Insurance">Travel Insurance Only</option>
                                     <option value="Multiple Services">Multiple Services</option>
-                                    
                                 </select>
                             </div>
 

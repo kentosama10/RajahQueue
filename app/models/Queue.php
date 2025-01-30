@@ -37,17 +37,17 @@ class Queue extends Model
         try {
             // Ensure reset logic runs
             $this->resetQueueNumbersIfNeeded();
-    
+
             // Determine the service initial letter
             $serviceInitial = $this->getServiceInitial($serviceType);
-    
+
             // Generate queue number
             $nextNumber = $this->getNextQueueNumberByService($serviceInitial);
             $queueNumber = $serviceInitial . '-' . $nextNumber;
-    
+
             // Determine the status
             $status = ($serviceType === 'Payment') ? 'Done' : 'Waiting';
-    
+
             // Insert into database
             $stmt = $this->db->prepare("
                 INSERT INTO queue (customer_name, service_type, payment_status, queue_number, status, created_at, updated_at)
@@ -59,7 +59,7 @@ class Queue extends Model
             $stmt->bindParam(':queue_number', $queueNumber);
             $stmt->bindParam(':status', $status);
             $stmt->execute();
-    
+
             // Return the queue number for confirmation
             return $queueNumber;
         } catch (PDOException $e) {
@@ -357,18 +357,42 @@ class Queue extends Model
      * @param int|null $userId ID of user completing the payment
      * @return bool Success status
      */
-    public function completePayment($queueNumber, $userId)
+    public function completePayment($queueNumber, $userId, $receiptNumber)
     {
         try {
             $this->db->beginTransaction();
 
+            // Log the input parameters for debugging
+            error_log("completePayment in Queue model called with queueNumber: $queueNumber, userId: $userId, receiptNumber: $receiptNumber");
+
+            // Check if the queue item exists and is in the correct state
+            $stmt = $this->db->prepare("
+                SELECT * FROM queue 
+                WHERE queue_number = :queueNumber 
+                AND payment_status = 'Pending' 
+                AND status = 'Done' 
+                AND reset_flag = 0
+            ");
+            $stmt->bindParam(':queueNumber', $queueNumber, PDO::PARAM_STR);
+            $stmt->execute();
+            $queueItem = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$queueItem) {
+                error_log("Queue item not found or not in the correct state for queueNumber: $queueNumber");
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Proceed with updating the payment status
             $stmt = $this->db->prepare("
                 UPDATE queue 
                 SET 
                     payment_status = 'Completed',
                     completed_by_user_id = :userId,
+                    receipt_number = :receiptNumber,
                     payment_completed_at = CURRENT_TIMESTAMP,
-                    updated_at = CURRENT_TIMESTAMP
+                    updated_at = CURRENT_TIMESTAMP,
+                    status = 'Done'
                 WHERE queue_number = :queueNumber
                 AND payment_status = 'Pending'
                 AND status = 'Done'
@@ -377,6 +401,7 @@ class Queue extends Model
 
             $stmt->bindParam(':queueNumber', $queueNumber, PDO::PARAM_STR);
             $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->bindParam(':receiptNumber', $receiptNumber, PDO::PARAM_STR);
 
             $success = $stmt->execute();
 
@@ -385,6 +410,7 @@ class Queue extends Model
                 return true;
             }
 
+            error_log("Failed to update queue item for queueNumber: $queueNumber");
             $this->db->rollBack();
             return false;
 
@@ -397,7 +423,7 @@ class Queue extends Model
 
     public function getQueueData()
     {
-        $stmt = $this->db->query("SELECT * FROM queue WHERE status = 'Done' AND payment_status = 'Pending' ORDER BY updated_at ASC");
+        $stmt = $this->db->query("SELECT * FROM queue WHERE status = 'Payment' AND payment_status = 'Pending' ORDER BY updated_at ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
