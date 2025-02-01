@@ -104,17 +104,19 @@ class Queue extends Model
     {
         switch ($serviceType) {
             case 'Tours / Cruise':
-                return 'T';
+                return 'Tours';
             case 'Travel Insurance':
                 return 'I'; // Use I for Travel Insurance to avoid conflict
             case 'Visa':
                 return 'V';
             case 'Flights':
-                return 'F';
+                return 'Flights';
             case 'Multiple Services':
                 return 'M';
             case 'Payment':
                 return 'P';
+            case 'Booth':
+                return 'B';
             default:
                 return 'U'; // Default to 'U' for Unknown
         }

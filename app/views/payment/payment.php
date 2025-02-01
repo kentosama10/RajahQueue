@@ -308,12 +308,6 @@
 
         function completePayment(queueNumber) {
             const receiptNumber = prompt('Please enter the receipt number:');
-            if (!receiptNumber) {
-                alert('Receipt number is required to complete the payment.');
-                return;
-            }
-
-            console.log('completePayment called with queueNumber:', queueNumber, 'receiptNumber:', receiptNumber);
 
             showLoadingSpinner(); // Show spinner
 
@@ -323,7 +317,6 @@
                 data: { queue_number: queueNumber, receipt_number: receiptNumber },
                 dataType: 'json',
                 success: function (response) {
-                    console.log('completePayment response:', response);
                     if (response.success) {
                         loadPaymentQueue();
                     } else {
@@ -332,7 +325,6 @@
                     hideLoadingSpinner(); // Hide spinner after success
                 },
                 error: function (xhr, status, error) {
-                    console.error('Error completing payment:', error);
                     alert('Error completing payment. Please try again.');
                     hideLoadingSpinner(); // Hide spinner after error
                 }

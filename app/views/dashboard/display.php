@@ -41,7 +41,7 @@
         .queue-item {
             background-color: #fff;
             border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 0;
             transition: transform var(--transition-speed), box-shadow var(--transition-speed);
             overflow: hidden;
@@ -61,7 +61,7 @@
         }
 
         .queue-number {
-            font-size: 3rem;
+            font-size: 2.3rem;
             font-weight: bold;
             color: var(--secondary-color);
             padding: 0.5rem;
@@ -259,7 +259,7 @@
             <!-- Continuing Clients Column -->
             <div class="dashboard-column">
                 <div class="display-header">
-                    <h2><i class="bi bi-credit-card me-2"></i>For Payment</h2>
+                    <h2><i class="bi bi-credit-card me-2"></i>Cashier</h2>
                 </div>
                 <div id="paymentQueue" class="row">
                     <!-- Payment queue items will be loaded here -->
@@ -357,7 +357,7 @@
         function processServingQueue(queue, itemsPerPage) {
             const servingByCounter = {};
             queue.forEach(item => {
-                if (item.status && item.status.toLowerCase() === 'serving' && item.counter_number) {
+                if (item.status && item.status.toLowerCase() === 'serving' && item.counter_number && item.service_type !== 'Booth') {
                     if (!servingByCounter[item.counter_number]) {
                         servingByCounter[item.counter_number] = [];
                     }
