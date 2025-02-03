@@ -96,11 +96,6 @@ class PaymentController extends Controller {
             $queueNumber = trim($_POST['queue_number']);
             $receiptNumber = trim($_POST['receipt_number']);
             $userId = (int)$_SESSION['user_id'];
-            
-            // Validate queue number format (e.g., "T-1", "V-2", etc.)
-            if (!preg_match('/^[A-Z]-\d+$/', $queueNumber)) {
-                throw new Exception("Invalid queue number format");
-            }
 
             $queueModel = $this->model('Queue');
 

@@ -112,10 +112,16 @@
                 <div class="service-filter-container">
                     <label for="serviceFilter" class="form-label">Filter by Service:</label>
                     <div id="serviceFilter" class="row">
-                        <div class="col-auto">
+                        <!-- <div class="col-auto">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="Visa" id="serviceVisa">
                                 <label class="form-check-label" for="serviceVisa">Visa</label>
+                            </div>
+                        </div> -->
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Booth" id="serviceBooth">
+                                <label class="form-check-label" for="serviceBooth">Booth</label>
                             </div>
                         </div>
                         <div class="col-auto">
