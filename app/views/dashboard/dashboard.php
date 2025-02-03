@@ -546,7 +546,7 @@
             // Update recall history (if available)
             if (data.recallHistory && data.recallHistory.length > 0) {
                 recallHistory.empty();
-                data.recallHistory.forEach(item => {
+                data.recallHistory.slice(0, 15).forEach(item => { // Increase limit to 15
                     recallHistory.append(createHistoryItem(item));
                 });
             } else {

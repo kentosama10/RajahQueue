@@ -125,8 +125,8 @@ class Queue extends Model
     private function getNextQueueNumberByService($serviceInitial)
     {
         // Count rows where reset_flag = 0 for the given service
-        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM queue WHERE reset_flag = 0 AND LEFT(queue_number, 1) = ?");
-        $stmt->execute([$serviceInitial]);
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM queue WHERE reset_flag = 0 AND queue_number LIKE ?");
+        $stmt->execute([$serviceInitial . '%']);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['count'] + 1; // Next queue number
     }
@@ -301,7 +301,7 @@ class Queue extends Model
             WHERE status IN ('No Show', 'Recalled', 'Serving', 'Done', 'Skipped')
             AND DATE(updated_at) = CURDATE()
             ORDER BY updated_at DESC
-            LIMIT 10
+            LIMIT 15
         ");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

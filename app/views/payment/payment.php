@@ -308,6 +308,10 @@
 
         function completePayment(queueNumber) {
             const receiptNumber = prompt('Please enter the receipt number:');
+            if (receiptNumber === null) {
+            alert('Receipt number is required to complete the payment.');
+            return;
+            }
 
             showLoadingSpinner(); // Show spinner
 
