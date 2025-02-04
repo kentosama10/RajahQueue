@@ -832,4 +832,17 @@ class Queue extends Model
         }
         return $averageTimeSpentByService;
     }
+
+    public function isUserServingAnotherCustomer($userId) {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) as count 
+            FROM queue 
+            WHERE serving_user_id = :userId 
+            AND status = 'Serving'
+        ");
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] > 0;
+    }
 }

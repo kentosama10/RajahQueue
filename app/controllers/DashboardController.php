@@ -80,22 +80,36 @@ class DashboardController extends Controller {
                 if ($queueItem) {
                     $servingUserId = (int)$queueItem['serving_user_id'];
 
-                    // Check the current status of the queue number before updating
-                    if ($queueItem['status'] === 'Serving' && $servingUserId !== null) {
-                        if ($newStatus === 'Done' && $servingUserId !== $userId) {
-                            $response['message'] = 'Only the user currently serving this customer can complete the status.';
-                        } else if ($servingUserId !== $userId) {
-                            $response['message'] = 'This customer is already being served by another user.';
-                        } else {
-                            // Handle "Done + Payment" status
-                            if ($newStatus === 'Done + Payment') {
-                                $newStatus = 'Done';
-                                $paymentStatus = 'Pending';
+                    // Check if the user is already serving another customer
+                    if ($newStatus === 'Serving' && $queueModel->isUserServingAnotherCustomer($userId)) {
+                        $response['message'] = 'You are already serving another customer.';
+                    } else {
+                        // Check the current status of the queue number before updating
+                        if ($queueItem['status'] === 'Serving' && $servingUserId !== null) {
+                            if ($newStatus === 'Done' && $servingUserId !== $userId) {
+                                $response['message'] = 'Only the user currently serving this customer can complete the status.';
+                            } else if ($servingUserId !== $userId) {
+                                $response['message'] = 'This customer is already being served by another user.';
                             } else {
-                                $paymentStatus = 'Not Required';
-                            }
+                                // Handle "Done + Payment" status
+                                if ($newStatus === 'Done + Payment') {
+                                    $newStatus = 'Done';
+                                    $paymentStatus = 'Pending';
+                                } else {
+                                    $paymentStatus = 'Not Required';
+                                }
 
-                            $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId, $paymentStatus);
+                                $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId, $paymentStatus);
+                                
+                                if ($success) {
+                                    $response['success'] = true;
+                                    $response['message'] = 'Status updated successfully';
+                                } else {
+                                    $response['message'] = 'Failed to update status';
+                                }
+                            }
+                        } else {
+                            $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId);
                             
                             if ($success) {
                                 $response['success'] = true;
@@ -103,15 +117,6 @@ class DashboardController extends Controller {
                             } else {
                                 $response['message'] = 'Failed to update status';
                             }
-                        }
-                    } else {
-                        $success = $queueModel->updateStatus($queueNumber, $newStatus, $userId);
-                        
-                        if ($success) {
-                            $response['success'] = true;
-                            $response['message'] = 'Status updated successfully';
-                        } else {
-                            $response['message'] = 'Failed to update status';
                         }
                     }
                 } else {
