@@ -72,14 +72,19 @@
         /* Add transition for showing/hiding dropdowns */
         .dropdown-field {
             transition: max-height 0.3s ease, opacity 0.3s ease;
-            max-height: 0; /* Initially hidden */
-            opacity: 0;    /* Initially hidden */
-            overflow: hidden; /* Prevent overflow */
+            max-height: 0;
+            /* Initially hidden */
+            opacity: 0;
+            /* Initially hidden */
+            overflow: hidden;
+            /* Prevent overflow */
         }
 
         .dropdown-field.show {
-            max-height: 100px; /* Adjust based on content */
-            opacity: 1;        /* Fully visible */
+            max-height: 100px;
+            /* Adjust based on content */
+            opacity: 1;
+            /* Fully visible */
         }
     </style>
 </head>
@@ -125,7 +130,9 @@
                                     <option value="Tours / Cruise">Tours / Cruise Only</option>
                                     <option value="Flights">Flights Only</option>
                                     <!-- <option value="Travel Insurance">Travel Insurance Only</option> -->
-                                    <option value="Booth">Booth Only</option>
+                                    <?php if ($_SESSION['role'] !== 'kiosk'): ?>
+                                        <option value="Booth">Booth</option>
+                                    <?php endif; ?>
                                     <option value="Multiple Services">Multiple Services</option>
                                 </select>
                             </div>
@@ -203,40 +210,41 @@
         // });
     </script> -->
 
-<?php if (isset($_SESSION['success_message'])):
-    $queueNumber = $_SESSION['success_message']['queue_number'];
-    unset($_SESSION['success_message']); // Clear session after showing the message
-    ?>
-    <!-- Success Modal -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0">
-                <!-- Modal Header -->
-                <div class="modal-header text-white" style="background-color: #F08221;">
-                    <h5 class="modal-title fw-bold" id="successModalLabel">Queue Added Successfully!</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+    <?php if (isset($_SESSION['success_message'])):
+        $queueNumber = $_SESSION['success_message']['queue_number'];
+        unset($_SESSION['success_message']); // Clear session after showing the message
+        ?>
+        <!-- Success Modal -->
+        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg border-0">
+                    <!-- Modal Header -->
+                    <div class="modal-header text-white" style="background-color: #F08221;">
+                        <h5 class="modal-title fw-bold" id="successModalLabel">Queue Added Successfully!</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
 
-                <!-- Modal Body -->
-                <div class="modal-body text-center">
-                    <h3 class="fw-bold" style="color: #F08221;">Your Queue Number</h3>
-                    <p class="display-4 fw-bold" style="color: #CE007C;"><?= $queueNumber; ?></p>
-                    <p class="text-muted">Please wait for your turn. Thank you!</p>
+                    <!-- Modal Body -->
+                    <div class="modal-body text-center">
+                        <h3 class="fw-bold" style="color: #F08221;">Your Queue Number</h3>
+                        <p class="display-4 fw-bold" style="color: #CE007C;"><?= $queueNumber; ?></p>
+                        <p class="text-muted">Please wait for your turn. Thank you!</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var successModal = new bootstrap.Modal(document.getElementById('successModal'), {
-                backdrop: 'static', // Prevent closing by clicking outside
-                keyboard: false     // Prevent closing with the escape key
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var successModal = new bootstrap.Modal(document.getElementById('successModal'), {
+                    backdrop: 'static', // Prevent closing by clicking outside
+                    keyboard: false     // Prevent closing with the escape key
+                });
+                successModal.show();
             });
-            successModal.show();
-        });
-    </script>
-<?php endif; ?>
+        </script>
+    <?php endif; ?>
 </body>
 <footer><?php include '../app/views/footer.php'; ?></footer>
+
 </html>
