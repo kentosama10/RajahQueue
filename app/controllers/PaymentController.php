@@ -27,6 +27,7 @@ class PaymentController extends Controller {
             // Get payment statistics
             $stats = [
                 'pending' => $queueModel->getPaymentCountByStatus('Pending'),
+                'serving' => $queueModel->getPaymentCountByStatus('Serving'),
                 'completed' => $queueModel->getPaymentsCompletedToday(),
                 'cancelled' => $queueModel->getCancelledPayments()
             ];
@@ -37,7 +38,7 @@ class PaymentController extends Controller {
                 $totalCount = $queueModel->getPaymentSearchCount($searchTerm);
             } else {
                 $payments = $queueModel->getPaymentQueue($page);
-                $totalCount = $queueModel->getTotalPendingPayments();
+                $totalCount = $queueModel->getTotalPendingPayments() + $queueModel->getPaymentCountByStatus('Serving');
             }
             
             $response = [
@@ -205,6 +206,33 @@ class PaymentController extends Controller {
             $response["message"] = "Payment cancellation failed: " . $e->getMessage();
         }
         
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+    public function updatePaymentStatus() {
+        ob_clean();
+
+        $response = ['success' => false, 'message' => ''];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_POST['queue_number']) || !isset($_POST['payment_status'])) {
+                $response['message'] = 'Missing required parameters';
+            } else {
+                $queueNumber = $_POST['queue_number'];
+                $paymentStatus = $_POST['payment_status'];
+
+                $queueModel = $this->model('Queue');
+                $success = $queueModel->updatePaymentStatus($queueNumber, $paymentStatus);
+
+                $response['success'] = $success;
+                $response['message'] = $success ? 'Payment status updated successfully' : 'Failed to update payment status';
+            }
+        } else {
+            $response['message'] = 'Invalid request method';
+        }
+
         header('Content-Type: application/json');
         echo json_encode($response);
         exit;

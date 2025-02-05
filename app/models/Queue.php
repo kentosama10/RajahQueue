@@ -271,8 +271,7 @@ class Queue extends Model
         }
     }
 
-    public function updatePaymentStatus($queueNumber, $paymentStatus)
-    {
+    public function updatePaymentStatus($queueNumber, $paymentStatus) {
         try {
             $stmt = $this->db->prepare("
                 UPDATE queue 
@@ -371,7 +370,7 @@ class Queue extends Model
             $stmt = $this->db->prepare("
                 SELECT * FROM queue 
                 WHERE queue_number = :queueNumber 
-                AND payment_status = 'Pending' 
+                AND payment_status = 'Serving' 
                 AND status = 'Done' 
                 AND reset_flag = 0
             ");
@@ -396,7 +395,7 @@ class Queue extends Model
                     updated_at = CURRENT_TIMESTAMP,
                     status = 'Done'
                 WHERE queue_number = :queueNumber
-                AND payment_status = 'Pending'
+                AND payment_status = 'Serving'
                 AND status = 'Done'
                 AND reset_flag = 0
             ");
@@ -542,7 +541,7 @@ class Queue extends Model
                     u.last_name
                 FROM queue q
                 LEFT JOIN users u ON q.serving_user_id = u.id
-                WHERE q.payment_status = 'Pending' 
+                WHERE q.payment_status IN ('Pending', 'Serving')
                 AND q.status = 'Done'
                 AND q.reset_flag = 0
                 ORDER BY q.updated_at ASC
@@ -698,7 +697,7 @@ class Queue extends Model
                     payment_completed_at = CURRENT_TIMESTAMP,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE queue_number = :queueNumber
-                AND payment_status = 'Pending'
+                AND payment_status = 'Serving'
                 AND status = 'Done'
                 AND reset_flag = 0
             ");

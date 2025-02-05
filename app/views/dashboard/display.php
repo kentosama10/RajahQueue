@@ -311,7 +311,7 @@
 
                     // Reset countdown
                     clearInterval(countdown);
-                    let countdownValue = 15;
+                    let countdownValue = 10;
                     updateCountdownDisplay(countdownValue);
                     countdown = setInterval(() => {
                         countdownValue--;
@@ -444,17 +444,20 @@
             // Sound effect for new items
             const newItemSound = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
 
-            if (items.length === 0) {
+            // Filter items to only include those with "Serving" status
+            const servingItems = items.filter(item => item.payment_status.toLowerCase() === 'serving');
+
+            if (servingItems.length === 0) {
                 // Show fallback animation when no data is available
                 paymentQueue.empty();
                 paymentQueue.append(`
             <div class="col-12 text-center mt-5 no-data-fade-in">
-                <h3 class="mt-3 text-muted">No pending for payments.</h3>
+                <h3 class="mt-3 text-muted">No payments currently being served.</h3>
             </div>
         `);
             } else {
                 // Render items with transitions for new data
-                items.forEach((item, index) => {
+                servingItems.forEach((item, index) => {
                     const isNew = !existingItems.includes(item.queue_number);
 
                     if (isNew) {
@@ -499,7 +502,7 @@
             updateClock();
             setInterval(updateClock, 1000);
             refreshDisplay();
-            setInterval(refreshDisplay, 15000); // Ensure no overlap
+            setInterval(refreshDisplay, 10000); // Ensure no overlap
         });
     </script>
 

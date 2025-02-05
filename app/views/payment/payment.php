@@ -1,12 +1,12 @@
 <?php include '../app/views/header.php'; ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"></html>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head></head>
+    <meta charset="""UTF-8">
+    <meta name="""viewport" content="""width=device-width, initial-scale=""1.0">
     <title>Payment Dashboard - RajahQueue</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="""https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="""stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -252,7 +252,7 @@
             if (!data.payments || data.payments.length === 0) {
                 paymentTableBody.append(`
                     <tr>
-                        <td colspan="5" class="text-center text-muted">No payments pending.</td>
+                        <td colspan="6" class="text-center text-muted">No payments pending.</td>
                     </tr>
                 `);
             } else {
@@ -264,19 +264,10 @@
                             <td class="text-center">${item.service_type}</td>
                             <td class="text-center">${item.first_name ? `${item.first_name} ${item.last_name}` : '—'}</td>
                             <td class="text-center">
-                                <span class="badge bg-warning">Pending Payment</span>
+                                <span class="badge ${getStatusBadgeClass(item.payment_status)}">${item.payment_status}</span>
                             </td>
                             <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    ${userRole === 'cashier' || userRole === 'admin' ? `
-                                        <button class="btn btn-success btn-sm" onclick="completePayment('${item.queue_number}')">
-                                            <i class="bi bi-check-circle"></i> Complete
-                                        </button>
-                                        <button class="btn btn-danger btn-sm ms-2" onclick="cancelPayment('${item.queue_number}')">
-                                            <i class="bi bi-x-circle"></i> Cancel
-                                        </button>
-                                    ` : ''}
-                                </div>
+                                ${getActionButtons(item)}
                             </td>
                         </tr>
                     `);
@@ -285,6 +276,64 @@
 
             // Update pagination
             updatePagination(data.totalCount || 0);
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status?.toLowerCase()) {
+                case 'pending':
+                    return 'bg-warning';
+                case 'serving':
+                    return 'bg-primary';
+                case 'completed':
+                    return 'bg-success';
+                case 'cancelled':
+                    return 'bg-danger';
+                default:
+                    return 'bg-secondary';
+            }
+        }
+
+        function getActionButtons(item) {
+            switch (item.payment_status.toLowerCase()) {
+                case 'pending':
+                    return `
+                        <button class="btn btn-sm btn-primary" onclick="updatePaymentStatus('${item.queue_number}', 'Serving')">
+                            <i class="bi bi-play-fill"></i> Start
+                        </button>`;
+                case 'serving':
+                    return `
+                        <button class="btn btn-sm btn-success" onclick="completePayment('${item.queue_number}')">
+                            <i class="bi bi-check-circle"></i> Complete
+                        </button>
+                        <button class="btn btn-sm btn-danger ms-2" onclick="cancelPayment('${item.queue_number}')">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>`;
+                default:
+                    return '';
+            }
+        }
+
+        function updatePaymentStatus(queueNumber, newStatus) {
+            $.ajax({
+                url: '/RajahQueue/public/PaymentController/updatePaymentStatus',
+                method: 'POST',
+                data: {
+                    queue_number: queueNumber,
+                    payment_status: newStatus
+                },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        loadPaymentQueue();
+                    } else {
+                        alert('Failed to update payment status. Please try again.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating payment status:', error);
+                    alert('Error updating payment status. Please try again.');
+                }
+            });
         }
 
         function updatePagination(totalCount) {
@@ -309,8 +358,8 @@
         function completePayment(queueNumber) {
             const receiptNumber = prompt('Please enter the receipt number:');
             if (receiptNumber === null) {
-            alert('Receipt number is required to complete the payment.');
-            return;
+                alert('Receipt number is required to complete the payment.');
+                return;
             }
 
             showLoadingSpinner(); // Show spinner
