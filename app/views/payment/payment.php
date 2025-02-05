@@ -2,91 +2,93 @@
 <!DOCTYPE html>
 <html lang="en"></html>
 
-<head></head>
-    <meta charset="""UTF-8">
-    <meta name="""viewport" content="""width=device-width, initial-scale=""1.0">
-    <title>Payment Dashboard - RajahQueue</title>
-    <link href="""https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="""stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
-        }
+</html>
 
-        .dashboard-header {
-            position: sticky;
-            top: 0;
-            /* Sticks to the top of the viewport */
-            z-index: 1000;
-            /* Ensure it stays above other elements */
-            background-color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
-            padding: 0.5rem 0;
-            margin-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Dashboard - RajahQueue</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f8f9fa;
+    }
 
-        .dashboard-header h2 {
-            font-weight: 600;
-            color: #2c3e50;
-        }
+    .dashboard-header {
+        position: sticky;
+        top: 0;
+        /* Sticks to the top of the viewport */
+        z-index: 1000;
+        /* Ensure it stays above other elements */
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+        padding: 0.5rem 0;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
 
-        .payment-stats {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
-            text-align: center;
-        }
+    .dashboard-header h2 {
+        font-weight: 600;
+        color: #2c3e50;
+    }
 
-        .stats-pending {
-            border-left: 4px solid #ffc107;
-        }
+    .payment-stats {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+        text-align: center;
+    }
 
-        .stats-completed {
-            border-left: 4px solid #28a745;
-        }
+    .stats-pending {
+        border-left: 4px solid #ffc107;
+    }
 
-        .stats-cancelled {
-            border-left: 4px solid #d3212d;
-        }
+    .stats-completed {
+        border-left: 4px solid #28a745;
+    }
+
+    .stats-cancelled {
+        border-left: 4px solid #d3212d;
+    }
 
 
-        .payment-card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
-        }
+    .payment-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+    }
 
-        .table th {
-            background-color: #f8f9fa;
-        }
+    .table th {
+        background-color: #f8f9fa;
+    }
 
-        .search-container {
-            max-width: 400px;
-            margin-bottom: 1rem;
-        }
+    .search-container {
+        max-width: 400px;
+        margin-bottom: 1rem;
+    }
 
-        .refresh-timer {
-            font-size: 0.9rem;
-            color: #64748b;
-            font-weight: 500;
-        }
+    .refresh-timer {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+    }
 
-        .refresh-button {
-            padding: 0.625rem 1.25rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
+    .refresh-button {
+        padding: 0.625rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
 
-        .refresh-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, .08);
-        }
-    </style>
+    .refresh-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, .08);
+    }
+</style>
 </head>
 
 <body>
@@ -94,6 +96,15 @@
         <div class="container d-flex justify-content-between align-items-center">
             <h2 class="mb-0">Payment Dashboard</h2>
             <div class="d-flex align-items-center gap-3">
+
+                <select id="cashierCounterSelect" class="form-select" onchange="updateCashierCounter()">
+                    <option value="" disabled selected>Choose Cashier Counter</option>
+                    <option value="release">Release Counter</option>
+                    <option value="1">Cashier 1</option>
+                    <option value="2">Cashier 2</option>
+                    <option value="3">Cashier 3</option>
+                    <!-- Add more cashier counters as needed -->
+                </select>
                 <span class="refresh-timer">
                     Auto-refresh in: <span id="countdown">10</span>s
                 </span>
@@ -245,18 +256,24 @@
             $('#completedCount').text(data.stats?.completed || 0);
             $('#cancelledCount').text(data.stats?.cancelled || 0);
 
+            // Sort payments to ensure 'serving' status is at the top, followed by 'pending', 'completed', and 'cancelled'
+            const sortedPayments = data.payments.sort((a, b) => {
+                const statusOrder = ['serving', 'pending', 'completed', 'cancelled'];
+                return statusOrder.indexOf(a.payment_status.toLowerCase()) - statusOrder.indexOf(b.payment_status.toLowerCase());
+            });
+
             // Update payment table
             const paymentTableBody = $('#paymentTableBody');
             paymentTableBody.empty();
 
-            if (!data.payments || data.payments.length === 0) {
+            if (!sortedPayments || sortedPayments.length === 0) {
                 paymentTableBody.append(`
                     <tr>
                         <td colspan="6" class="text-center text-muted">No payments pending.</td>
                     </tr>
                 `);
             } else {
-                data.payments.forEach(item => {
+                sortedPayments.forEach(item => {
                     paymentTableBody.append(`
                         <tr>
                             <td class="text-center">${item.queue_number}</td>
@@ -314,12 +331,19 @@
         }
 
         function updatePaymentStatus(queueNumber, newStatus) {
+            const counterNumber = prompt('Please enter your counter number:');
+            if (counterNumber === null) {
+                alert('Counter number is required to start serving.');
+                return;
+            }
+
             $.ajax({
                 url: '/RajahQueue/public/PaymentController/updatePaymentStatus',
                 method: 'POST',
                 data: {
                     queue_number: queueNumber,
-                    payment_status: newStatus
+                    payment_status: newStatus,
+                    counter_number: counterNumber
                 },
                 dataType: 'json',
                 success: function (response) {
@@ -408,6 +432,48 @@
                     console.error('Error canceling payment:', error);
                     alert('Error canceling payment. Please try again.');
                     hideLoadingSpinner(); // Hide spinner after error
+                }
+            });
+        }
+
+        function updateCashierCounter() {
+            const selectedCounter = document.getElementById("cashierCounterSelect").value;
+
+            if (!selectedCounter) {
+                alert("Please select a cashier counter first.");
+                return;
+            }
+
+            const isReleasingCounter = selectedCounter === "release";
+
+            $.ajax({
+                url: "/RajahQueue/public/PaymentController/updateCashierCounter",
+                method: "POST",
+                data: {
+                    cashier_number: isReleasingCounter ? null : selectedCounter
+                },
+                success: function (response) {
+                    try {
+                        const data = typeof response === 'string' ? JSON.parse(response) : response;
+
+                        if (data.success) {
+                            if (isReleasingCounter) {
+                                alert("Cashier counter successfully released!");
+                                document.getElementById("cashierCounterSelect").value = ""; // Reset to default
+                            } else {
+                                alert(`You are now assigned to Cashier Counter ${selectedCounter}.`);
+                            }
+                        } else {
+                            alert(data.message || "Failed to update the cashier counter. Please try again.");
+                        }
+                    } catch (e) {
+                        console.error("Error parsing response:", e);
+                        alert("An error occurred while processing the response.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error updating cashier counter:", error);
+                    alert("An error occurred while updating the cashier counter. Please try again.");
                 }
             });
         }

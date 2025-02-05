@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
 
 </head>
 
@@ -70,6 +70,11 @@
                                 <option value="13">Counter 13</option>
                                 <option value="14">Counter 14</option>
                                 <option value="15">Counter 15</option>
+                                <option value="16">Counter 16</option>
+                                <option value="17">Counter 17</option>
+                                <option value="18">Counter 18</option>
+                                <option value="19">Counter 19</option>
+                                <option value="20">Counter 20</option>
                             </select>
                         </div>
                         <!-- Active Counters -->
@@ -740,21 +745,21 @@
         // Function to fetch active counters
         function fetchActiveCounters() {
             $.ajax({
-            url: '/RajahQueue/public/DashboardController/getActiveCounters',
-            method: 'GET',
-            dataType: 'json',
-            success: function (response) {
-                const activeCountersList = $('#activeCountersList');
-                activeCountersList.empty();
-                // Sort counters by counter_number
-                response.activeCounters.sort((a, b) => a.counter_number - b.counter_number);
-                response.activeCounters.forEach(counter => {
-                activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.first_name}</li>`);
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error('Error fetching active counters:', error);
-            }
+                url: '/RajahQueue/public/DashboardController/getActiveCounters',
+                method: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    const activeCountersList = $('#activeCountersList');
+                    activeCountersList.empty();
+                    // Sort counters by counter_number
+                    response.activeCounters.sort((a, b) => a.counter_number - b.counter_number);
+                    response.activeCounters.forEach(counter => {
+                        activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.first_name}</li>`);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching active counters:', error);
+                }
             });
         }
 

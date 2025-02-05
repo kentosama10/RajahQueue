@@ -186,9 +186,6 @@ class PaymentController extends Controller {
             $queueNumber = trim($_POST['queue_number']);
             $userId = (int)$_SESSION['user_id'];
             
-            if (!preg_match('/^[A-Z]-\d+$/', $queueNumber)) {
-                throw new Exception("Invalid queue number format");
-            }
 
             $queueModel = $this->model('Queue');
             $success = $queueModel->cancelPayment($queueNumber, $userId);
