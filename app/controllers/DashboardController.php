@@ -269,4 +269,8 @@ class DashboardController extends Controller {
         echo json_encode(['activeCounters' => $activeCounters]);
         exit;
     }
+
+    public function grid() {
+        $this->view('dashboard/grid_display');
+    }
 }
