@@ -159,6 +159,93 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
+
+        #currentPaymentDisplays {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #currentPaymentDisplays .now-serving {
+            background: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        #currentPaymentDisplays .counter-info {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        #currentPaymentDisplays .queue-number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        #currentPaymentDisplays .customer-info {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .payment-section .upcoming-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .payment-section .upcoming-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Add these to your existing styles */
+        .queue-item {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .queue-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, .15);
+        }
+
+        .counter-header {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            padding: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .no-data-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: translateIn 0.5s forwards;
+        }
+
+        @keyframes translateIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -173,7 +260,6 @@
             </div>
 
             <div class="upcoming-numbers">
-                <h3>Upcoming Numbers</h3>
                 <div id="upcomingList">
                     <!-- Upcoming numbers will be populated here -->
                 </div>
@@ -184,12 +270,15 @@
                 <div class="payment-header">
                     <h3><i class="bi bi-credit-card me-2"></i>Cashier</h3>
                 </div>
-                <div class="now-serving">
-                    <div id="currentPayment" class="queue-number">---</div>
-                    <div id="counterInfo" class="counter-info">Counter: ---</div>
+                <!-- Container for all active payment counters -->
+                <div id="currentPaymentDisplays">
+                    <!-- Payment displays will be dynamically inserted here -->
                 </div>
-                <div id="upcomingPayments" class="upcoming-numbers">
-                    <!-- Upcoming payment numbers will be populated here -->
+                <div class="upcoming-numbers">
+                    <h3>Upcoming Payments</h3>
+                    <div id="upcomingPayments">
+                        <!-- Upcoming payment numbers will be populated here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,74 +358,65 @@
         }
 
         function updatePaymentDisplay(paymentData) {
-            // Sort payments to ensure 'serving' status is at the top, followed by 'pending'
-            const sortedPayments = paymentData.sort((a, b) => {
-                const statusOrder = ['serving', 'pending'];
-                const aStatus = a.payment_status?.toLowerCase() || '';
-                const bStatus = b.payment_status?.toLowerCase() || '';
-                return statusOrder.indexOf(aStatus) - statusOrder.indexOf(bStatus);
-            });
-
-            // Filter serving payments (only those with assigned counters)
-            const servingPayments = sortedPayments.filter(item => 
-                item.payment_status && 
-                item.payment_status.toLowerCase() === "serving"
+            // Filter only serving payments and sort by counter number
+            const servingPayments = paymentData.filter(item => 
+                item.payment_status?.toLowerCase() === "serving"
             );
 
-            // Filter pending payments
-            const pendingPayments = sortedPayments.filter(item => 
-                item.payment_status && 
-                item.payment_status.toLowerCase() === "pending"
-            ).slice(0, 3);
-
-            // Update current payment display with animations
-            if (servingPayments.length > 0) {
-                servingPayments.forEach(current => {
-                    // Only display if there's a counter number
-                    if (current.counter_number) {
-                        const paymentDisplayId = `payment-counter-${current.counter_number}`;
-                        
-                        // Create or update the payment display for this counter
-                        let paymentDisplay = $(`#${paymentDisplayId}`);
-                        if (paymentDisplay.length === 0) {
-                            // Create new display if it doesn't exist
-                            const newDisplay = `
-                                <div id="${paymentDisplayId}" class="now-serving mb-3 animate__animated animate__fadeIn">
-                                    <div class="counter-info">Counter ${current.counter_number}</div>
-                                    <div class="queue-number">${current.queue_number}</div>
-                                    ${current.customer_name ? `
-                                        <div class="customer-info text-center mt-2">
-                                            ${current.customer_name}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `;
-                            $("#currentPaymentDisplays").append(newDisplay);
-                        } else {
-                            // Update existing display with animation if number changed
-                            const currentNumber = paymentDisplay.find('.queue-number').text();
-                            if (currentNumber !== current.queue_number) {
-                                paymentDisplay.find('.queue-number').fadeOut(300, function() {
-                                    $(this).text(current.queue_number).fadeIn(300);
-                                    // Play notification sound
-                                    const audio = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
-                                    audio.play();
-                                });
-                            }
-                        }
-                    }
-                });
-            } else {
-                // No serving payments
-                $("#currentPaymentDisplays").html(`
-                    <div class="now-serving">
-                        <div class="counter-info">No Active Counters</div>
-                        <div class="queue-number">---</div>
+            // Update payment display section
+            const currentPaymentDisplays = $("#currentPaymentDisplays");
+            
+            if (servingPayments.length === 0) {
+                currentPaymentDisplays.html(`
+                    <div class="col-12 text-center mt-5 no-data-fade-in">
+                        <h3 class="mt-3 text-muted">No payments currently being served.</h3>
                     </div>
                 `);
+            } else {
+                currentPaymentDisplays.empty();
+                
+                // Get existing queue numbers for comparison
+                const existingItems = previousPaymentData.map(prev => prev.queue_number);
+                
+                // Sound effect for new items
+                const newItemSound = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
+
+                servingPayments.forEach((payment, index) => {
+                    const isNew = !existingItems.includes(payment.queue_number);
+
+                    // Play sound for new items
+                    if (isNew) {
+                        newItemSound.play();
+                    }
+
+                    const displayHtml = `
+                        <div class="col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}"
+                             style="animation-delay: ${index * 0.1}s">
+                            <div class="queue-item text-center">
+                                <div class="counter-header">
+                                    <div class="status-indicator bg-success"></div>
+                                    <h4 class="mb-0">Counter ${payment.counter_number || 'N/A'}</h4>
+                                </div>
+                                <div class="queue-number">
+                                    <i class="bi bi-credit-card me-2"></i>${payment.queue_number}
+                                </div>
+                                ${payment.customer_name ? `
+                                    <div class="customer-info text-center mt-2">
+                                        ${payment.customer_name}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                    currentPaymentDisplays.append(displayHtml);
+                });
             }
 
-            // Update upcoming payments list with animations
+            // Update upcoming payments (only show pending)
+            const pendingPayments = paymentData.filter(item => 
+                item.payment_status?.toLowerCase() === "pending"
+            ).slice(0, 3);
+
             const upcomingContainer = $("#upcomingPayments");
             if (pendingPayments.length > 0) {
                 const upcomingHtml = pendingPayments.map((item, index) => `
@@ -364,6 +444,9 @@
                     </div>
                 `);
             }
+
+            // Update previous data for comparison in next refresh
+            previousPaymentData = servingPayments;
         }
 
         // Initialize
