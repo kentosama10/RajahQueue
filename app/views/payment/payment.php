@@ -98,11 +98,28 @@
             <div class="d-flex align-items-center gap-3">
 
                 <select id="cashierCounterSelect" class="form-select" onchange="updateCashierCounter()">
-                    <option value="" disabled selected>Choose Cashier Counter</option>
-                    <option value="release">Release Counter</option>
-                    <option value="1">Cashier 1</option>
-                    <option value="2">Cashier 2</option>
-                    <option value="3">Cashier 3</option>
+                <option value="" disabled selected>Choose Counter</option>
+                                <option value="release">Release Counter</option>
+                                <option value="1">Counter 1</option>
+                                <option value="2">Counter 2</option>
+                                <option value="3">Counter 3</option>
+                                <option value="4">Counter 4</option>
+                                <option value="5">Counter 5</option>
+                                <option value="6">Counter 6</option>
+                                <option value="7">Counter 7</option>
+                                <option value="8">Counter 8</option>
+                                <option value="9">Counter 9</option>
+                                <option value="10">Counter 10</option>
+                                <option value="11">Counter 11</option>
+                                <option value="12">Counter 12</option>
+                                <option value="13">Counter 13</option>
+                                <option value="14">Counter 14</option>
+                                <option value="15">Counter 15</option>
+                                <option value="16">Counter 16</option>
+                                <option value="17">Counter 17</option>
+                                <option value="18">Counter 18</option>
+                                <option value="19">Counter 19</option>
+                                <option value="20">Counter 20</option>
                     <!-- Add more cashier counters as needed -->
                 </select>
                 <span class="refresh-timer">
@@ -113,6 +130,17 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <div class="active-counters mt-2">
+        <h4>
+            <button id="toggleActiveCounters" class="btn btn-primary" onclick="toggleActiveCounters()">
+                Show Active Counters
+            </button>
+        </h4>
+        <ul id="activeCountersList" class="list-group mt-2" 
+            style="display: none; transition: max-height 0.5s ease-out; overflow: hidden;">
+        </ul>
     </div>
 
     <div class="container">
@@ -331,9 +359,10 @@
         }
 
         function updatePaymentStatus(queueNumber, newStatus) {
-            const counterNumber = prompt('Please enter your counter number:');
-            if (counterNumber === null) {
-                alert('Counter number is required to start serving.');
+            const selectedCounter = document.getElementById("cashierCounterSelect").value;
+            
+            if (!selectedCounter || selectedCounter === "release") {
+                alert('Please select a counter first before serving customers.');
                 return;
             }
 
@@ -343,14 +372,14 @@
                 data: {
                     queue_number: queueNumber,
                     payment_status: newStatus,
-                    counter_number: counterNumber
+                    counter_number: selectedCounter
                 },
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
                         loadPaymentQueue();
                     } else {
-                        alert('Failed to update payment status. Please try again.');
+                        alert(response.message || 'Failed to update payment status. Please try again.');
                     }
                 },
                 error: function (xhr, status, error) {
@@ -446,11 +475,46 @@
 
             const isReleasingCounter = selectedCounter === "release";
 
+            // First check counter availability before updating
+            if (!isReleasingCounter) {
+                $.ajax({
+                    url: "/RajahQueue/public/UserController/checkCounterAvailability",
+                    method: "POST",
+                    data: { counter_number: selectedCounter },
+                    success: function (response) {
+                        try {
+                            const data = typeof response === 'string' ? JSON.parse(response) : response;
+                            if (!data.available) {
+                                alert("This counter is already assigned to another user.");
+                                refreshCashierCounterSelect(); // Reset the dropdown
+                                return;
+                            }
+                            // If available, proceed with counter update
+                            proceedWithCounterUpdate(selectedCounter, isReleasingCounter);
+                        } catch (e) {
+                            console.error("Error checking counter availability:", e);
+                            alert("An error occurred while checking counter availability.");
+                            refreshCashierCounterSelect();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error checking counter availability:", error);
+                        alert("An error occurred while checking counter availability.");
+                        refreshCashierCounterSelect();
+                    }
+                });
+            } else {
+                // If releasing counter, proceed directly
+                proceedWithCounterUpdate(selectedCounter, isReleasingCounter);
+            }
+        }
+
+        function proceedWithCounterUpdate(selectedCounter, isReleasingCounter) {
             $.ajax({
-                url: "/RajahQueue/public/PaymentController/updateCashierCounter",
+                url: "/RajahQueue/public/UserController/updateCounter",
                 method: "POST",
                 data: {
-                    cashier_number: isReleasingCounter ? null : selectedCounter
+                    counter_number: isReleasingCounter ? null : selectedCounter
                 },
                 success: function (response) {
                     try {
@@ -458,30 +522,131 @@
 
                         if (data.success) {
                             if (isReleasingCounter) {
-                                alert("Cashier counter successfully released!");
+                                alert("Counter successfully released!");
                                 document.getElementById("cashierCounterSelect").value = ""; // Reset to default
                             } else {
-                                alert(`You are now assigned to Cashier Counter ${selectedCounter}.`);
+                                alert(`You are now assigned to Counter ${selectedCounter}.`);
                             }
+                            loadPaymentQueue(); // Refresh the payment queue to update counter information
                         } else {
-                            alert(data.message || "Failed to update the cashier counter. Please try again.");
+                            alert(data.message || "Failed to update the counter. Please try again.");
+                            refreshCashierCounterSelect();
                         }
                     } catch (e) {
                         console.error("Error parsing response:", e);
                         alert("An error occurred while processing the response.");
+                        refreshCashierCounterSelect();
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error updating cashier counter:", error);
-                    alert("An error occurred while updating the cashier counter. Please try again.");
+                    console.error("Error updating counter:", error);
+                    alert("An error occurred while updating the counter. Please try again.");
+                    refreshCashierCounterSelect();
                 }
             });
         }
 
-        // Initial load
+        function refreshCashierCounterSelect() {
+            $.ajax({
+                url: "/RajahQueue/public/UserController/getCounter",
+                method: "GET",
+                success: function (response) {
+                    try {
+                        const data = typeof response === 'string' ? JSON.parse(response) : response;
+                        const select = document.getElementById("cashierCounterSelect");
+
+                        if (data.counter_number) {
+                            select.value = data.counter_number;
+                        } else {
+                            select.value = ""; // Reset to default if no counter is assigned
+                        }
+                    } catch (e) {
+                        console.error("Error refreshing counter select:", e);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching counter info:", error);
+                }
+            });
+        }
+
+        // Add this function to fetch and display active counters
+        function fetchActiveCounters() {
+            $.ajax({
+                url: '/RajahQueue/public/DashboardController/getActiveCounters',
+                method: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    const activeCountersList = $('#activeCountersList');
+                    activeCountersList.empty();
+                    // Sort counters by counter_number
+                    response.activeCounters.sort((a, b) => a.counter_number - b.counter_number);
+                    response.activeCounters.forEach(counter => {
+                        activeCountersList.append(`<li>Counter ${counter.counter_number}: ${counter.first_name}</li>`);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching active counters:', error);
+                }
+            });
+        }
+
+        // Update the document ready function
         $(document).ready(function () {
+            refreshCashierCounterSelect();
             loadPaymentQueue();
+            fetchActiveCounters();
+            setInterval(fetchActiveCounters, 15000); // Refresh every 15 seconds
+
+            // Add event listener for counter select changes
+            document.getElementById("cashierCounterSelect").addEventListener("change", function (e) {
+                const selectedValue = e.target.value;
+                if (selectedValue && selectedValue !== "release") {
+                    // Check if counter is already assigned
+                    $.ajax({
+                        url: "/RajahQueue/public/UserController/checkCounterAvailability",
+                        method: "POST",
+                        data: { counter_number: selectedValue },
+                        success: function (response) {
+                            try {
+                                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                                if (!data.available) {
+                                    alert("This counter is already assigned to another user.");
+                                    refreshCashierCounterSelect(); // Reset the dropdown
+                                    return;
+                                }
+                                // If available, proceed with updateCashierCounter
+                                updateCashierCounter();
+                            } catch (e) {
+                                console.error("Error checking counter availability:", e);
+                                alert("An error occurred while checking counter availability.");
+                                refreshCashierCounterSelect();
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error checking counter availability:", error);
+                            alert("An error occurred while checking counter availability.");
+                            refreshCashierCounterSelect();
+                        }
+                    });
+                } else {
+                    // If releasing or no counter selected, proceed normally
+                    updateCashierCounter();
+                }
+            });
         });
+
+        // Add the toggle function
+        function toggleActiveCounters() {
+            var activeCountersList = $('#activeCountersList');
+            if (activeCountersList.css('display') === 'none') {
+                activeCountersList.css('display', 'block').hide().slideDown();
+            } else {
+                activeCountersList.slideUp(function () {
+                    $(this).css('display', 'none');
+                });
+            }
+        }
     </script>
 </body>
 

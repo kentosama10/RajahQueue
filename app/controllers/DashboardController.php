@@ -270,7 +270,7 @@ class DashboardController extends Controller {
         exit;
     }
 
-    public function grid() {
-        $this->view('dashboard/grid_display');
+    public function v2() {
+        $this->view('dashboard/displayv2');
     }
 }
