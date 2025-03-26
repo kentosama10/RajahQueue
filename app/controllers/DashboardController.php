@@ -40,7 +40,8 @@ class DashboardController extends Controller {
                 $data['totalCount'] = $dashboardModel->getTotalQueueCount();
             }
     
-            $data['paymentQueue'] = $queueModel->getPaymentQueue();
+            // Get payment queue with cashier information
+            $data['paymentQueue'] = $queueModel->getPaymentQueueWithCashier();
     
             // Fetch the counter's active user
             $counterNumber = $_GET['counter_number'] ?? 1; // Default to counter 1 if not provided

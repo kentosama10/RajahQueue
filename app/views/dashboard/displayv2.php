@@ -267,15 +267,11 @@
 
             <!-- Payment Queue Section -->
             <div class="payment-section">
-                <div class="payment-header">
-                    <h3><i class="bi bi-credit-card me-2"></i>Cashier</h3>
-                </div>
                 <!-- Container for all active payment counters -->
                 <div id="currentPaymentDisplays">
                     <!-- Payment displays will be dynamically inserted here -->
                 </div>
                 <div class="upcoming-numbers">
-                    <h3>Upcoming Payments</h3>
                     <div id="upcomingPayments">
                         <!-- Upcoming payment numbers will be populated here -->
                     </div>
@@ -358,65 +354,54 @@
         }
 
         function updatePaymentDisplay(paymentData) {
-            // Filter only serving payments and sort by counter number
+            // Sort and filter payments
             const servingPayments = paymentData.filter(item => 
-                item.payment_status?.toLowerCase() === "serving"
-            );
+                item.payment_status?.toLowerCase() === "serving" &&
+                item.counter_number // Only include payments with assigned counters
+            ).sort((a, b) => Number(a.counter_number) - Number(b.counter_number));
 
-            // Update payment display section
-            const currentPaymentDisplays = $("#currentPaymentDisplays");
-            
-            if (servingPayments.length === 0) {
-                currentPaymentDisplays.html(`
-                    <div class="col-12 text-center mt-5 no-data-fade-in">
-                        <h3 class="mt-3 text-muted">No payments currently being served.</h3>
-                    </div>
-                `);
-            } else {
-                currentPaymentDisplays.empty();
-                
-                // Get existing queue numbers for comparison
-                const existingItems = previousPaymentData.map(prev => prev.queue_number);
-                
-                // Sound effect for new items
-                const newItemSound = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
-
-                servingPayments.forEach((payment, index) => {
-                    const isNew = !existingItems.includes(payment.queue_number);
-
-                    // Play sound for new items
-                    if (isNew) {
-                        newItemSound.play();
-                    }
-
-                    const displayHtml = `
-                        <div class="col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}"
-                             style="animation-delay: ${index * 0.1}s">
-                            <div class="queue-item text-center">
-                                <div class="counter-header">
-                                    <div class="status-indicator bg-success"></div>
-                                    <h4 class="mb-0">Counter ${payment.counter_number || 'N/A'}</h4>
-                                </div>
-                                <div class="queue-number">
-                                    <i class="bi bi-credit-card me-2"></i>${payment.queue_number}
-                                </div>
-                                ${payment.customer_name ? `
-                                    <div class="customer-info text-center mt-2">
-                                        ${payment.customer_name}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    `;
-                    currentPaymentDisplays.append(displayHtml);
-                });
-            }
-
-            // Update upcoming payments (only show pending)
             const pendingPayments = paymentData.filter(item => 
                 item.payment_status?.toLowerCase() === "pending"
-            ).slice(0, 3);
+            ).slice(0, 5);
 
+            // Update current payment display
+            const currentPaymentDisplays = $("#currentPaymentDisplays");
+            
+            if (servingPayments.length > 0) {
+                // Take the first serving payment as the main display
+                const current = servingPayments[0];
+                const displayHtml = `
+                    <div class="now-serving">
+                        <h2><i class="bi bi-cash me-2"></i>Cashier</h2>
+                        <div class="queue-number">${current.queue_number}</div>
+                        <div class="counter-info">
+                            <i class="bi bi-person-badge me-2"></i>
+                            Counter ${current.counter_number}
+                        </div>
+                    </div>
+                `;
+
+                currentPaymentDisplays.html(displayHtml);
+
+                // Play sound if this is a new number
+                const previousPayment = previousPaymentData[0];
+                if (!previousPayment || 
+                    previousPayment.queue_number !== current.queue_number || 
+                    previousPayment.counter_number !== current.counter_number) {
+                    const audio = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
+                    audio.play();
+                }
+            } else {
+                currentPaymentDisplays.html(`
+                    <div class="now-serving">
+                        <h2><i class="bi bi-credit-card-2-front me-2"></i>Cashier</h2>
+                        <div class="queue-number">---</div>
+                        <div class="counter-info">---</div>
+                    </div>
+                `);
+            }
+
+            // Update upcoming payments list
             const upcomingContainer = $("#upcomingPayments");
             if (pendingPayments.length > 0) {
                 const upcomingHtml = pendingPayments.map((item, index) => `
@@ -424,12 +409,7 @@
                          style="animation-delay: ${index * 0.2}s">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <strong class="queue-number">Queue: ${item.queue_number}</strong>
-                                ${item.customer_name ? `
-                                    <div class="customer-name small text-muted">
-                                        ${item.customer_name}
-                                    </div>
-                                ` : ''}
+                                <span class="me-2">Queue: ${item.queue_number}</span>
                             </div>
                             <span class="badge bg-warning text-dark">Pending</span>
                         </div>

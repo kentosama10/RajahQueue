@@ -844,4 +844,55 @@ class Queue extends Model
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['count'] > 0;
     }
+
+    public function updatePaymentStatusAndServer($queueNumber, $paymentStatus, $counterNumber, $userId) {
+        try {
+            $sql = "UPDATE queue 
+                    SET payment_status = ?,
+                        cashier_server = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE queue_number = ?";
+                    
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$paymentStatus, $counterNumber, $queueNumber]);
+        } catch (PDOException $e) {
+            error_log("Error updating payment status and server: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getPaymentQueueWithCashier() {
+        try {
+            $sql = "SELECT q.*, u.first_name, u.last_name 
+                    FROM queue q 
+                    LEFT JOIN users u ON u.id = q.serving_user_id 
+                    WHERE q.payment_status IN ('Pending', 'Serving') 
+                    AND q.reset_flag = 0 
+                    ORDER BY 
+                        CASE q.payment_status 
+                            WHEN 'Serving' THEN 1 
+                            WHEN 'Pending' THEN 2 
+                        END,
+                        q.created_at ASC";
+                        
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Format the results to include cashier name
+            foreach ($results as &$row) {
+                if ($row['first_name'] && $row['last_name']) {
+                    $row['cashier_name'] = $row['first_name'] . ' ' . $row['last_name'];
+                }
+                // Include counter number from cashier_server field
+                $row['counter_number'] = $row['cashier_server'];
+            }
+            
+            return $results;
+        } catch (PDOException $e) {
+            error_log("Error getting payment queue with cashier: " . $e->getMessage());
+            return [];
+        }
+    }
 }

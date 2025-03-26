@@ -210,26 +210,39 @@ class PaymentController extends Controller {
 
     public function updatePaymentStatus() {
         ob_clean();
-
+        
         $response = ['success' => false, 'message' => ''];
-
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!isset($_POST['queue_number']) || !isset($_POST['payment_status'])) {
+            if (!isset($_POST['queue_number']) || !isset($_POST['payment_status']) || !isset($_POST['counter_number'])) {
                 $response['message'] = 'Missing required parameters';
             } else {
                 $queueNumber = $_POST['queue_number'];
                 $paymentStatus = $_POST['payment_status'];
+                $counterNumber = $_POST['counter_number'];
+                $userId = $_SESSION['user_id'] ?? null;
 
-                $queueModel = $this->model('Queue');
-                $success = $queueModel->updatePaymentStatus($queueNumber, $paymentStatus);
-
-                $response['success'] = $success;
-                $response['message'] = $success ? 'Payment status updated successfully' : 'Failed to update payment status';
+                if (!$userId) {
+                    $response['message'] = 'User not authenticated';
+                } else {
+                    $queueModel = $this->model('Queue');
+                    
+                    // Update both payment status and cashier_server
+                    $success = $queueModel->updatePaymentStatusAndServer(
+                        $queueNumber, 
+                        $paymentStatus, 
+                        $counterNumber,
+                        $userId
+                    );
+                    
+                    $response['success'] = $success;
+                    $response['message'] = $success ? 'Payment status updated successfully' : 'Failed to update payment status';
+                }
             }
         } else {
             $response['message'] = 'Invalid request method';
         }
-
+        
         header('Content-Type: application/json');
         echo json_encode($response);
         exit;
