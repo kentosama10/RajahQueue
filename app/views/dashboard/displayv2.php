@@ -37,7 +37,7 @@
             flex: 1;
             padding: 20px;
             background-color: #f8f9fa;
-            overflow-y: auto;
+            overflow-y: hidden;
         }
 
         .media-section {
@@ -50,19 +50,22 @@
         .now-serving {
             background: var(--secondary-color);
             color: #fff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
-            margin-bottom: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
         }
 
         .now-serving h2 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             margin-bottom: 10px;
+            text-align: center;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .queue-number {
-            font-size: 4rem;
+            font-size: 2rem;
             font-weight: bold;
             text-align: center;
         }
@@ -70,23 +73,43 @@
         .counter-info {
             font-size: 1.2rem;
             text-align: center;
-            margin-top: 10px;
         }
 
         .upcoming-numbers {
             background: #fff;
-            padding: 15px;
+            padding: 12px;
             border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .upcoming-numbers p {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            font-weight: 500;
+        }
+
+        /* Add grid layout for upcoming items */
+        .upcoming-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
         }
 
         .upcoming-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            animation: fadeIn 0.5s ease-in-out;
+            padding: 8px;
+            border-radius: 6px;
+            background: #f8f9fa;
+            transition: transform 0.3s ease, background 0.3s ease;
+            text-align: center;
+        }
+
+        .upcoming-item:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
         }
 
         /* Video Section */
@@ -101,7 +124,7 @@
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         /* News Ticker */
@@ -144,14 +167,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .payment-section {
-            margin-top: 20px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
         .payment-header {
             background: var(--primary-color);
             color: #fff;
@@ -163,35 +178,19 @@
         #currentPaymentDisplays {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
         }
 
         #currentPaymentDisplays .now-serving {
             background: var(--primary-color);
-            transition: all 0.3s ease;
         }
 
-        #currentPaymentDisplays .counter-info {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        #currentPaymentDisplays .queue-number {
-            font-size: 3.5rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 0.5rem 0;
-        }
-
-        #currentPaymentDisplays .customer-info {
-            font-size: 1.2rem;
-            opacity: 0.9;
+        #currentPaymentDisplays .now-serving:last-child {
+            margin-bottom: 0;
         }
 
         .payment-section .upcoming-item {
-            padding: 0.75rem;
-            border-radius: 8px;
+            padding: 5px;
+            border-radius: 0;
             transition: all 0.3s ease;
         }
 
@@ -246,35 +245,100 @@
                 transform: translateY(0);
             }
         }
+
+        /* Add these styles */
+        .serving-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .serving-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        /* Add these new styles */
+        .serving-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .service-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .service-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .serving-item {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            padding: 6px;
+            transition: transform 0.2s ease;
+        }
+
+        .serving-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .serving-item .queue-number {
+            font-size: 1.6rem;
+            margin: 3px 0;
+            font-weight: bold;
+        }
+
+        .serving-item .counter-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
     <div class="split-container">
         <!-- Left Side - Queue Information -->
         <div class="queue-section">
-            <!-- Regular Queue Section -->
+            <!-- Combined Now Serving Section -->
             <div class="now-serving">
-                <h2><i class="bi bi-people-fill me-2"></i>Now Serving</h2>
-                <div id="currentServing" class="queue-number">---</div>
-                <div id="counterInfo" class="counter-info">Counter: ---</div>
+                <h2><i class="bi bi-display me-2"></i>Now Serving</h2>
+                <div class="serving-container">
+                    <!-- Regular Queue Section -->
+                    <div class="service-section">
+                        <h3><i class="bi bi-people-fill me-1"></i>Queue</h3>
+                        <div id="currentServing">
+                            <!-- Queue numbers will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Section -->
+                    <div class="service-section">
+                        <h3><i class="bi bi-cash me-1"></i>Cashier</h3>
+                        <div id="currentPaymentDisplays">
+                            <!-- Payment numbers will be populated here -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Upcoming Sections -->
             <div class="upcoming-numbers">
-                <div id="upcomingList">
+                <div id="upcomingList" class="upcoming-list">
                     <!-- Upcoming numbers will be populated here -->
                 </div>
             </div>
 
-            <!-- Payment Queue Section -->
-            <div class="payment-section">
-                <!-- Container for all active payment counters -->
-                <div id="currentPaymentDisplays">
-                    <!-- Payment displays will be dynamically inserted here -->
-                </div>
-                <div class="upcoming-numbers">
-                    <div id="upcomingPayments">
-                        <!-- Upcoming payment numbers will be populated here -->
-                    </div>
+            <div class="upcoming-numbers">
+                <div id="upcomingPayments" class="upcoming-list">
+                    <!-- Upcoming payments will be populated here -->
                 </div>
             </div>
         </div>
@@ -284,7 +348,7 @@
             <div class="clock-display" id="clockDisplay"></div>
             <div class="video-container">
                 <video id="promoVideo" autoplay loop muted>
-                    <source src="/RajahQueue/app/assets/videos/promo.mp4" type="video/mp4">
+                    <source src="/RajahQueue/app/assets/videos/promo2.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -299,6 +363,7 @@
     <script>
         let previousServingData = [];
         let previousPaymentData = [];
+        const itemsPerPage = 5; // Number of items to show per page
 
         function updateClock() {
             const clockDisplay = document.getElementById("clockDisplay");
@@ -333,18 +398,24 @@
 
             const waitingItems = queueData.filter(item => 
                 item.status && item.status.toLowerCase() === "waiting"
-            ).slice(0, 5);
+            );
+
+            // Store serving data for rendering
+            previousServingData = servingItems;
 
             // Update current serving
-            if (servingItems.length > 0) {
-                const current = servingItems[0];
-                $("#currentServing").text(current.queue_number);
-                $("#counterInfo").text(`Counter: ${current.counter_number || "---"}`);
-            }
+            const servingHtml = servingItems.map(item => `
+                <div class="serving-item animate__animated animate__fadeIn">
+                    <div class="queue-number">${item.queue_number}</div>
+                    <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${item.counter_number || "---"}</div>
+                </div>
+            `).join("");
+            
+            $("#currentServing").html(servingHtml);
 
-            // Update upcoming list
+            // Update upcoming list independently
             const upcomingHtml = waitingItems.map(item => `
-                <div class="upcoming-item">
+                <div class="upcoming-item animate__animated animate__fadeIn">
                     <span>Queue: ${item.queue_number}</span>
                     <span>Status: Waiting</span>
                 </div>
@@ -354,79 +425,43 @@
         }
 
         function updatePaymentDisplay(paymentData) {
-            // Sort and filter payments
             const servingPayments = paymentData.filter(item => 
                 item.payment_status?.toLowerCase() === "serving" &&
-                item.counter_number // Only include payments with assigned counters
-            ).sort((a, b) => Number(a.counter_number) - Number(b.counter_number));
+                item.counter_number
+            );
 
             const pendingPayments = paymentData.filter(item => 
                 item.payment_status?.toLowerCase() === "pending"
-            ).slice(0, 5);
+            );
+
+            // Store payment data for rendering
+            previousPaymentData = servingPayments;
 
             // Update current payment display
-            const currentPaymentDisplays = $("#currentPaymentDisplays");
-            
-            if (servingPayments.length > 0) {
-                // Take the first serving payment as the main display
-                const current = servingPayments[0];
-                const displayHtml = `
-                    <div class="now-serving">
-                        <h2><i class="bi bi-cash me-2"></i>Cashier</h2>
-                        <div class="queue-number">${current.queue_number}</div>
-                        <div class="counter-info">
-                            <i class="bi bi-person-badge me-2"></i>
-                            Counter ${current.counter_number}
-                        </div>
-                    </div>
-                `;
+            const displayHtml = servingPayments.map(payment => `
+                <div class="serving-item animate__animated animate__fadeIn">
+                    <div class="queue-number">${payment.queue_number}</div>
+                    <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${payment.counter_number}</div>
+                </div>
+            `).join("");
 
-                currentPaymentDisplays.html(displayHtml);
+            $("#currentPaymentDisplays").html(displayHtml);
 
-                // Play sound if this is a new number
-                const previousPayment = previousPaymentData[0];
-                if (!previousPayment || 
-                    previousPayment.queue_number !== current.queue_number || 
-                    previousPayment.counter_number !== current.counter_number) {
-                    const audio = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
-                    audio.play();
-                }
-            } else {
-                currentPaymentDisplays.html(`
-                    <div class="now-serving">
-                        <h2><i class="bi bi-credit-card-2-front me-2"></i>Cashier</h2>
-                        <div class="queue-number">---</div>
-                        <div class="counter-info">---</div>
-                    </div>
-                `);
-            }
-
-            // Update upcoming payments list
+            // Update upcoming payments list independently
             const upcomingContainer = $("#upcomingPayments");
-            if (pendingPayments.length > 0) {
-                const upcomingHtml = pendingPayments.map((item, index) => `
-                    <div class="upcoming-item animate__animated animate__fadeInUp" 
-                         style="animation-delay: ${index * 0.2}s">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="me-2">Queue: ${item.queue_number}</span>
-                            </div>
-                            <span class="badge bg-warning text-dark">Pending</span>
-                        </div>
-                    </div>
-                `).join("");
-                
-                upcomingContainer.html(upcomingHtml);
-            } else {
-                upcomingContainer.html(`
-                    <div class="text-center text-muted animate__animated animate__fadeIn">
-                        <p>No pending payments</p>
-                    </div>
-                `);
-            }
-
-            // Update previous data for comparison in next refresh
-            previousPaymentData = servingPayments;
+            const upcomingHtml = pendingPayments.map((item, index) => `
+                <div class="upcoming-item animate__animated animate__fadeInUp" 
+                     style="animation-delay: ${index * 0.2}s">
+                    <span>Queue: ${item.queue_number}</span>
+                    <span>Status: Pending</span>
+                </div>
+            `).join("");
+            
+            upcomingContainer.html(upcomingHtml || `
+                <div class="text-center text-muted animate__animated animate__fadeIn">
+                    <p>No pending payments</p>
+                </div>
+            `);
         }
 
         // Initialize
@@ -434,7 +469,7 @@
             updateClock();
             setInterval(updateClock, 1000);
             refreshDisplay();
-            setInterval(refreshDisplay, 10000);
+            setInterval(refreshDisplay, 15000); // Fetch new data every 15 seconds
         });
     </script>
 </body>
