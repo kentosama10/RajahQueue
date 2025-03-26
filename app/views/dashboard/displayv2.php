@@ -331,12 +331,14 @@
 
             <!-- Upcoming Sections -->
             <div class="upcoming-numbers">
+                <p><i class="bi bi-clock me-1"></i>Upcoming Queues</p>
                 <div id="upcomingList" class="upcoming-list">
                     <!-- Upcoming numbers will be populated here -->
                 </div>
             </div>
 
             <div class="upcoming-numbers">
+                <p><i class="bi bi-cash me-1"></i>Upcoming Payments</p>
                 <div id="upcomingPayments" class="upcoming-list">
                     <!-- Upcoming payments will be populated here -->
                 </div>
@@ -420,8 +422,7 @@
                     <span>Status: Waiting</span>
                 </div>
             `).join("");
-            
-            $("#upcomingList").html(upcomingHtml || "<p>No upcoming numbers</p>");
+        
         }
 
         function updatePaymentDisplay(paymentData) {
@@ -459,7 +460,6 @@
             
             upcomingContainer.html(upcomingHtml || `
                 <div class="text-center text-muted animate__animated animate__fadeIn">
-                    <p>No pending payments</p>
                 </div>
             `);
         }
