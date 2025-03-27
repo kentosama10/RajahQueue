@@ -258,7 +258,7 @@
             $('#errorMessage').hide();
 
             $.ajax({
-                url: '/RajahQueue/public/PaymentController/getPaymentQueue',
+                url: '/RajahQueue/public/payment/getPaymentQueue',
                 method: 'GET',
                 data: {
                     page: currentPage,
@@ -367,7 +367,7 @@
             }
 
             $.ajax({
-                url: '/RajahQueue/public/PaymentController/updatePaymentStatus',
+                url: '/RajahQueue/public/payment/updatePaymentStatus',
                 method: 'POST',
                 data: {
                     queue_number: queueNumber,
@@ -418,7 +418,7 @@
             showLoadingSpinner(); // Show spinner
 
             $.ajax({
-                url: '/RajahQueue/public/PaymentController/completePayment',
+                url: '/RajahQueue/public/payment/completePayment',
                 method: 'POST',
                 data: { queue_number: queueNumber, receipt_number: receiptNumber },
                 dataType: 'json',
@@ -445,7 +445,7 @@
             showLoadingSpinner(); // Show spinner
 
             $.ajax({
-                url: '/RajahQueue/public/PaymentController/cancelPayment',
+                url: '/RajahQueue/public/payment/cancelPayment',
                 method: 'POST',
                 data: { queue_number: queueNumber },
                 dataType: 'json',
@@ -478,7 +478,7 @@
             // First check counter availability before updating
             if (!isReleasingCounter) {
                 $.ajax({
-                    url: "/RajahQueue/public/UserController/checkCounterAvailability",
+                    url: "/RajahQueue/public/user/checkCounterAvailability",
                     method: "POST",
                     data: { counter_number: selectedCounter },
                     success: function (response) {
@@ -511,7 +511,7 @@
 
         function proceedWithCounterUpdate(selectedCounter, isReleasingCounter) {
             $.ajax({
-                url: "/RajahQueue/public/UserController/updateCounter",
+                url: "/RajahQueue/public/user/updateCounter",
                 method: "POST",
                 data: {
                     counter_number: isReleasingCounter ? null : selectedCounter
@@ -548,7 +548,7 @@
 
         function refreshCashierCounterSelect() {
             $.ajax({
-                url: "/RajahQueue/public/UserController/getCounter",
+                url: "/RajahQueue/public/user/getCounter",
                 method: "GET",
                 success: function (response) {
                     try {
@@ -573,7 +573,7 @@
         // Add this function to fetch and display active counters
         function fetchActiveCounters() {
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getActiveCounters',
+                url: '/RajahQueue/public/dashboard/getActiveCounters',
                 method: 'GET',
                 dataType: 'json',
                 success: function (response) {
@@ -604,7 +604,7 @@
                 if (selectedValue && selectedValue !== "release") {
                     // Check if counter is already assigned
                     $.ajax({
-                        url: "/RajahQueue/public/UserController/checkCounterAvailability",
+                        url: "/RajahQueue/public/user/checkCounterAvailability",
                         method: "POST",
                         data: { counter_number: selectedValue },
                         success: function (response) {

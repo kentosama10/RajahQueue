@@ -301,6 +301,23 @@
             font-size: 0.9rem;
             opacity: 0.9;
         }
+
+        /* Zoom in and out animation for new items */
+        @keyframes zoomInOut {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2); /* Zoom in */
+            }
+            100% {
+                transform: scale(1); /* Zoom out */
+            }
+        }
+
+        .new-item {
+            animation: zoomInOut 1s ease-in-out infinite; /* Animation loops every 1 second */
+        }
     </style>
 </head>
 <body>
@@ -362,6 +379,9 @@
         </div>
     </div>
 
+    <!-- Add this audio element for the notification sound -->
+    <audio id="notificationSound" src="/RajahQueue/app/assets/sounds/notification.mp3" preload="auto"></audio>
+
     <script>
         let previousServingData = [];
         let previousPaymentData = [];
@@ -379,7 +399,7 @@
 
         function refreshDisplay() {
             $.ajax({
-                url: "/RajahQueue/public/DashboardController/getDashboardData",
+                url: "/RajahQueue/public/dashboard/getDashboardData",
                 method: "GET",
                 dataType: "json",
                 success: function(data) {
@@ -402,16 +422,30 @@
                 item.status && item.status.toLowerCase() === "waiting"
             );
 
+            // Check for new serving items
+            const newServingItems = servingItems.filter(item => 
+                !previousServingData.some(prevItem => prevItem.queue_number === item.queue_number)
+            );
+
+            if (newServingItems.length > 0) {
+                // Play notification sound if there are new items
+                const notificationSound = document.getElementById("notificationSound");
+                notificationSound.play();
+            }
+
             // Store serving data for rendering
             previousServingData = servingItems;
 
             // Update current serving
-            const servingHtml = servingItems.map(item => `
-                <div class="serving-item animate__animated animate__fadeIn">
-                    <div class="queue-number">${item.queue_number}</div>
-                    <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${item.counter_number || "---"}</div>
-                </div>
-            `).join("");
+            const servingHtml = servingItems.map(item => {
+                const isNew = newServingItems.some(newItem => newItem.queue_number === item.queue_number);
+                return `
+                    <div class="serving-item animate__animated animate__fadeIn ${isNew ? 'new-item' : ''}">
+                        <div class="queue-number">${item.queue_number}</div>
+                        <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${item.counter_number || "---"}</div>
+                    </div>
+                `;
+            }).join("");
             
             $("#currentServing").html(servingHtml);
 
@@ -422,7 +456,8 @@
                     <span>Status: Waiting</span>
                 </div>
             `).join("");
-        
+            
+            $("#upcomingList").html(upcomingHtml);
         }
 
         function updatePaymentDisplay(paymentData) {
@@ -435,16 +470,21 @@
                 item.payment_status?.toLowerCase() === "pending"
             );
 
-            // Store payment data for rendering
-            previousPaymentData = servingPayments;
+            // Check for new serving payment items
+            const newPaymentItems = servingPayments.filter(item => 
+                !previousPaymentData.some(prevItem => prevItem.queue_number === item.queue_number)
+            );
 
             // Update current payment display
-            const displayHtml = servingPayments.map(payment => `
-                <div class="serving-item animate__animated animate__fadeIn">
-                    <div class="queue-number">${payment.queue_number}</div>
-                    <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${payment.counter_number}</div>
-                </div>
-            `).join("");
+            const displayHtml = servingPayments.map(payment => {
+                const isNew = newPaymentItems.some(newItem => newItem.queue_number === payment.queue_number);
+                return `
+                    <div class="serving-item animate__animated animate__fadeIn ${isNew ? 'new-item' : ''}">
+                        <div class="queue-number">${payment.queue_number}</div>
+                        <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${payment.counter_number}</div>
+                    </div>
+                `;
+            }).join("");
 
             $("#currentPaymentDisplays").html(displayHtml);
 
@@ -457,11 +497,14 @@
                     <span>Status: Pending</span>
                 </div>
             `).join("");
-            
+
             upcomingContainer.html(upcomingHtml || `
                 <div class="text-center text-muted animate__animated animate__fadeIn">
                 </div>
             `);
+
+            // Update the previous payment data to the current serving payments
+            previousPaymentData = servingPayments;
         }
 
         // Initialize

@@ -77,7 +77,7 @@
                                 <?php echo htmlspecialchars($data['error']); ?>
                             </div>
                         <?php endif; ?>
-                        <form action="/RajahQueue/public/UserController/login" method="POST">
+                        <form action="/RajahQueue/public/user/login" method="POST">
                             <!-- Username Input -->
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>

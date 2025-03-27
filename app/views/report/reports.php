@@ -241,7 +241,7 @@
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
 
-        fetch(`/RajahQueue/public/DashboardController/filterQueueData?start_date=${startDate}&end_date=${endDate}`)
+        fetch(`/RajahQueue/public/dashboard/filterQueueData?start_date=${startDate}&end_date=${endDate}`)
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('filteredQueueData');

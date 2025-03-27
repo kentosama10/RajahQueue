@@ -275,7 +275,7 @@
             currentFilter = selectedServices.join(','); // Save the current filter state as a comma-separated string
 
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&services=' + encodeURIComponent(currentFilter) + '&limit=24', // Pass the selected services and limit
+                url: '/RajahQueue/public/dashboard/getDashboardData?page=' + currentPage + '&services=' + encodeURIComponent(currentFilter) + '&limit=24', // Pass the selected services and limit
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -434,7 +434,7 @@
 
             // Check the current status of the queue number before updating
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/checkQueueStatus',
+                url: '/RajahQueue/public/dashboard/checkQueueStatus',
                 method: 'POST',
                 data: { queue_number: queueNumber },
                 dataType: 'json',
@@ -453,7 +453,7 @@
 
                         // Proceed with updating the status if no conflict
                         $.ajax({
-                            url: '/RajahQueue/public/DashboardController/updateStatus',
+                            url: '/RajahQueue/public/dashboard/updateStatus',
                             method: 'POST',
                             data: {
                                 queue_number: queueNumber,
@@ -500,7 +500,7 @@
 
         function updatePaymentStatus(queueNumber, paymentStatus) {
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/updatePaymentStatus',
+                url: '/RajahQueue/public/dashboard/updatePaymentStatus',
                 method: 'POST',
                 data: {
                     queue_number: queueNumber,
@@ -650,7 +650,7 @@
             currentPage = 1; // Reset to the first page on new search
 
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm) + '&services=' + encodeURIComponent(selectedServices.join(',')), // Pass the search term and selected services
+                url: '/RajahQueue/public/dashboard/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm) + '&services=' + encodeURIComponent(selectedServices.join(',')), // Pass the search term and selected services
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -679,7 +679,7 @@
 
             // Send the AJAX request to update or release the counter
             $.ajax({
-                url: "/RajahQueue/public/UserController/updateCounter",
+                url: "/RajahQueue/public/user/updateCounter",
                 method: "POST",
                 data: {
                     counter_number: isReleasingCounter ? null : selectedCounter
@@ -719,7 +719,7 @@
         // Function to refresh the counter select dropdown
         function refreshCounterSelect() {
             $.ajax({
-                url: "/RajahQueue/public/UserController/getCounter",
+                url: "/RajahQueue/public/user/getCounter",
                 method: "GET",
                 success: function (response) {
                     try {
@@ -745,7 +745,7 @@
         // Function to fetch active counters
         function fetchActiveCounters() {
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getActiveCounters',
+                url: '/RajahQueue/public/dashboard/getActiveCounters',
                 method: 'GET',
                 dataType: 'json',
                 success: function (response) {
@@ -769,7 +769,7 @@
             if (selectedValue && selectedValue !== "release") {
                 // Check if counter is already assigned
                 $.ajax({
-                    url: "/RajahQueue/public/UserController/checkCounterAvailability",
+                    url: "/RajahQueue/public/user/checkCounterAvailability",
                     method: "POST",
                     data: { counter_number: selectedValue },
                     success: function (response) {
@@ -864,7 +864,7 @@
             currentPage = 1; // Reset to the first page on new search
 
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm) + '&services=' + encodeURIComponent(selectedServices.join(',')), // Pass the search term and selected services
+                url: '/RajahQueue/public/dashboard/getDashboardData?page=' + currentPage + '&search=' + encodeURIComponent(searchTerm) + '&services=' + encodeURIComponent(selectedServices.join(',')), // Pass the search term and selected services
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {

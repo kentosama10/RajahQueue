@@ -115,7 +115,7 @@
 
                     <!-- Logout Button -->
                     <li class="nav-item">
-                        <a class="btn btn-danger btn-logout" href="/RajahQueue/public/UserController/logout">
+                        <a class="btn btn-danger btn-logout" href="/RajahQueue/public/user/logout">
                             <i class="bi bi-box-arrow-right"></i>
                         </a>
                     </li>
