@@ -119,13 +119,13 @@ class UserController extends Controller {
                 $_SESSION['first_name'] = $user['first_name'];
 
                 if ($user['role'] == 'kiosk') {
-                    header('Location: /RajahQueue/public/QueueController/index');
+                    header('Location: /RajahQueue/public/queue/index');
                 } else if ($user['role'] == 'user') {
-                    header('Location: /RajahQueue/public/DashboardController/index');
+                    header('Location: /RajahQueue/public/dashboard/index');
                 } else if ($user['role'] == 'cashier') {
-                    header('Location: /RajahQueue/public/PaymentController/index');
+                    header('Location: /RajahQueue/public/payment/index');
                 } else {
-                    header('Location: /RajahQueue/public/DashboardController/index');
+                    header('Location: /RajahQueue/public/dashboard/index');
                 }
                 exit;
             } else {

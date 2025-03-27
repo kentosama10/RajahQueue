@@ -29,7 +29,7 @@ class Router {
         call_user_func_array([$this->controller, $this->method], $this->params);
 
         // Add this route in the Router constructor or wherever you define routes
-        $this->addRoute('GET', 'DashboardController/display', 'DashboardController@display');
+        $this->addRoute('GET', 'DashboardController/display', '@display');
         $this->addRoute('GET', 'DashboardController/reports', 'DashboardController@reports');
         $this->addRoute('GET', 'DashboardController/filterQueueData', 'DashboardController@filterQueueData');
         $this->addRoute('GET', 'DashboardController/exportQueueData', 'DashboardController@exportQueueData');
@@ -37,7 +37,14 @@ class Router {
 
     private function parseUrl() {
         if (isset($_GET['url'])) {
-            return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
+            $url = explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
+            
+            // Normalize the controller name (e.g., 'dashboard' -> 'DashboardController')
+            if (isset($url[0])) {
+                $url[0] = ucfirst($url[0]) . 'Controller';
+            }
+            
+            return $url;
         }
         return ['UserController', 'showLoginForm']; // Default route
     }

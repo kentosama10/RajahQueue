@@ -89,19 +89,19 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/QueueController/index">Form</a>
+                        <a class="nav-link" href="/RajahQueue/public/queue/index">Form</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/DashboardController/index">Queue Dashboard</a>
+                        <a class="nav-link" href="/RajahQueue/public/dashboard/index">Queue Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/PaymentController/index">Payment Dashboard</a>
+                        <a class="nav-link" href="/RajahQueue/public/payment/index">Payment Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/DashboardController/display">Customer Serving</a>
+                        <a class="nav-link" href="/RajahQueue/public/dashboard/display">Customer Serving</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/DashboardController/reports">Reports</a>
+                        <a class="nav-link" href="/RajahQueue/public/dashboard/reports">Reports</a>
                     </li>
 
                     <!-- Welcome Message -->

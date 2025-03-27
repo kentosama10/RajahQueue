@@ -37,7 +37,7 @@ class QueueController extends Controller {
                 'queue_number' => $queueNumber
             ];
 
-            header('Location: /RajahQueue/public/QueueController/index');
+            header('Location: /RajahQueue/public/queue/index');
             exit;
         }
     }

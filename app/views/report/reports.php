@@ -271,7 +271,7 @@
             function exportToCSV() {
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;
-                window.location.href = `/RajahQueue/public/DashboardController/exportQueueData?start_date=${startDate}&end_date=${endDate}`;
+                window.location.href = `/RajahQueue/public/dashboard/exportQueueData?start_date=${startDate}&end_date=${endDate}`;
             }
         </script>
 </body>

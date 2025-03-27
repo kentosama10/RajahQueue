@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Queue Display - RajahQueue</title>
+    <title>Queue Display V2 - RajahQueue</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" href="/RajahQueue/app/assets/images/RTC LOGO 2017 - Vector-02-ORB.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -21,23 +20,185 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: "Roboto", sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
             background-color: #f8f9fa;
-            padding: 10px;
-            min-height: 100vh;
+        }
+
+        /* Split Screen Layout */
+        .split-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .queue-section {
+            flex: 1;
+            padding: 20px;
+            background-color: #f8f9fa;
+            overflow-y: hidden;
+        }
+
+        .media-section {
+            flex: 1;
+            background-color: #000;
+            position: relative;
+        }
+
+        /* Queue Display Styling */
+        .now-serving {
+            background: var(--secondary-color);
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .now-serving h2 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            text-align: center;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .queue-number {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .counter-info {
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .upcoming-numbers {
+            background: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .upcoming-numbers p {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            font-weight: 500;
+        }
+
+        /* Add grid layout for upcoming items */
+        .upcoming-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .upcoming-item {
+            padding: 8px;
+            border-radius: 6px;
+            background: #f8f9fa;
+            transition: transform 0.3s ease, background 0.3s ease;
+            text-align: center;
+        }
+
+        .upcoming-item:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        /* Video Section */
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 50px); /* Account for news ticker */
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* News Ticker */
+        .news-ticker {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: var(--primary-color);
+            color: #fff;
             overflow: hidden;
         }
 
-        .display-header {
-            background: var(--secondary-color);
-            color: #fff;
-            padding: 0.5rem 0;
-            text-align: center;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .ticker-content {
+            white-space: nowrap;
+            animation: ticker 30s linear infinite;
+            padding: 15px 0;
         }
 
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Clock Display */
+        .clock-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            font-size: 1.5rem;
+            z-index: 100;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .payment-header {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        #currentPaymentDisplays {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #currentPaymentDisplays .now-serving {
+            background: var(--primary-color);
+        }
+
+        #currentPaymentDisplays .now-serving:last-child {
+            margin-bottom: 0;
+        }
+
+        .payment-section .upcoming-item {
+            padding: 5px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+
+        .payment-section .upcoming-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Add these to your existing styles */
         .queue-item {
             background-color: #fff;
             border-radius: 12px;
@@ -60,92 +221,17 @@
             padding: 0.5rem;
         }
 
-        .queue-number {
-            font-size: 2.3rem;
-            font-weight: bold;
-            color: var(--secondary-color);
-            padding: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
         }
 
-        .clock-display {
-            font-size: 1.5rem;
-            color: #fff;
-            margin-bottom: 0;
-        }
-
-        .dashboard-layout {
-            display: flex;
-            gap: 20px;
-        }
-
-        .dashboard-column {
-            flex: 1;
-            min-width: 0;
-            /* Prevents flex items from overflowing */
-        }
-
-        .animate__animated {
-            animation-duration: 0.5s;
-            animation-fill-mode: both;
-        }
-
-        .animate__fadeInUp {
-            animation-name: fadeInUp;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate__fadeInRight {
-            animation-name: fadeInRight;
-        }
-
-        @keyframes fadeInRight {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-
-        .queue-section {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        /* Enhance the payment queue items */
-        #paymentQueue .queue-item {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            transition: all 0.3s ease;
-
-        }
-
-        #paymentQueue .queue-item:hover {
-            background: linear-gradient(135deg, #e9ecef, #dee2e6);
-        }
-
-        .no-data-translate {
+        .no-data-fade-in {
             opacity: 0;
             transform: translateY(20px);
-            /* Start from below */
             animation: translateIn 0.5s forwards;
         }
 
@@ -153,128 +239,133 @@
             from {
                 opacity: 0;
                 transform: translateY(20px);
-                /* Start from below */
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
-                /* End at original position */
             }
         }
 
-        footer {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0;
+        /* Add these styles */
+        .serving-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .serving-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        /* Add these new styles */
+        .serving-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .service-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .service-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
             text-align: center;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            margin: 0;
-            overflow: hidden;
-            /* Prevent overflow issues */
+            color: rgba(255, 255, 255, 0.9);
         }
 
-        .marquee {
-            white-space: nowrap;
-            box-sizing: border-box;
-            display: inline-block;
-            animation: marquee 40s linear infinite;
-            margin: 0;
-            padding: 0;
-            position: relative;
+        .serving-item {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            padding: 6px;
+            transition: transform 0.2s ease;
         }
 
-        .marquee p {
-            padding: 0;
-            margin: 0;
-            color: black;
+        .serving-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .serving-item .queue-number {
+            font-size: 1.6rem;
+            margin: 3px 0;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .marquee:hover {
-            animation-play-state: paused;
-            /* Pause animation on hover */
+        .serving-item .counter-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
-
-        .social-icons a {
-            margin-left: 0;
-        }
-
-        @keyframes marquee {
-            0% {
-                transform: translateX(100%);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-
-        /* Gradient fade effect on both sides */
-        footer::before,
-        footer::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 50px;
-            background: linear-gradient(to right, var(--primary-color), transparent);
-            z-index: 1001;
-        }
-
-        footer::before {
-            left: 0;
-        }
-
-        footer::after {
-            right: 0;
-            transform: rotateY(180deg);
-        }
-    </style>
     </style>
 </head>
-
 <body>
-
-    <div class="container-fluid">
-        <div class="dashboard-layout">
-            <!-- Currently Serving Column -->
-            <div class="dashboard-column">
-                <div class="display-header">
-                    <div class="clock-display" id="clockDisplay"></div>
-                    <h2><i class="bi bi-people-fill me-2"></i>Currently Serving</h2>
-                </div>
-                <div id="servingQueue" class="row">
-                    <!-- Serving queue items will be loaded here -->
+    <div class="split-container">
+        <!-- Left Side - Queue Information -->
+        <div class="queue-section">
+            <!-- Combined Now Serving Section -->
+            <div class="now-serving">
+                <h2><i class="bi bi-display me-2"></i>Now Serving</h2>
+                <div class="serving-container">
+                    <!-- Regular Queue Section -->
+                    <div class="service-section">
+                        <h3><i class="bi bi-people-fill me-1"></i>Queue</h3>
+                        <div id="currentServing">
+                            <!-- Queue numbers will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Section -->
+                    <div class="service-section">
+                        <h3><i class="bi bi-cash me-1"></i>Cashier</h3>
+                        <div id="currentPaymentDisplays">
+                            <!-- Payment numbers will be populated here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Continuing Clients Column -->
-            <div class="dashboard-column">
-                <div class="display-header">
-                    <h2><i class="bi bi-credit-card me-2"></i>Cashier</h2>
+            <!-- Upcoming Sections -->
+            <div class="upcoming-numbers">
+                <p><i class="bi bi-clock me-1"></i>Upcoming Queues</p>
+                <div id="upcomingList" class="upcoming-list">
+                    <!-- Upcoming numbers will be populated here -->
                 </div>
-                <div id="paymentQueue" class="row">
-                    <!-- Payment queue items will be loaded here -->
+            </div>
+
+            <div class="upcoming-numbers">
+                <p><i class="bi bi-cash me-1"></i>Upcoming Payments</p>
+                <div id="upcomingPayments" class="upcoming-list">
+                    <!-- Upcoming payments will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Media and Announcements -->
+        <div class="media-section">
+            <div class="clock-display" id="clockDisplay"></div>
+            <div class="video-container">
+                <video id="promoVideo" autoplay loop muted>
+                    <source src="/RajahQueue/app/assets/videos/promo2.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="news-ticker">
+                <div class="ticker-content" id="tickerContent">
+                    Welcome to Rajah Travel Corporation - Your trusted partner in travel since 1972
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentServingPage = 0;
-        let currentPaymentPage = 0;
         let previousServingData = [];
         let previousPaymentData = [];
-        let countdown;
-        let isRefreshing = false; // Prevent overlapping refreshes
+        const itemsPerPage = 5; // Number of items to show per page
 
         function updateClock() {
             const clockDisplay = document.getElementById("clockDisplay");
@@ -286,243 +377,100 @@
             });
         }
 
-        function updateCountdownDisplay(countdownValue) {
-            const countdownDisplay = document.getElementById("countdownDisplay");
-            if (countdownDisplay) {
-                countdownDisplay.textContent = `Next update in ${countdownValue} seconds`;
-            }
-        }
-
         function refreshDisplay() {
-            if (isRefreshing) return; // Prevent overlapping refresh calls
-            isRefreshing = true;
-
             $.ajax({
-                url: '/RajahQueue/public/DashboardController/getDashboardData',
-                method: 'GET',
-                dataType: 'json',
-                success: function (data) {
-
-                    // Ensure valid data structure
-                    const queueData = data.queue || [];
-                    const paymentQueueData = data.paymentQueue || [];
-
-                    updateUI({ queue: queueData, paymentQueue: paymentQueueData });
-
-                    // Reset countdown
-                    clearInterval(countdown);
-                    let countdownValue = 10;
-                    updateCountdownDisplay(countdownValue);
-                    countdown = setInterval(() => {
-                        countdownValue--;
-                        updateCountdownDisplay(countdownValue);
-                        if (countdownValue <= 0) {
-                            clearInterval(countdown);
-                        }
-                    }, 1000);
+                url: "/RajahQueue/public/DashboardController/getDashboardData",
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    updateQueueDisplay(data.queue || []);
+                    updatePaymentDisplay(data.paymentQueue || []);
                 },
-                error: function (xhr, status, error) {
+                error: function(xhr, status, error) {
+                    console.error("Error fetching queue data:", error);
                     setTimeout(refreshDisplay, 5000);
-                },
-                complete: function () {
-                    isRefreshing = false; // Allow next refresh
                 }
             });
         }
 
-        function updateUI(data) {
-            const ITEMS_PER_PAGE_SERVING = 12;
-            const ITEMS_PER_PAGE_PAYMENT = 6;
+        function updateQueueDisplay(queueData) {
+            const servingItems = queueData.filter(item => 
+                item.status && item.status.toLowerCase() === "serving"
+            );
 
-            // Process Serving Queue
-            const servingQueue = $("#servingQueue");
-            const servingData = processServingQueue(data.queue || [], ITEMS_PER_PAGE_SERVING);
-            renderQueue(servingQueue, servingData.items, previousServingData, "fadeInUp");
-            previousServingData = servingData.allItems;
-            currentServingPage = servingData.nextPage;
+            const waitingItems = queueData.filter(item => 
+                item.status && item.status.toLowerCase() === "waiting"
+            );
 
-            // Process Payment Queue
-            const paymentQueue = $("#paymentQueue");
-            const paymentData = processPaymentQueue(data.paymentQueue || [], ITEMS_PER_PAGE_PAYMENT);
-            renderPaymentQueue(paymentQueue, paymentData.items, previousPaymentData);
-            previousPaymentData = paymentData.allItems;
-            currentPaymentPage = paymentData.nextPage;
+            // Store serving data for rendering
+            previousServingData = servingItems;
 
-            // Check if both queues are empty and force refresh if so
-            if (servingData.items.length === 0 && paymentData.items.length === 0) {
-                setTimeout(refreshDisplay, 5000); // Wait 5 seconds before refreshing
-            }
-        }
-
-        function processServingQueue(queue, itemsPerPage) {
-            const servingByCounter = {};
-            queue.forEach(item => {
-                if (item.status && item.status.toLowerCase() === 'serving' && item.counter_number && item.service_type !== 'Booth') {
-                    if (!servingByCounter[item.counter_number]) {
-                        servingByCounter[item.counter_number] = [];
-                    }
-                    servingByCounter[item.counter_number].push(item);
-                }
-            });
-
-            const sortedCounters = Object.keys(servingByCounter).sort((a, b) => parseInt(a) - parseInt(b));
-            const allItems = sortedCounters.flatMap(counter => servingByCounter[counter]);
-            const totalPages = Math.ceil(allItems.length / itemsPerPage);
-
-            if (allItems.length === 0) return { allItems, items: [], nextPage: 0 };
-
-            const start = currentServingPage * itemsPerPage;
-            const items = allItems.slice(start, start + itemsPerPage);
-            const nextPage = (currentServingPage + 1) % totalPages;
-
-            return { allItems, items, nextPage };
-        }
-
-        function processPaymentQueue(queue, itemsPerPage) {
-            const totalPages = Math.ceil(queue.length / itemsPerPage);
-            if (queue.length === 0) return { allItems: [], items: [], nextPage: 0 };
-
-            const start = currentPaymentPage * itemsPerPage;
-            const items = queue.slice(start, start + itemsPerPage);
-            const nextPage = (currentPaymentPage + 1) % totalPages;
-
-            return { allItems: queue, items, nextPage };
-        }
-
-        function renderQueue(queueElement, items, previousData, animationClass) {
-            const fragment = document.createDocumentFragment();
-            const existingItems = previousData.map(prev => prev.queue_number);
-
-            // Sound effect for new items
-            const newItemSound = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
-
-            if (items.length === 0) {
-                // Show fallback animation when no data is available
-                queueElement.empty();
-                queueElement.append(`
-            <div class="col-12 text-center mt-5 no-data-fade-in">
-                <h3 class="mt-3 text-muted">No customers are currently being served.</h3>
-            </div>
-        `);
-            } else {
-                // Render items with transitions for new data
-                items.forEach((item, index) => {
-                    const isNew = !existingItems.includes(item.queue_number);
-
-                    if (isNew) {
-                        // Play sound effect for new items
-                        newItemSound.play();
-                    }
-
-                    const div = document.createElement('div');
-                    div.className = `col-md-4 mb-4 ${isNew ? `animate__animated ${animationClass}` : ''}`;
-                    div.style.animationDelay = isNew ? `${index * 0.1}s` : '';
-                    div.innerHTML = `
-                <div class="queue-item text-center">
-                    <div class="counter-header">
-                        <div class="status-indicator bg-success"></div>
-                        <h4 class="mb-0">Counter ${item.counter_number || 'N/A'}</h4>
-                    </div>
+            // Update current serving
+            const servingHtml = servingItems.map(item => `
+                <div class="serving-item animate__animated animate__fadeIn">
                     <div class="queue-number">${item.queue_number}</div>
+                    <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${item.counter_number || "---"}</div>
                 </div>
-            `;
+            `).join("");
+            
+            $("#currentServing").html(servingHtml);
 
-                    fragment.appendChild(div);
-                });
-
-                queueElement.empty();
-                queueElement.append(fragment);
-            }
+            // Update upcoming list independently
+            const upcomingHtml = waitingItems.map(item => `
+                <div class="upcoming-item animate__animated animate__fadeIn">
+                    <span>Queue: ${item.queue_number}</span>
+                    <span>Status: Waiting</span>
+                </div>
+            `).join("");
+        
         }
 
+        function updatePaymentDisplay(paymentData) {
+            const servingPayments = paymentData.filter(item => 
+                item.payment_status?.toLowerCase() === "serving" &&
+                item.counter_number
+            );
 
+            const pendingPayments = paymentData.filter(item => 
+                item.payment_status?.toLowerCase() === "pending"
+            );
 
-        function renderPaymentQueue(paymentQueue, items, previousData) {
-            const fragment = document.createDocumentFragment();
-            const existingItems = previousData.map(prev => prev.queue_number);
+            // Store payment data for rendering
+            previousPaymentData = servingPayments;
 
-            // Sound effect for new items
-            const newItemSound = new Audio("/RajahQueue/app/assets/sounds/notification.mp3");
-
-            // Filter items to only include those with "Serving" status
-            const servingItems = items.filter(item => item.payment_status.toLowerCase() === 'serving');
-
-            if (servingItems.length === 0) {
-                // Show fallback animation when no data is available
-                paymentQueue.empty();
-                paymentQueue.append(`
-            <div class="col-12 text-center mt-5 no-data-fade-in">
-                <h3 class="mt-3 text-muted">No payments currently being served.</h3>
-            </div>
-        `);
-            } else {
-                // Render items with transitions for new data
-                servingItems.forEach((item, index) => {
-                    const isNew = !existingItems.includes(item.queue_number);
-
-                    if (isNew) {
-                        // Play sound effect for new items
-                        newItemSound.play();
-                    }
-
-                    const div = document.createElement('div');
-                    div.className = `col-12 mb-4 ${isNew ? 'animate__animated animate__fadeInRight' : ''}`;
-                    div.style.animationDelay = isNew ? `${index * 0.1}s` : '';
-                    div.innerHTML = `
-                <div class="queue-item text-center">
-                    <div class="queue-number">
-                        <i class="bi bi-credit-card me-2"></i>${item.queue_number}
-                    </div>
+            // Update current payment display
+            const displayHtml = servingPayments.map(payment => `
+                <div class="serving-item animate__animated animate__fadeIn">
+                    <div class="queue-number">${payment.queue_number}</div>
+                    <div class="counter-info"><i class="bi bi-display me-1"></i>Counter ${payment.counter_number}</div>
                 </div>
-            `;
+            `).join("");
 
-                    fragment.appendChild(div);
-                });
+            $("#currentPaymentDisplays").html(displayHtml);
 
-                paymentQueue.empty();
-                paymentQueue.append(fragment);
-            }
-        }
-
-
-
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'alert alert-danger alert-dismissible fade show';
-            errorDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-            document.querySelector('.container').prepend(errorDiv);
-            setTimeout(() => errorDiv.remove(), 5000);
+            // Update upcoming payments list independently
+            const upcomingContainer = $("#upcomingPayments");
+            const upcomingHtml = pendingPayments.map((item, index) => `
+                <div class="upcoming-item animate__animated animate__fadeInUp" 
+                     style="animation-delay: ${index * 0.2}s">
+                    <span>Queue: ${item.queue_number}</span>
+                    <span>Status: Pending</span>
+                </div>
+            `).join("");
+            
+            upcomingContainer.html(upcomingHtml || `
+                <div class="text-center text-muted animate__animated animate__fadeIn">
+                </div>
+            `);
         }
 
         // Initialize
-        $(document).ready(function () {
+        $(document).ready(function() {
             updateClock();
             setInterval(updateClock, 1000);
             refreshDisplay();
-            setInterval(refreshDisplay, 10000); // Ensure no overlap
+            setInterval(refreshDisplay, 15000); // Fetch new data every 15 seconds
         });
     </script>
-
-    <!-- Footer Marquee -->
-    <footer>
-        <div class="marquee">
-            <p>Contact Us: Telephone: +63 (02) 8894-0886 &nbsp; | &nbsp; E-mail: webinquiry@rajahtravel.com &nbsp; |
-                &nbsp;
-                Address: 3rd Floor 331 Building Sen. Gil Puyat Ave. Makati &nbsp; | &nbsp; Room 202 GLC Building
-                A. Mabini cor. T.M. Kalaw Sts. Manila &nbsp; | &nbsp; Follow us on:
-                <span class="social-icons">
-                    <span class="text-black ms-3"><i class="bi bi-facebook"></i> rajahtravel.com</span>
-                    <span class="text-black ms-3"><i class="bi bi-twitter-x"></i> rajahtravel.com</span>
-                    <span class="text-black ms-3"><i class="bi bi-instagram"></i> rajahtravel_com</span>
-                </span>
-            </p>
-
-        </div>
-    </footer>
-
 </body>
-
 </html>
