@@ -144,7 +144,7 @@ class UserController extends Controller {
             session_start();
         }
         session_destroy();
-        header('Location: /RajahQueue/public/UserController/showLoginForm');
+        header('Location: /RajahQueue/public/user/showLoginForm');
         exit();
     }
 

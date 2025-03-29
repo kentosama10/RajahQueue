@@ -35,7 +35,7 @@
 
         .queue-section {
             flex: 1;
-            padding: 20px;
+            padding: 10px;
             background-color: #f8f9fa;
             overflow-y: hidden;
         }
@@ -273,8 +273,8 @@
         }
 
         .service-section h3 {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
             text-align: center;
             color: rgba(255, 255, 255, 0.9);
         }
@@ -282,8 +282,8 @@
         .serving-item {
             background: rgba(0, 0, 0, 0.15);
             border-radius: 6px;
-            margin-bottom: 6px;
-            padding: 6px;
+            margin-bottom: 5px;
+            padding: 0;
             transition: transform 0.2s ease;
         }
 
@@ -292,13 +292,12 @@
         }
 
         .serving-item .queue-number {
-            font-size: 1.6rem;
-            margin: 3px 0;
+            font-size: 2rem;
             font-weight: bold;
         }
 
         .serving-item .counter-info {
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             opacity: 0.9;
         }
 
