@@ -17,22 +17,22 @@
         background-color: #f8f9fa;
     }
 
+    /* Updated styles for the dashboard header */
     .dashboard-header {
         position: sticky;
         top: 0;
-        /* Sticks to the top of the viewport */
         z-index: 1000;
-        /* Ensure it stays above other elements */
         background-color: #fff;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
-        padding: 0.5rem 0;
-        margin-bottom: 0.5rem;
+        padding: 0.5rem 1rem;
+        margin-bottom: 0;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .dashboard-header h2 {
         font-weight: 600;
         color: #2c3e50;
+        margin: 0;
     }
 
     .payment-stats {
@@ -56,7 +56,6 @@
         border-left: 4px solid #d3212d;
     }
 
-
     .payment-card {
         background-color: #fff;
         border-radius: 8px;
@@ -69,7 +68,7 @@
 
     .search-container {
         max-width: 400px;
-        margin-bottom: 1rem;
+        margin: 0;
     }
 
     .refresh-timer {
@@ -79,7 +78,8 @@
     }
 
     .refresh-button {
-        padding: 0.625rem 1.25rem;
+        width: 10rem;
+        padding: 7px;
         font-weight: 500;
         transition: all 0.2s ease;
     }
@@ -87,6 +87,17 @@
     .refresh-button:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 6px rgba(0, 0, 0, .08);
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 1rem;
+    }
+
+    .active-counters-btn {
+        white-space: nowrap;
     }
 </style>
 </head>
@@ -96,32 +107,6 @@
         <div class="container d-flex justify-content-between align-items-center">
             <h2 class="mb-0">Payment Dashboard</h2>
             <div class="d-flex align-items-center gap-3">
-
-                <select id="cashierCounterSelect" class="form-select" onchange="updateCashierCounter()">
-                <option value="" disabled selected>Choose Counter</option>
-                                <option value="release">Release Counter</option>
-                                <option value="1">Counter 1</option>
-                                <option value="2">Counter 2</option>
-                                <option value="3">Counter 3</option>
-                                <option value="4">Counter 4</option>
-                                <option value="5">Counter 5</option>
-                                <option value="6">Counter 6</option>
-                                <option value="7">Counter 7</option>
-                                <option value="8">Counter 8</option>
-                                <option value="9">Counter 9</option>
-                                <option value="10">Counter 10</option>
-                                <option value="11">Counter 11</option>
-                                <option value="12">Counter 12</option>
-                                <option value="13">Counter 13</option>
-                                <option value="14">Counter 14</option>
-                                <option value="15">Counter 15</option>
-                                <option value="16">Counter 16</option>
-                                <option value="17">Counter 17</option>
-                                <option value="18">Counter 18</option>
-                                <option value="19">Counter 19</option>
-                                <option value="20">Counter 20</option>
-                    <!-- Add more cashier counters as needed -->
-                </select>
                 <span class="refresh-timer">
                     Auto-refresh in: <span id="countdown">10</span>s
                 </span>
@@ -132,29 +117,58 @@
         </div>
     </div>
 
-    <div class="active-counters mt-2">
-        <h4>
-            <button id="toggleActiveCounters" class="btn btn-primary" onclick="toggleActiveCounters()">
-                Show Active Counters
-            </button>
-        </h4>
+    <div class="container mt-3">
+        <div class="header-actions d-flex justify-content-between align-items-center">
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control"
+                        placeholder="Search by customer name or queue number" onkeyup="searchPayments()">
+                </div>
+            </div>
+
+            <!-- Counter Selection and Show Active Counters -->
+            <div class="d-flex align-items-center gap-3">
+                <select id="cashierCounterSelect" class="form-select counter-select" onchange="updateCashierCounter()">
+                    <option value="" disabled selected>Choose Counter</option>
+                    <option value="release">Release Counter</option>
+                    <option value="1">Counter 1</option>
+                    <option value="2">Counter 2</option>
+                    <option value="3">Counter 3</option>
+                    <option value="4">Counter 4</option>
+                    <option value="5">Counter 5</option>
+                    <option value="6">Counter 6</option>
+                    <option value="7">Counter 7</option>
+                    <option value="8">Counter 8</option>
+                    <option value="9">Counter 9</option>
+                    <option value="10">Counter 10</option>
+                    <option value="11">Counter 11</option>
+                    <option value="12">Counter 12</option>
+                    <option value="13">Counter 13</option>
+                    <option value="14">Counter 14</option>
+                    <option value="15">Counter 15</option>
+                    <option value="16">Counter 16</option>
+                    <option value="17">Counter 17</option>
+                    <option value="18">Counter 18</option>
+                    <option value="19">Counter 19</option>
+                    <option value="20">Counter 20</option>
+                </select>
+                <button id="toggleActiveCounters" class="btn btn-primary active-counters-btn" onclick="toggleActiveCounters()">
+                    Show Active Counters
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Counters List -->
         <ul id="activeCountersList" class="list-group mt-2" 
             style="display: none; transition: max-height 0.5s ease-out; overflow: hidden;">
         </ul>
     </div>
 
     <div class="container">
-        <!-- Search Bar -->
-        <div class="search-container">
-            <div class="input-group">
-                <span class="input-group-text">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="searchInput" class="form-control"
-                    placeholder="Search by customer name or queue number" onkeyup="searchPayments()">
-            </div>
-        </div>
-
         <!-- Payment Statistics -->
         <div class="row mb-4">
             <div class="col-md-4">
