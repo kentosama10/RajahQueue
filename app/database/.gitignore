@@ -1,0 +1,10 @@
+# Ignore database backup files
+*.sql
+
+# Ignore temporary files
+*.tmp
+*.bak
+
+# Ignore system files
+.DS_Store
+Thumbs.db
