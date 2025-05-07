@@ -217,12 +217,13 @@
                                         <th>Queue Number</th>
                                         <th>Status</th>
                                         <th>Created At</th>
+                                        <th>Served At</th>
                                         <th>Updated At</th>
                                         <th>Time Spent</th>
                                         <th>Payment Status</th>
                                         <th>Serving User Name</th>
-                                        <th>Completed By User Name</th>
                                         <th>Payment Completed At</th>
+                                        <th>Cashier Name</th>
                                     </tr>
                                 </thead>
                                 <tbody id="filteredQueueData">
@@ -236,38 +237,40 @@
         </div>
 
         <script>
-    function filterQueueData(event) {
-        event.preventDefault();
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
+            function filterQueueData(event) {
+                event.preventDefault();
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
 
-        fetch(`/RajahQueue/public/dashboard/filterQueueData?start_date=${startDate}&end_date=${endDate}`)
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('filteredQueueData');
-                tbody.innerHTML = '';
-                data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    const hours = Math.floor(row.time_spent / 60);
-                    const minutes = row.time_spent % 60;
-                    tr.innerHTML = `
-                        <td>${row.id}</td>
-                        <td>${row.customer_name}</td>
-                        <td>${row.service_type}</td>
-                        <td>${row.queue_number}</td>
-                        <td>${row.status}</td>
-                        <td>${row.created_at}</td>
-                        <td>${row.updated_at}</td>
-                        <td>${hours}h ${minutes}m</td>
-                        <td>${row.payment_status}</td>
-                        <td>${row.serving_user_name}</td>
-                        <td>${row.completed_by_user_name}</td>
-                        <td>${row.payment_completed_at}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            });
-    }
+                fetch(`/RajahQueue/public/dashboard/filterQueueData?start_date=${startDate}&end_date=${endDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.getElementById('filteredQueueData');
+                        tbody.innerHTML = '';
+                        data.forEach(row => {
+                            const hours = Math.floor(row.time_spent / 60);
+                            const minutes = row.time_spent % 60;
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${row.id}</td>
+                                    <td>${row.customer_name}</td>
+                                    <td>${row.service_type}</td>
+                                    <td>${row.queue_number}</td>
+                                    <td>${row.status}</td>
+                                    <td>${row.created_at}</td>
+                                    <td>${row.served_at || 'N/A'}</td>
+                                    <td>${row.updated_at}</td>
+                                    <td>${hours}h ${minutes}m</td>
+                                    <td>${row.payment_status}</td>
+                                    <td>${row.serving_user_name}</td>
+                                    <td>${row.payment_completed_at}</td>
+                                    <td>${row.cashier_name}</td> <!-- Display cashier name -->
+                                </tr>
+                            `;
+                        });
+                    });
+            }
+
             function exportToCSV() {
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;

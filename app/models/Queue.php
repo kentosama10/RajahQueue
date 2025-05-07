@@ -233,14 +233,14 @@ class Queue extends Model
                     SET 
                         status = ?,
                         serving_user_id = ?,
-                        payment_status = CASE WHEN ? = 'Done' THEN 'Pending' ELSE payment_status END,
+                        served_at = CURRENT_TIMESTAMP,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE queue_number = ? 
                     AND reset_flag = 0 
                     AND (status != 'Done' AND (status != 'Serving' OR serving_user_id IS NULL))
                 ";
                 $stmt = $this->db->prepare($sql);
-                $result = $stmt->execute([$status, $userId, $status, $queueNumber]);
+                $result = $stmt->execute([$status, $userId, $queueNumber]);
             } else {
                 $sql = "
                     UPDATE queue 
@@ -778,12 +778,29 @@ class Queue extends Model
     {
         $stmt = $this->db->prepare("
             SELECT 
-                q.id, q.customer_name, q.service_type, q.region, q.priority, q.priority_type, q.queue_number, q.status, q.created_at, q.updated_at, q.payment_status, q.serving_user_id, q.completed_by_user_id, q.payment_completed_at,
-                CONCAT(su.first_name, ' ', su.last_name) as serving_user_name, CONCAT(cu.first_name, ' ', cu.last_name) as completed_by_user_name,
-                TIMESTAMPDIFF(MINUTE, q.created_at, q.updated_at) AS time_spent
+                q.id, 
+                q.customer_name, 
+                q.service_type, 
+                q.region, 
+                q.priority, 
+                q.priority_type, 
+                q.queue_number, 
+                q.status, 
+                q.created_at, 
+                q.served_at, 
+                q.updated_at, 
+                q.payment_status, 
+                q.serving_user_id, 
+                q.completed_by_user_id, 
+                q.payment_completed_at,
+                CONCAT(su.first_name, ' ', su.last_name) as serving_user_name, 
+                CONCAT(cu.first_name, ' ', cu.last_name) as completed_by_user_name,
+                IFNULL(CONCAT(cashier.first_name, ' ', cashier.last_name), 'N/A') as cashier_name, -- Fetch cashier name
+                TIMESTAMPDIFF(MINUTE, q.served_at, q.updated_at) AS time_spent
             FROM queue q
             LEFT JOIN users su ON q.serving_user_id = su.id
             LEFT JOIN users cu ON q.completed_by_user_id = cu.id
+            LEFT JOIN users cashier ON q.completed_by_user_id = cashier.id -- Use completed_by_user_id for cashier
             WHERE DATE(q.created_at) BETWEEN :startDate AND :endDate
         ");
         $stmt->bindParam(':startDate', $startDate);
@@ -820,7 +837,14 @@ class Queue extends Model
 
     public function getAverageTimeSpentByService()
     {
-        $sql = "SELECT service_type, AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) AS average_time_spent FROM queue WHERE status = 'Done' GROUP BY service_type";
+        $sql = "
+            SELECT 
+                service_type, 
+                AVG(TIMESTAMPDIFF(MINUTE, served_at, updated_at)) AS average_time_spent 
+            FROM queue 
+            WHERE status = 'Done' AND served_at IS NOT NULL
+            GROUP BY service_type
+        ";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
