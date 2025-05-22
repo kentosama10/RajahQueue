@@ -360,16 +360,46 @@
                             <i class="bi bi-play-fill"></i> Start
                         </button>`;
                 case 'serving':
+                    // Always use the selected counter if item.counter_number is missing
+                    let counterNum = item.counter_number;
+                    if (!counterNum) {
+                        const select = document.getElementById("cashierCounterSelect");
+                        counterNum = select && select.value && select.value !== "release" ? select.value : '';
+                    }
                     return `
                         <button class="btn btn-sm btn-success" onclick="completePayment('${item.queue_number}')">
                             <i class="bi bi-check-circle"></i> Complete
                         </button>
                         <button class="btn btn-sm btn-danger ms-2" onclick="cancelPayment('${item.queue_number}')">
                             <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                        <button class="btn btn-sm btn-primary ms-2" onclick="triggerAnnouncement('${item.queue_number}', '${counterNum}')">
+                            <i class="bi bi-megaphone"></i>
                         </button>`;
                 default:
                     return '';
             }
+        }
+
+        function triggerAnnouncement(queueNumber, counterNumber) {
+            if (!queueNumber || !counterNumber) {
+                alert('Counter number is missing for this queue.');
+                return;
+            }
+            $.ajax({
+                url: '/RajahQueue/public/dashboard/announceManual',
+                method: 'POST',
+                data: {
+                    queue_number: queueNumber,
+                    counter_number: counterNumber
+                },
+                success: function(response) {
+                    alert('Announcement triggered. Please check the display.');
+                },
+                error: function() {
+                    alert('Failed to trigger announcement.');
+                }
+            });
         }
 
         function updatePaymentStatus(queueNumber, newStatus) {
