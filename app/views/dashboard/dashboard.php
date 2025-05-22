@@ -369,6 +369,9 @@
                             <button class="btn btn-sm btn-warning ms-1" onclick="updateStatus('${item.queue_number}', 'No Show')">
                                 <i class="bi bi-person-x"></i> No Show
                             </button>
+                            <button class="btn btn-sm btn-primary ms-1" onclick="triggerAnnouncement('${item.queue_number}', '${item.counter_number || ''}')">
+                                <i class="bi bi-megaphone"></i> 
+                            </button>
                         </div>`;
                 case 'no show':
                     return `
@@ -832,6 +835,26 @@
         // Call refreshDashboard at regular intervals
         setInterval(refreshDashboard, 10000); // Adjust the interval as needed
 
+        function triggerAnnouncement(queueNumber, counterNumber) {
+            if (!queueNumber || !counterNumber) {
+                alert('Counter number is missing for this queue.');
+                return;
+            }
+            $.ajax({
+                url: '/RajahQueue/public/dashboard/announceManual',
+                method: 'POST',
+                data: {
+                    queue_number: queueNumber,
+                    counter_number: counterNumber
+                },
+                success: function(response) {
+                    alert('Announcement triggered. Please check the display.');
+                },
+                error: function() {
+                    alert('Failed to trigger announcement.');
+                }
+            });
+        }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

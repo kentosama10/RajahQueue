@@ -274,4 +274,34 @@ class DashboardController extends Controller {
     public function v2() {
         $this->view('dashboard/displayv2');
     }
+
+    public function announceManual() {
+        // Save the announcement to a file (for demo; use DB for production)
+        $response = ['success' => false];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['queue_number'], $_POST['counter_number'])) {
+            $data = [
+                'id' => uniqid(),
+                'queue_number' => $_POST['queue_number'],
+                'counter_number' => $_POST['counter_number'],
+                'timestamp' => time()
+            ];
+            file_put_contents(__DIR__ . '/../../manual_announcement.json', json_encode($data));
+            $response['success'] = true;
+        }
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+
+    public function getManualAnnouncement() {
+        $file = __DIR__ . '/../../manual_announcement.json';
+        if (file_exists($file)) {
+            $data = json_decode(file_get_contents($file), true);
+            header('Content-Type: application/json');
+            echo json_encode($data);
+        } else {
+            echo json_encode(null);
+        }
+        exit;
+    }
 }

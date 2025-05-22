@@ -88,9 +88,7 @@
             <!-- Navigation Links -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/queue/index">Form</a>
-                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="/RajahQueue/public/dashboard/index">Queue Dashboard</a>
                     </li>
@@ -98,7 +96,11 @@
                         <a class="nav-link" href="/RajahQueue/public/payment/index">Payment Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/RajahQueue/public/dashboard/display">Customer Serving</a>
+                        <a class="nav-link" href="/RajahQueue/public/queue/index" target="_blank">Form</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/RajahQueue/public/dashboard/display" target="_blank">Customer
+                            Serving</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/RajahQueue/public/dashboard/reports">Reports</a>

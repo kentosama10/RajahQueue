@@ -363,10 +363,9 @@
 
         <!-- Right Side - Media and Announcements -->
         <div class="media-section">
-            <div class="clock-display" id="clockDisplay"></div>
+            <div class="clock-display" id="clockDisplay" hidden></div>
             <div class="video-container">
                 <video id="promoVideo" autoplay loop muted>
-                    <source src="/RajahQueue/app/assets/videos/promo2.mp4" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -385,6 +384,51 @@
         let previousServingData = [];
         let previousPaymentData = [];
         const itemsPerPage = 5; // Number of items to show per page
+
+        // Text-to-speech announcement
+        function announceServing(queueNumber, counterNumber) {
+            if (!queueNumber || !counterNumber) return;
+            const message = `${queueNumber} please proceed to counter ${counterNumber}`;
+            if ('speechSynthesis' in window) {
+                setTimeout(() => {
+                    const utter = new SpeechSynthesisUtterance(message);
+                    utter.rate = 1;
+                    utter.pitch = 1;
+                    utter.volume = 1;
+                    window.speechSynthesis.speak(utter);
+                }, 3000); // 2 seconds delay before speech
+            }
+        }
+
+        // Listen for manual announcement trigger from dashboard
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'manualAnnouncement' && event.newValue) {
+                try {
+                    const data = JSON.parse(event.newValue);
+                    if (data.queueNumber && data.counterNumber) {
+                        announceServing(data.queueNumber, data.counterNumber);
+                    }
+                } catch (e) {
+                    // Ignore parse errors
+                }
+            }
+        });
+
+        let lastManualAnnouncementId = null;
+
+        function pollManualAnnouncement() {
+            $.ajax({
+                url: '/RajahQueue/public/dashboard/getManualAnnouncement',
+                method: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data && data.id && data.id !== lastManualAnnouncementId) {
+                        lastManualAnnouncementId = data.id;
+                        announceServing(data.queue_number, data.counter_number);
+                    }
+                }
+            });
+        }
 
         function updateClock() {
             const clockDisplay = document.getElementById("clockDisplay");
@@ -430,6 +474,10 @@
                 // Play notification sound if there are new items
                 const notificationSound = document.getElementById("notificationSound");
                 notificationSound.play();
+                // Announce each new serving item
+                newServingItems.forEach(item => {
+                    announceServing(item.queue_number, item.counter_number || "unknown");
+                });
             }
 
             // Store serving data for rendering
@@ -474,6 +522,13 @@
                 !previousPaymentData.some(prevItem => prevItem.queue_number === item.queue_number)
             );
 
+            if (newPaymentItems.length > 0) {
+                // Announce each new serving payment item
+                newPaymentItems.forEach(item => {
+                    announceServing(item.queue_number, item.counter_number || "unknown");
+                });
+            }
+
             // Update current payment display
             const displayHtml = servingPayments.map(payment => {
                 const isNew = newPaymentItems.some(newItem => newItem.queue_number === payment.queue_number);
@@ -512,6 +567,7 @@
             setInterval(updateClock, 1000);
             refreshDisplay();
             setInterval(refreshDisplay, 15000); // Fetch new data every 15 seconds
+            setInterval(pollManualAnnouncement, 3000); // Poll every 3 seconds
         });
     </script>
 </body>
