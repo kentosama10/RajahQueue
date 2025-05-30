@@ -71,8 +71,15 @@
         }
 
         .counter-info {
-            font-size: 1.2rem;
+            font-size: 2rem;
             text-align: center;
+            /* color: var(--primary-color); */
+            /* text-shadow: 
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000; */
+            font-weight: bold;
         }
 
         .upcoming-numbers {

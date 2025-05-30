@@ -848,7 +848,7 @@
                     counter_number: counterNumber
                 },
                 success: function(response) {
-                    alert('Announcement triggered. Please check the display.');
+                    alert('Announcement triggered.');
                 },
                 error: function() {
                     alert('Failed to trigger announcement.');
