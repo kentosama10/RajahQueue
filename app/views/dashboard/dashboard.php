@@ -848,7 +848,7 @@
                     counter_number: counterNumber
                 },
                 success: function(response) {
-                    alert('Announcement triggered.');
+                    alert('Announcement triggered. Please wait for the audio to play.');
                 },
                 error: function() {
                     alert('Failed to trigger announcement.');

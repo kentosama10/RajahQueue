@@ -374,7 +374,7 @@
                             <i class="bi bi-x-circle"></i> Cancel
                         </button>
                         <button class="btn btn-sm btn-primary ms-2" onclick="triggerAnnouncement('${item.queue_number}', '${counterNum}')">
-                            <i class="bi bi-megaphone"></i>
+                            <i class="bi bi-megaphone"></i> 
                         </button>`;
                 default:
                     return '';
@@ -394,7 +394,7 @@
                     counter_number: counterNumber
                 },
                 success: function(response) {
-                    alert('Announcement triggered. Please check the display.');
+                    alert('Announcement triggered. Please wait for the audio to play.');
                 },
                 error: function() {
                     alert('Failed to trigger announcement.');
