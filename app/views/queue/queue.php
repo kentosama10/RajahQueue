@@ -86,6 +86,25 @@
             opacity: 1;
             /* Fully visible */
         }
+
+        @media print {
+
+            /* Hide everything except the print template */
+            body * {
+                visibility: hidden;
+            }
+
+            #printTemplate,
+            #printTemplate * {
+                visibility: visible;
+            }
+
+            #printTemplate {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
     </style>
 </head>
 
@@ -94,7 +113,7 @@
     <div class="dashboard-header">
         <div class="container">
             <img src="/RajahQueue/app/assets/images/01 RTC Logo.png" alt="RajahQueue Logo" height="50">
-            <a href="/RajahQueue/public/UserController/logout" class="logout-btn" title="Logout">
+            <a href="/RajahQueue/public/user/logout" class="logout-btn" title="Logout">
                 <i class="bi bi-box-arrow-right"></i>
             </a>
         </div>
@@ -183,6 +202,44 @@
         </div>
     </div>
 
+    <!-- Hidden Print Template -->
+    <div id="printTemplate" style="display: none;">
+        <div style="width: 280px; text-align: center; padding: 5px; font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;">
+            <img src="/RajahQueue/app/assets/images/logo-black.png" alt="RTC Logo"
+                style="width: 150px; margin-bottom: 0px;"><br>
+            <?php if (isset($_SESSION['success_message']) && isset($_SESSION['success_message']['queue_number'])): ?>
+                <div style="font-size: 48px; font-weight: bold; margin: 5px 0;">
+                    <?= $_SESSION['success_message']['queue_number']; ?>
+                </div>
+                <div style="font-size: 14px; margin: 0;">
+                    <?= date('Y-m-d H:i:s'); ?>
+                </div>
+                <hr>
+                <div style="font-size: 12px; line-height: 1;">
+                    Thank you for choosing Rajah Travel!<br>
+                    <div style="margin-top: 10px;">
+                        <strong>Contact Us:</strong><br>
+                        📞 (632) 8894-0886<br>
+                        🌐 www.rajahtravel.com<br>
+                        📧 webinquiry@rajahtravel.com<br>   
+                        📍 3rd Floor 331 Building
+                        Sen. Gil Puyat Ave. Makati City, Philippines
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Add Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white;">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-2">Printing your ticket...</div>
+        </div>
+    </div>
+
     <!-- Scripts
     <script>
         $(document).ready(function () {
@@ -229,6 +286,9 @@
                         <h3 class="fw-bold" style="color: #F08221;">Your Queue Number</h3>
                         <p class="display-4 fw-bold" style="color: #CE007C;"><?= $queueNumber; ?></p>
                         <p class="text-muted">Please wait for your turn. Thank you!</p>
+                        <button id="printTicket" class="btn btn-primary mt-3">
+                            <i class="bi bi-printer"></i> Print Ticket
+                        </button>
                     </div>
                 </div>
             </div>
@@ -244,6 +304,51 @@
             });
         </script>
     <?php endif; ?>
+
+    <script>
+        document.getElementById('printTicket').addEventListener('click', function () {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'block';
+
+            const printContent = document.getElementById('printTemplate').innerHTML;
+            const printWindow = window.open('', '_blank', 'width=1,height=1');
+
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Queue Number</title>
+                    <style>
+                        @media print {
+                            @page {
+                                margin: 0;
+                                size: 80mm 100mm;
+                            }
+                            body {
+                                margin: 0;
+                                padding: 10px;
+                                font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif;
+                                text-align: center;
+                            }
+                            img {
+                                max-width: 150px;
+                                margin-bottom: 10px;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>${printContent}</body>
+                </html>
+            `);
+
+            printWindow.document.close();
+            
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        });
+    </script>
 </body>
 <footer><?php include '../app/views/footer.php'; ?></footer>
 
